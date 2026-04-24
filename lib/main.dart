@@ -41,14 +41,6 @@ class _HomePageState extends ConsumerState<_HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<AuthTokens?>>(authTokensProvider, (previous, next) {
-      final wasLoggedOut = previous?.valueOrNull == null;
-      final isLoggedIn = next.valueOrNull != null;
-      if (wasLoggedOut && isLoggedIn && _dialogOpen) {
-        Navigator.of(context).pop();
-      }
-    });
-
     final tokensAsync = ref.watch(authTokensProvider);
     final blank = Scaffold(body: Container(color: context.theme.background));
 

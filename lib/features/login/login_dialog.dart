@@ -1,6 +1,7 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/theme/theme.dart';
 import 'package:onosendai/features/login/presentation/riverpod/login_providers.dart';
 
@@ -34,6 +35,12 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<AuthTokens?>>(authTokensProvider, (_, next) {
+      if (next.valueOrNull != null && context.mounted) {
+        Navigator.of(context).pop();
+      }
+    });
+
     final loginState = ref.watch(loginNotifierProvider);
     final isLoading = loginState.isLoading;
     final errorMessage = loginState.hasError
@@ -121,26 +128,6 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
                             : Icons.visibility_off_outlined,
                         size: 18,
                         color: context.theme.dimmed,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Forgot password
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Text(
-                        'Forgot password?',
-                        style: TextStyle(
-                          fontFamily: 'monospace',
-                          fontSize: 12,
-                          color: context.theme.foreground,
-                          decoration: TextDecoration.underline,
-                          decorationColor: context.theme.foreground,
-                        ),
                       ),
                     ),
                   ),
