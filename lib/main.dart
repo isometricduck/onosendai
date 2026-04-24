@@ -1,3 +1,4 @@
+import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
@@ -26,40 +27,41 @@ class _HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<_HomePage> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (ref.read(authTokensProvider) == null) {
-        _showLoginDialog();
-      }
-    });
-  }
+  bool _dialogOpen = false;
 
   void _showLoginDialog() {
+    if (_dialogOpen) return;
+    _dialogOpen = true;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => const LoginDialog(),
-    );
+    ).whenComplete(() => _dialogOpen = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(authTokensProvider, (previous, next) {
-      if (previous == null && next != null) {
+    ref.listen<AsyncValue<AuthTokens?>>(authTokensProvider, (previous, next) {
+      final wasLoggedOut = previous?.valueOrNull == null;
+      final isLoggedIn = next.valueOrNull != null;
+      if (wasLoggedOut && isLoggedIn && _dialogOpen) {
         Navigator.of(context).pop();
       }
     });
 
-    final isLoggedIn = ref.watch(authTokensProvider) != null;
+    final tokensAsync = ref.watch(authTokensProvider);
+    final blank = Scaffold(body: Container(color: context.theme.background));
 
-    if (isLoggedIn) {
-      return const FeedPage();
-    }
-
-    return Scaffold(
-      body: Container(color: context.theme.background),
+    return tokensAsync.when(
+      loading: () => blank,
+      error: (_, _) => blank,
+      data: (tokens) {
+        if (tokens != null) return const FeedPage();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _showLoginDialog();
+        });
+        return blank;
+      },
     );
   }
 }

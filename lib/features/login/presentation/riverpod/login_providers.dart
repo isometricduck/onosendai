@@ -25,7 +25,7 @@ class LoginNotifier extends AsyncNotifier<void> {
       final tokens = await ref
           .read(loginUseCaseProvider)
           .call(email: email, password: password);
-      ref.read(authTokensProvider.notifier).state = tokens;
+      await ref.read(authTokensProvider.notifier).set(tokens);
     });
   }
 }

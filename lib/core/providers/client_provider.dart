@@ -1,18 +1,63 @@
+import 'dart:io';
+
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onosendai/core/auth/file_token_storage.dart';
+import 'package:onosendai/core/auth/secure_storage_token_storage.dart';
+import 'package:onosendai/core/auth/token_storage.dart';
 
-final authTokensProvider = StateProvider<AuthTokens?>((ref) => null);
+final tokenStorageProvider = Provider<TokenStorage>((ref) {
+  if (Platform.isLinux) return FileTokenStorage();
+  return SecureStorageTokenStorage();
+});
+
+final authTokensProvider =
+    AsyncNotifierProvider<AuthTokensNotifier, AuthTokens?>(
+  AuthTokensNotifier.new,
+);
+
+class AuthTokensNotifier extends AsyncNotifier<AuthTokens?> {
+  @override
+  Future<AuthTokens?> build() async {
+    final tokens = await ref.read(tokenStorageProvider).read();
+    if (tokens != null) {
+      ref.read(cyberspaceClientProvider).setToken(
+            tokens.idToken,
+            refreshToken: tokens.refreshToken,
+            rtdbToken: tokens.rtdbToken,
+          );
+    }
+    return tokens;
+  }
+
+  Future<void> set(AuthTokens tokens) async {
+    await ref.read(tokenStorageProvider).write(tokens);
+    ref.read(cyberspaceClientProvider).setToken(
+          tokens.idToken,
+          refreshToken: tokens.refreshToken,
+          rtdbToken: tokens.rtdbToken,
+        );
+    state = AsyncData(tokens);
+  }
+
+  Future<void> clear() async {
+    await ref.read(tokenStorageProvider).clear();
+    ref.read(cyberspaceClientProvider).clearToken();
+    state = const AsyncData(null);
+  }
+}
 
 class _RiverpodAuthTokenProvider implements AuthTokenProvider {
   final Ref _ref;
   _RiverpodAuthTokenProvider(this._ref);
 
   @override
-  Future<String?> getToken() async => _ref.read(authTokensProvider)?.idToken;
+  Future<String?> getToken() async =>
+      _ref.read(authTokensProvider).valueOrNull?.idToken;
 
   @override
   Future<void> onUnauthorized() async {
-    _ref.read(authTokensProvider.notifier).state = null;
+    await _ref.read(authTokensProvider.notifier).clear();
   }
 }
 
