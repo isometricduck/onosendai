@@ -2,21 +2,24 @@ This is a Flutter client for the Cyberspace social network. It works on both mob
 
 All communication with the cyberspace API is handled in the package cyberspace_client.
 
-The code is organized in vertical features:
+The code is organized in vertical features with a clean architecture approach:
 
 lib/
 ├── core/           # theme, router, DI, network, error handling
 ├── features/
 │   ├── feed/
 │   │   ├── data/
+│   │   │   ├── datasources/
+│   │   │   ├── models/
+│   │   │   ├── repositories/
 │   │   ├── domain/
+│   │   │   ├── entities      # Pure Dart classes
+│   │   │   ├── repositories/ # Abstract interfaces
+│   │   │   ├── usecases/
 │   │   └── presentation/
+│   │   │   ├── riverpod
+│   │   │   ├── pages
+│   │   │   ├── widgets
 │   ├── notifications/
 │   └── settings/
 └── shared/         # shared widgets, utils, extensions
-
-The architecture is divided in these layers:
-
-. Presentation layer
-. Domain layer (pure Dart)
-. Data layer

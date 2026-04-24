@@ -46,3 +46,7 @@ app.*.map.json
 
 #IA
 .claude
+
+# FVM Version Cache
+.fvm/
+.fvmrc

@@ -1,27 +1,22 @@
+import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/login/presentation/riverpod/login_providers.dart';
 
-class LoginDialog extends StatefulWidget {
+class LoginDialog extends ConsumerStatefulWidget {
   const LoginDialog({super.key});
 
   @override
-  State<LoginDialog> createState() => _LoginDialogState();
+  ConsumerState<LoginDialog> createState() => _LoginDialogState();
 }
 
-class _LoginDialogState extends State<LoginDialog> {
+class _LoginDialogState extends ConsumerState<LoginDialog> {
   final _emailController = TextEditingController(
     text: 'netizen@cyberspace.online',
   );
   final _passwordController = TextEditingController(text: '········');
   bool _obscurePassword = true;
-
-  //static const _bg = Color(0xFF0D0F0B);
-  //static const _surface = Color(0xFF141610);
-  //static const _border = Color(0xFF2A2D24);
-  //static const _textPrimary = Color(0xFFD4D9C8);
-  //static const _textMuted = Color(0xFF6B7160);
-  //static const _accent = Color(0xFFB8C49A);
-  //static const _inputBg = Color(0xFF1A1D16);
 
   @override
   void dispose() {
@@ -30,8 +25,23 @@ class _LoginDialogState extends State<LoginDialog> {
     super.dispose();
   }
 
+  Future<void> _handleLogin() async {
+    await ref.read(loginNotifierProvider.notifier).login(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final loginState = ref.watch(loginNotifierProvider);
+    final isLoading = loginState.isLoading;
+    final errorMessage = loginState.hasError
+        ? (loginState.error is CyberspaceApiException
+            ? (loginState.error as CyberspaceApiException).message
+            : 'Login failed. Please try again.')
+        : null;
+
     return Dialog(
       backgroundColor: context.theme.background,
       child: Container(
@@ -61,7 +71,7 @@ class _LoginDialogState extends State<LoginDialog> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
+                    onTap: isLoading ? null : () => Navigator.of(context).pop(),
                     child: Text(
                       '[ESC]',
                       style: TextStyle(
@@ -138,7 +148,25 @@ class _LoginDialogState extends State<LoginDialog> {
                   const SizedBox(height: 20),
 
                   // Login button
-                  _LoginButton(label: 'Login', onTap: () {}),
+                  _LoginButton(
+                    label: 'Login',
+                    isLoading: isLoading,
+                    onTap: isLoading ? null : _handleLogin,
+                  ),
+
+                  // Error message
+                  if (errorMessage != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      errorMessage,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        color: const Color(0xFFcc241d),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -222,9 +250,14 @@ class _LoginTextField extends StatelessWidget {
 
 class _LoginButton extends StatefulWidget {
   final String label;
-  final VoidCallback onTap;
+  final bool isLoading;
+  final VoidCallback? onTap;
 
-  const _LoginButton({required this.label, required this.onTap});
+  const _LoginButton({
+    required this.label,
+    required this.isLoading,
+    required this.onTap,
+  });
 
   @override
   State<_LoginButton> createState() => _LoginButtonState();
@@ -246,20 +279,33 @@ class _LoginButtonState extends State<_LoginButton> {
           decoration: BoxDecoration(
             color: context.theme.background,
             border: Border.all(
-              color: _hovered ? context.theme.foreground : context.theme.dimmed,
+              color: widget.isLoading
+                  ? context.theme.dimmed
+                  : _hovered
+                      ? context.theme.foreground
+                      : context.theme.dimmed,
               width: 1,
             ),
           ),
           alignment: Alignment.center,
-          child: Text(
-            widget.label,
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 13,
-              color: context.theme.foreground,
-              letterSpacing: 1.5,
-            ),
-          ),
+          child: widget.isLoading
+              ? SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    color: context.theme.dimmed,
+                  ),
+                )
+              : Text(
+                  widget.label,
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 13,
+                    color: context.theme.foreground,
+                    letterSpacing: 1.5,
+                  ),
+                ),
         ),
       ),
     );
