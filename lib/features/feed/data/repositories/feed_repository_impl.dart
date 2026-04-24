@@ -1,0 +1,12 @@
+import 'package:cyberspace_client/cyberspace_client.dart';
+import 'package:onosendai/features/feed/domain/repositories/feed_repository.dart';
+
+class FeedRepositoryImpl implements FeedRepository {
+  final CyberspaceClient _client;
+
+  FeedRepositoryImpl(this._client);
+
+  @override
+  Future<PagedResult<Post>> fetch({int limit = 20, String? cursor}) =>
+      _client.posts.list(limit: limit, cursor: cursor);
+}
