@@ -12,4 +12,6 @@ abstract class Theme {
   Color get border;
   Color get code;
   Color get codeBg;
+  TextStyle get mainFont;
+  TextStyle get codeFont;
 }

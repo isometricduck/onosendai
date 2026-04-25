@@ -13,10 +13,8 @@ class LoginDialog extends ConsumerStatefulWidget {
 }
 
 class _LoginDialogState extends ConsumerState<LoginDialog> {
-  final _emailController = TextEditingController(
-    text: 'netizen@cyberspace.online',
-  );
-  final _passwordController = TextEditingController(text: '········');
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override

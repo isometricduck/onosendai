@@ -1,5 +1,8 @@
 import 'dart:ui';
 
+// ignore: implementation_imports
+import 'package:flutter/src/painting/text_style.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:onosendai/core/theme/theme.dart';
 
 class DarkTheme extends Theme {
@@ -20,4 +23,16 @@ class DarkTheme extends Theme {
 
   @override
   Color get dimmed => Color(int.parse('#a89984'.replaceAll('#', '0xFF')));
+
+  @override
+  TextStyle get mainFont => GoogleFonts.courierPrime(
+      fontSize: 13,
+      fontWeight: FontWeight.w400
+    );
+
+  @override
+  TextStyle get codeFont => GoogleFonts.courierPrime(
+      fontSize: 13,
+      fontWeight: FontWeight.w400
+    );
 }

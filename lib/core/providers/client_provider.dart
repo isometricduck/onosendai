@@ -13,15 +13,17 @@ final tokenStorageProvider = Provider<TokenStorage>((ref) {
 
 final authTokensProvider =
     AsyncNotifierProvider<AuthTokensNotifier, AuthTokens?>(
-  AuthTokensNotifier.new,
-);
+      AuthTokensNotifier.new,
+    );
 
 class AuthTokensNotifier extends AsyncNotifier<AuthTokens?> {
   @override
   Future<AuthTokens?> build() async {
     final tokens = await ref.read(tokenStorageProvider).read();
     if (tokens != null) {
-      ref.read(cyberspaceClientProvider).setToken(
+      ref
+          .read(cyberspaceClientProvider)
+          .setToken(
             tokens.idToken,
             refreshToken: tokens.refreshToken,
             rtdbToken: tokens.rtdbToken,
@@ -32,7 +34,9 @@ class AuthTokensNotifier extends AsyncNotifier<AuthTokens?> {
 
   Future<void> set(AuthTokens tokens) async {
     await ref.read(tokenStorageProvider).write(tokens);
-    ref.read(cyberspaceClientProvider).setToken(
+    ref
+        .read(cyberspaceClientProvider)
+        .setToken(
           tokens.idToken,
           refreshToken: tokens.refreshToken,
           rtdbToken: tokens.rtdbToken,
@@ -54,6 +58,29 @@ class _RiverpodAuthTokenProvider implements AuthTokenProvider {
   @override
   Future<String?> getToken() async =>
       _ref.read(authTokensProvider).valueOrNull?.idToken;
+
+  @override
+  Future<String?> getRefreshToken() async =>
+      _ref.read(authTokensProvider).valueOrNull?.refreshToken;
+
+  @override
+  Future<void> onTokensRefreshed(RefreshedTokens tokens) async {
+    final current = _ref.read(authTokensProvider).valueOrNull;
+    if (current == null) {
+      await _ref.read(authTokensProvider.notifier).clear();
+      return;
+    }
+
+    await _ref
+        .read(authTokensProvider.notifier)
+        .set(
+          AuthTokens(
+            idToken: tokens.idToken,
+            refreshToken: current.refreshToken,
+            rtdbToken: tokens.rtdbToken,
+          ),
+        );
+  }
 
   @override
   Future<void> onUnauthorized() async {

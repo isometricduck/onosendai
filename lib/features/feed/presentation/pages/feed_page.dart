@@ -49,8 +49,6 @@ class _FeedPageState extends ConsumerState<FeedPage> {
       body: SafeArea(
         child: Column(
           children: [
-            const _FeedHeader(),
-            Divider(height: 1, thickness: 1, color: theme.border),
             Expanded(
               child: Center(
                 child: ConstrainedBox(
@@ -82,32 +80,6 @@ class _FeedPageState extends ConsumerState<FeedPage> {
 String _errorMessage(Object err) {
   if (err is CyberspaceApiException) return err.message;
   return 'Something went wrong.';
-}
-
-class _FeedHeader extends StatelessWidget {
-  const _FeedHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-      child: Row(
-        children: [
-          Text(
-            'FEED',
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: theme.foreground,
-              letterSpacing: 2.0,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _FeedList extends StatelessWidget {
