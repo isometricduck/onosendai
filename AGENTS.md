@@ -45,7 +45,6 @@ All navigation state lives in a single top-level `AppShell` widget.
 - Use `MediaQuery.sizeOf(context).width` inside `build()` to determine the active variant. Do not use `LayoutBuilder` for this.
 - The three layout variants are separate private widgets: `_MobileShell`, `_TabletShell`, `_DesktopShell`. `AppShell` only selects between them.
 - Navigation destinations must be defined once as a `const List` and shared across all three variants.
-- Every destination must supply both `icon` (outline) and `selectedIcon` (filled) using the Material icon pair convention (e.g. `Icons.feed_outlined` / `Icons.feed`).
 - Labels are always visible on mobile (`NavigationBar` default). On tablet, hide them (`extended: false`). On desktop, show them (`extended: true`).
 - The `NavigationRail` on tablet/desktop is separated from the content area with a `VerticalDivider(width: 1)`.
 

@@ -44,33 +44,27 @@ class _FeedPageState extends ConsumerState<FeedPage> {
     final theme = context.theme;
     final feedAsync = ref.watch(feedNotifierProvider);
 
-    return Scaffold(
-      backgroundColor: theme.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 640),
-                  child: feedAsync.when(
-                    loading: () => const _CenteredSpinner(),
-                    error: (err, _) => _ErrorView(
-                      message: _errorMessage(err),
-                      onRetry: () =>
-                          ref.read(feedNotifierProvider.notifier).refresh(),
-                    ),
-                    data: (state) => _FeedList(
-                      state: state,
-                      scrollController: _scrollController,
-                      onRefresh: () =>
-                          ref.read(feedNotifierProvider.notifier).refresh(),
-                    ),
-                  ),
-                ),
+    return ColoredBox(
+      color: theme.background,
+      child: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: feedAsync.when(
+              loading: () => const _CenteredSpinner(),
+              error: (err, _) => _ErrorView(
+                message: _errorMessage(err),
+                onRetry: () =>
+                    ref.read(feedNotifierProvider.notifier).refresh(),
+              ),
+              data: (state) => _FeedList(
+                state: state,
+                scrollController: _scrollController,
+                onRefresh: () =>
+                    ref.read(feedNotifierProvider.notifier).refresh(),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onosendai/core/navigation/app_shell.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/theme/theme.dart';
-import 'package:onosendai/features/feed/presentation/pages/feed_page.dart';
 import 'package:onosendai/features/login/login_dialog.dart';
 
 void main() {
@@ -47,7 +47,7 @@ class _HomePageState extends ConsumerState<_HomePage> {
       loading: () => blank,
       error: (_, _) => blank,
       data: (tokens) {
-        if (tokens != null) return const FeedPage();
+        if (tokens != null) return const AppShell();
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) _showLoginDialog();
         });
