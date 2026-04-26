@@ -25,7 +25,9 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
   }
 
   Future<void> _handleLogin() async {
-    await ref.read(loginNotifierProvider.notifier).login(
+    await ref
+        .read(loginNotifierProvider.notifier)
+        .login(
           email: _emailController.text,
           password: _passwordController.text,
         );
@@ -41,11 +43,10 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
 
     final loginState = ref.watch(loginNotifierProvider);
     final isLoading = loginState.isLoading;
+    final error = loginState.error;
     final errorMessage = loginState.hasError
-        ? (loginState.error is CyberspaceApiException
-            ? (loginState.error as CyberspaceApiException).message
-            : 'Login failed. Please try again.')
-        : null;
+        ? error.toString()
+        : 'Login failed. Please try again.';
 
     return Dialog(
       backgroundColor: context.theme.background,
@@ -267,8 +268,8 @@ class _LoginButtonState extends State<_LoginButton> {
               color: widget.isLoading
                   ? context.theme.dimmed
                   : _hovered
-                      ? context.theme.foreground
-                      : context.theme.dimmed,
+                  ? context.theme.foreground
+                  : context.theme.dimmed,
               width: 1,
             ),
           ),

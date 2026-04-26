@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/navigation/app_shell.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/theme/theme.dart';
-import 'package:onosendai/features/login/login_dialog.dart';
+import 'package:onosendai/features/login/presentation/login_dialog.dart';
 
 void main() {
   runApp(const ProviderScope(child: MainApp()));

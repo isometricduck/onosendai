@@ -83,9 +83,11 @@ class _PostCardState extends State<PostCard> {
       height: 1.4,
     );
 
-    final truncated = !_expanded && post.content.length > _truncateAt;
-    final displayText =
-        truncated ? '${post.content.substring(0, _truncateAt)}…' : post.content;
+    final content = post.content.replaceAll('&amp;', '&');
+    final truncated = !_expanded && content.length > _truncateAt;
+    final displayText = truncated
+        ? '${content.substring(0, _truncateAt)}…'
+        : content;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

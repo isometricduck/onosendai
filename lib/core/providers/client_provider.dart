@@ -7,7 +7,7 @@ import 'package:onosendai/core/auth/secure_storage_token_storage.dart';
 import 'package:onosendai/core/auth/token_storage.dart';
 
 final tokenStorageProvider = Provider<TokenStorage>((ref) {
-  if (Platform.isLinux) return FileTokenStorage();
+  if (Platform.isLinux || Platform.isMacOS) return FileTokenStorage();
   return SecureStorageTokenStorage();
 });
 
