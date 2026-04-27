@@ -1,21 +1,132 @@
+import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
 
 enum _WriteDestination { journal, feed }
 
-class WritePage extends StatefulWidget {
+class WritePage extends ConsumerStatefulWidget {
   const WritePage({super.key});
 
   @override
-  State<WritePage> createState() => _WritePageState();
+  ConsumerState<WritePage> createState() => _WritePageState();
 }
 
-class _WritePageState extends State<WritePage> {
+class _WritePageState extends ConsumerState<WritePage> {
+  final _contentController = TextEditingController();
   var _destination = _WriteDestination.journal;
+  var _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final content = _contentController.text.trim();
+    if (content.isEmpty || _isSubmitting) return;
+    if (_destination == _WriteDestination.feed &&
+        !await _confirmFeedPublish()) {
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    try {
+      final client = ref.read(cyberspaceClientProvider);
+      switch (_destination) {
+        case _WriteDestination.journal:
+          await client.notes.create(content: content);
+        case _WriteDestination.feed:
+          await client.posts.create(content: content, isPublic: true);
+          ref.invalidate(feedNotifierProvider);
+      }
+
+      _contentController.clear();
+      if (!mounted) return;
+      setState(() {});
+      _showMessage(switch (_destination) {
+        _WriteDestination.journal => 'Note saved.',
+        _WriteDestination.feed => 'Post published.',
+      });
+    } catch (error) {
+      if (!mounted) return;
+      _showMessage(_errorMessage(error));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  String _errorMessage(Object error) {
+    if (error is CyberspaceClientException) return error.message;
+    return 'Something went wrong.';
+  }
+
+  void _showMessage(String message) {
+    final theme = context.theme;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: theme.mainFont.copyWith(color: theme.background),
+        ),
+        backgroundColor: theme.foreground,
+      ),
+    );
+  }
+
+  Future<bool> _confirmFeedPublish() async {
+    final theme = context.theme;
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: theme.background,
+            surfaceTintColor: theme.background,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+              side: BorderSide(color: theme.border),
+            ),
+            title: Text(
+              'Publish to Feed?',
+              style: theme.mainFont.copyWith(
+                color: theme.foreground,
+                fontSize: 18,
+              ),
+            ),
+            content: Text(
+              'This post will be visible in the public feed.',
+              style: theme.mainFont.copyWith(color: theme.dimmed),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.dimmed,
+                  textStyle: theme.mainFont,
+                ),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: TextButton.styleFrom(
+                  backgroundColor: theme.foreground,
+                  foregroundColor: theme.background,
+                  textStyle: theme.mainFont,
+                ),
+                child: const Text('Publish'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
+    final canSubmit = _contentController.text.trim().isNotEmpty;
     final publishLabel = switch (_destination) {
       _WriteDestination.journal => 'Save Note',
       _WriteDestination.feed => 'Publish to Feed',
@@ -96,13 +207,13 @@ class _WritePageState extends State<WritePage> {
                 ),
                 const SizedBox(height: 16),
                 TextField(
+                  controller: _contentController,
                   minLines: 8,
                   maxLines: 12,
+                  onChanged: (_) => setState(() {}),
                   style: theme.mainFont.copyWith(color: theme.foreground),
                   cursorColor: theme.foreground,
                   decoration: InputDecoration(
-                    hintText: 'What is happening?',
-                    hintStyle: theme.mainFont.copyWith(color: theme.dimmed),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: theme.border),
                     ),
@@ -115,11 +226,16 @@ class _WritePageState extends State<WritePage> {
                 SizedBox(
                   width: double.infinity,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: canSubmit && !_isSubmitting ? _submit : null,
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
-                        theme.foreground,
-                      ),
+                      backgroundColor: WidgetStateProperty.resolveWith<Color>((
+                        states,
+                      ) {
+                        if (states.contains(WidgetState.disabled)) {
+                          return theme.dimmed;
+                        }
+                        return theme.foreground;
+                      }),
                       foregroundColor: WidgetStateProperty.all(
                         theme.background,
                       ),
@@ -137,7 +253,16 @@ class _WritePageState extends State<WritePage> {
                         const EdgeInsets.symmetric(vertical: 14),
                       ),
                     ),
-                    child: Text(publishLabel),
+                    child: _isSubmitting
+                        ? SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: theme.background,
+                            ),
+                          )
+                        : Text(publishLabel),
                   ),
                 ),
               ],
