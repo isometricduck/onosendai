@@ -101,12 +101,7 @@ class _PostCardState extends State<PostCard> {
 
   Widget _buildContent(BuildContext context, Post post) {
     final theme = context.theme;
-    final contentStyle = TextStyle(
-      fontFamily: 'monospace',
-      fontSize: 14,
-      color: theme.foreground,
-      height: 1.4,
-    );
+    final contentStyle = theme.mainFont;
 
     final content = post.content.replaceAll('&amp;', '&');
     final truncated = !_full && content.length > _truncateAt;

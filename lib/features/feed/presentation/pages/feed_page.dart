@@ -193,22 +193,13 @@ class _ErrorView extends StatelessWidget {
           children: [
             Text(
               '[ERROR]',
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 13,
-                color: const Color(0xFFcc241d),
-                letterSpacing: 1.5,
-              ),
+              style: theme.mainFont,
             ),
             const SizedBox(height: 12),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 13,
-                color: theme.foreground,
-              ),
+              style: theme.mainFont,
             ),
             const SizedBox(height: 20),
             _RetryButton(onTap: onRetry),
@@ -249,12 +240,8 @@ class _RetryButtonState extends State<_RetryButton> {
           ),
           child: Text(
             'Retry',
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 13,
-              color: theme.foreground,
-              letterSpacing: 1.5,
-            ),
+            style: theme.mainFont,
+
           ),
         ),
       ),
@@ -270,12 +257,7 @@ class _DimmedText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TextStyle(
-        fontFamily: 'monospace',
-        fontSize: 12,
-        color: context.theme.dimmed,
-        letterSpacing: 0.5,
-      ),
+      style: context.theme.mainFont,
     );
   }
 }
