@@ -1,5 +1,6 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
+import 'package:onosendai/core/images/images.dart';
 import 'package:onosendai/core/theme/theme.dart';
 
 class PostCard extends StatefulWidget {
@@ -88,11 +89,24 @@ class _PostCardState extends State<PostCard> {
     final displayText = truncated
         ? '${content.substring(0, _truncateAt)}…'
         : content;
+    final segments = _PostContentSegment.parse(displayText);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SelectableText(displayText, style: contentStyle),
+        for (final (index, segment) in segments.indexed) ...[
+          if (index > 0) const SizedBox(height: 8),
+          switch (segment) {
+            _TextSegment(:final text) => SelectableText(
+              text,
+              style: contentStyle,
+            ),
+            _ImageSegment(:final altText, :final url) => _PostImage(
+              altText: altText,
+              url: url,
+            ),
+          },
+        ],
         if (truncated || _expanded) ...[
           const SizedBox(height: 4),
           GestureDetector(
@@ -109,6 +123,128 @@ class _PostCardState extends State<PostCard> {
           ),
         ],
       ],
+    );
+  }
+}
+
+sealed class _PostContentSegment {
+  const _PostContentSegment();
+
+  static final _imagePattern = RegExp(r'!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)');
+
+  static List<_PostContentSegment> parse(String content) {
+    final segments = <_PostContentSegment>[];
+    var cursor = 0;
+
+    for (final match in _imagePattern.allMatches(content)) {
+      if (match.start > cursor) {
+        final text = content.substring(cursor, match.start);
+        if (text.isNotEmpty) segments.add(_TextSegment(text));
+      }
+
+      segments.add(_ImageSegment(match.group(1) ?? '', match.group(2)!));
+      cursor = match.end;
+    }
+
+    if (cursor < content.length) {
+      final text = content.substring(cursor);
+      if (text.isNotEmpty) segments.add(_TextSegment(text));
+    }
+
+    return segments;
+  }
+}
+
+class _TextSegment extends _PostContentSegment {
+  final String text;
+
+  const _TextSegment(this.text);
+}
+
+class _ImageSegment extends _PostContentSegment {
+  final String altText;
+  final String url;
+
+  const _ImageSegment(this.altText, this.url);
+}
+
+class _PostImage extends StatelessWidget {
+  final String altText;
+  final String url;
+
+  const _PostImage({required this.altText, required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return Semantics(
+      label: altText.isEmpty ? 'Post image' : altText,
+      image: true,
+      child: Container(
+        constraints: const BoxConstraints(maxHeight: 420),
+        decoration: BoxDecoration(
+          border: Border.all(color: theme.border, width: 1),
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: DitheredNetworkImage(
+          url: url,
+          fit: BoxFit.contain,
+          settings: DitherShaderSettings(
+            foreground: theme.foreground,
+            background: theme.background,
+          ),
+          placeholderBuilder: (_) => const _PostImagePlaceholder(),
+          errorBuilder: (_) => const _PostImageError(),
+        ),
+      ),
+    );
+  }
+}
+
+class _PostImagePlaceholder extends StatelessWidget {
+  const _PostImagePlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return SizedBox(
+      height: 180,
+      child: Center(
+        child: SizedBox(
+          width: 14,
+          height: 14,
+          child: CircularProgressIndicator(
+            strokeWidth: 1.5,
+            color: theme.dimmed,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PostImageError extends StatelessWidget {
+  const _PostImageError();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return SizedBox(
+      height: 120,
+      child: Center(
+        child: Text(
+          '[image failed to load]',
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 12,
+            color: theme.dimmed,
+            letterSpacing: 0.4,
+          ),
+        ),
+      ),
     );
   }
 }
