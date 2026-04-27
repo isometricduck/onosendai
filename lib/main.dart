@@ -9,12 +9,17 @@ void main() {
   runApp(const ProviderScope(child: MainApp()));
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends ConsumerWidget {
   const MainApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(home: _HomePage());
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appTheme = ref.watch(appThemeProvider);
+
+    return AppThemeScope(
+      theme: appTheme.theme,
+      child: const MaterialApp(home: _HomePage()),
+    );
   }
 }
 

@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
 import 'package:onosendai/features/feed/presentation/pages/feed_page.dart';
 import 'package:onosendai/features/settings/presentation/pages/settings_page.dart';
 import 'package:onosendai/features/write/presentation/pages/write_page.dart';
 
-class AppShell extends StatefulWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
 
   @override
-  State<AppShell> createState() => _AppShellState();
+  ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> {
+class _AppShellState extends ConsumerState<AppShell> {
   var _selectedIndex = 0;
 
   void _selectDestination(int index) {
+    final destination = _destinations[index];
+
+    if (destination.sheet != null) {
+      showModalBottomSheet<void>(context: context, builder: destination.sheet!);
+      return;
+    }
+
     setState(() => _selectedIndex = index);
   }
 
@@ -46,32 +54,99 @@ class _AppShellState extends State<AppShell> {
 
 class _AppDestination {
   final IconData icon;
-  final Widget page;
+  final Widget? page;
+  final WidgetBuilder? sheet;
 
-  const _AppDestination({
-    required this.icon,
-    required this.page,
-  });
+  const _AppDestination({required this.icon, required this.page})
+    : sheet = null;
+
+  const _AppDestination.sheet({required this.icon, required this.sheet})
+    : page = null;
 }
 
 const _destinations = <_AppDestination>[
-  _AppDestination(
-    icon: LucideIcons.menuSquare,
-    page: FeedPage(),
-  ),
-  _AppDestination(
-    icon: LucideIcons.pencil,
-    page: WritePage(),
-  ),
-  _AppDestination(
-    icon: LucideIcons.eye,
-    page: WritePage(),
-  ),
-  _AppDestination(
-    icon: LucideIcons.wrench,
-    page: SettingsPage(),
-  ),
+  _AppDestination(icon: LucideIcons.menuSquare, page: FeedPage()),
+  _AppDestination(icon: LucideIcons.pencil, page: WritePage()),
+  _AppDestination.sheet(icon: LucideIcons.eye, sheet: _themeBottomSheet),
+  _AppDestination(icon: LucideIcons.wrench, page: SettingsPage()),
 ];
+
+Widget _themeBottomSheet(BuildContext context) {
+  return const _ThemeBottomSheet();
+}
+
+class _ThemeBottomSheet extends ConsumerWidget {
+  const _ThemeBottomSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = context.theme;
+    final selectedTheme = ref.watch(appThemeProvider);
+
+    return Material(
+      color: theme.background,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final appTheme in AppThemeId.values)
+                _ThemeOption(
+                  appTheme: appTheme,
+                  selected: appTheme == selectedTheme,
+                  onSelected: () {
+                    ref.read(appThemeProvider.notifier).state = appTheme;
+                    Navigator.pop(context);
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ThemeOption extends StatelessWidget {
+  final AppThemeId appTheme;
+  final bool selected;
+  final VoidCallback onSelected;
+
+  const _ThemeOption({
+    required this.appTheme,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return InkWell(
+      onTap: onSelected,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        child: Row(
+          children: [
+            Icon(
+              selected ? LucideIcons.circleDot : LucideIcons.circle,
+              color: selected ? theme.foreground : theme.dimmed,
+            ),
+            const SizedBox(width: 14),
+            Text(
+              appTheme.label,
+              style: theme.mainFont.copyWith(
+                color: selected ? theme.foreground : theme.dimmed,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _MobileShell extends StatelessWidget {
   final int selectedIndex;
@@ -88,7 +163,7 @@ class _MobileShell extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.background,
-      body: _destinations[selectedIndex].page,
+      body: _destinations[selectedIndex].page!,
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           iconTheme: WidgetStateProperty.resolveWith((states) {
@@ -105,7 +180,7 @@ class _MobileShell extends StatelessWidget {
           selectedIndex: selectedIndex,
           onDestinationSelected: onDestinationSelected,
           backgroundColor: theme.background,
-          indicatorColor: theme.code,
+          indicatorColor: theme.dimmed,
           destinations: [
             for (final destination in _destinations)
               NavigationDestination(
@@ -194,7 +269,7 @@ class _RailBody extends StatelessWidget {
           onDestinationSelected: onDestinationSelected,
           extended: extended,
           backgroundColor: theme.background,
-          indicatorColor: theme.code,
+          indicatorColor: theme.dimmed,
           selectedIconTheme: IconThemeData(color: theme.foreground),
           unselectedIconTheme: IconThemeData(color: theme.dimmed),
           selectedLabelTextStyle: theme.mainFont.copyWith(
@@ -213,7 +288,7 @@ class _RailBody extends StatelessWidget {
           ],
         ),
         VerticalDivider(width: 1, color: theme.border),
-        Expanded(child: _destinations[selectedIndex].page),
+        Expanded(child: _destinations[selectedIndex].page!),
       ],
     );
   }
