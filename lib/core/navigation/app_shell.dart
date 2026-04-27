@@ -45,36 +45,30 @@ class _AppShellState extends State<AppShell> {
 }
 
 class _AppDestination {
-  final String label;
   final IconData icon;
-  final IconData selectedIcon;
   final Widget page;
 
   const _AppDestination({
-    required this.label,
     required this.icon,
-    required this.selectedIcon,
     required this.page,
   });
 }
 
 const _destinations = <_AppDestination>[
   _AppDestination(
-    label: 'Feed',
     icon: LucideIcons.menuSquare,
-    selectedIcon: LucideIcons.menuSquare,
     page: FeedPage(),
   ),
   _AppDestination(
-    label: 'Write',
     icon: LucideIcons.pencil,
-    selectedIcon: LucideIcons.pencil,
     page: WritePage(),
   ),
   _AppDestination(
-    label: 'Settings',
+    icon: LucideIcons.eye,
+    page: WritePage(),
+  ),
+  _AppDestination(
     icon: LucideIcons.wrench,
-    selectedIcon: LucideIcons.wrench,
     page: SettingsPage(),
   ),
 ];
@@ -94,13 +88,6 @@ class _MobileShell extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.background,
-      appBar: AppBar(
-        title: Text(_destinations[selectedIndex].label),
-        backgroundColor: theme.background,
-        foregroundColor: theme.foreground,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-      ),
       body: _destinations[selectedIndex].page,
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
@@ -123,8 +110,8 @@ class _MobileShell extends StatelessWidget {
             for (final destination in _destinations)
               NavigationDestination(
                 icon: Icon(destination.icon),
-                selectedIcon: Icon(destination.selectedIcon),
-                label: destination.label,
+                selectedIcon: Icon(destination.icon),
+                label: '',
               ),
           ],
         ),
@@ -220,8 +207,8 @@ class _RailBody extends StatelessWidget {
             for (final destination in _destinations)
               NavigationRailDestination(
                 icon: Icon(destination.icon),
-                selectedIcon: Icon(destination.selectedIcon),
-                label: Text(destination.label),
+                selectedIcon: Icon(destination.icon),
+                label: Text(''),
               ),
           ],
         ),

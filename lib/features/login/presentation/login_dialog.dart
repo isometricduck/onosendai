@@ -15,20 +15,63 @@ class LoginDialog extends ConsumerStatefulWidget {
 class _LoginDialogState extends ConsumerState<LoginDialog> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
   bool _obscurePassword = true;
+  bool _emailError = false;
+  bool _passwordError = false;
+
+  static final _emailPattern = RegExp(
+    r"^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$",
+  );
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
+  bool _validate() {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    bool emailError = false;
+    bool passwordError = false;
+    FocusNode? focusNode;
+
+    if (email.isEmpty) {
+      emailError = true;
+      focusNode = _emailFocusNode;
+    } else if (!_emailPattern.hasMatch(email)) {
+      emailError = true;
+      focusNode = _emailFocusNode;
+    }
+
+    if (password.isEmpty) {
+      passwordError = true;
+      focusNode ??= _passwordFocusNode;
+    }
+
+    setState(() {
+      _emailError = emailError;
+      _passwordError = passwordError;
+    });
+
+    focusNode?.requestFocus();
+    return !emailError && !passwordError;
+  }
+
   Future<void> _handleLogin() async {
+    if (!_validate()) {
+      return;
+    }
+
     await ref
         .read(loginNotifierProvider.notifier)
         .login(
-          email: _emailController.text,
+          email: _emailController.text.trim(),
           password: _passwordController.text,
         );
   }
@@ -44,9 +87,12 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
     final loginState = ref.watch(loginNotifierProvider);
     final isLoading = loginState.isLoading;
     final error = loginState.error;
-    final errorMessage = loginState.hasError
-        ? error.toString()
-        : 'Login failed. Please try again.';
+    String? errorMessage;
+    if (loginState.hasError) {
+      errorMessage = error != null
+          ? error.toString()
+          : 'Login failed. Please try again.';
+    }
 
     return Dialog(
       backgroundColor: context.theme.background,
@@ -106,8 +152,16 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
                   const SizedBox(height: 8),
                   _LoginTextField(
                     controller: _emailController,
+                    focusNode: _emailFocusNode,
                     obscureText: false,
                     keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    onChanged: (_) {
+                      if (_emailError) {
+                        setState(() => _emailError = false);
+                      }
+                    },
+                    onSubmitted: (_) => _passwordFocusNode.requestFocus(),
                   ),
 
                   const SizedBox(height: 20),
@@ -117,7 +171,19 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
                   const SizedBox(height: 8),
                   _LoginTextField(
                     controller: _passwordController,
+                    focusNode: _passwordFocusNode,
                     obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.done,
+                    onChanged: (_) {
+                      if (_passwordError) {
+                        setState(() => _passwordError = false);
+                      }
+                    },
+                    onSubmitted: (_) {
+                      if (!isLoading) {
+                        _handleLogin();
+                      }
+                    },
                     suffix: GestureDetector(
                       onTap: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
@@ -148,7 +214,7 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
                       style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 12,
-                        color: const Color(0xFFcc241d),
+                        color: context.theme.foreground,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -183,53 +249,73 @@ class _FieldLabel extends StatelessWidget {
 
 class _LoginTextField extends StatelessWidget {
   final TextEditingController controller;
+  final FocusNode focusNode;
   final bool obscureText;
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
   final Widget? suffix;
 
   const _LoginTextField({
     required this.controller,
+    required this.focusNode,
     required this.obscureText,
     this.keyboardType,
+    this.textInputAction,
+    this.onChanged,
+    this.onSubmitted,
     this.suffix,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.theme.background,
-        border: Border.all(color: context.theme.border, width: 1),
-      ),
-      child: TextField(
-        controller: controller,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        style: TextStyle(
-          fontFamily: 'monospace',
-          fontSize: 13,
-          color: context.theme.foreground,
-          letterSpacing: 0.3,
-        ),
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 14,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: context.theme.background,
+            border: Border.all(
+              color: context.theme.border,
+              width: 1,
+            ),
           ),
-          border: InputBorder.none,
-          suffixIcon: suffix != null
-              ? Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: suffix,
-                )
-              : null,
-          suffixIconConstraints: const BoxConstraints(
-            minWidth: 0,
-            minHeight: 0,
+          child: TextField(
+            controller: controller,
+            focusNode: focusNode,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            textInputAction: textInputAction,
+            onChanged: onChanged,
+            onSubmitted: onSubmitted,
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 13,
+              color: context.theme.foreground,
+              letterSpacing: 0.3,
+            ),
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 14,
+              ),
+              border: InputBorder.none,
+              suffixIcon: suffix != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: suffix,
+                    )
+                  : null,
+              suffixIconConstraints: const BoxConstraints(
+                minWidth: 0,
+                minHeight: 0,
+              ),
+            ),
+            cursorColor: context.theme.foreground,
           ),
         ),
-        cursorColor: context.theme.foreground,
-      ),
+      ],
     );
   }
 }
