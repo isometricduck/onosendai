@@ -1,20 +1,22 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
-import 'package:onosendai/features/feed/domain/entities/feed_state.dart';
-import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
+import 'package:onosendai/features/feed/domain/entities/post_detail_state.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
 import 'package:onosendai/features/feed/presentation/widgets/post_card.dart';
 
-class FeedPage extends ConsumerStatefulWidget {
-  const FeedPage({super.key});
+class PostDetailPage extends ConsumerStatefulWidget {
+  final Post post;
+
+  const PostDetailPage({super.key, required this.post});
 
   @override
-  ConsumerState<FeedPage> createState() => _FeedPageState();
+  ConsumerState<PostDetailPage> createState() => _PostDetailPageState();
 }
 
-class _FeedPageState extends ConsumerState<FeedPage> {
+class _PostDetailPageState extends ConsumerState<PostDetailPage> {
   final _scrollController = ScrollController();
   static const _loadMoreThreshold = 400.0;
 
@@ -36,75 +38,92 @@ class _FeedPageState extends ConsumerState<FeedPage> {
     if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
     if (position.pixels >= position.maxScrollExtent - _loadMoreThreshold) {
-      ref.read(feedNotifierProvider.notifier).loadMore();
+      ref.read(postDetailNotifierProvider(widget.post).notifier).loadMore();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    final feedAsync = ref.watch(feedNotifierProvider);
+    final detailAsync = ref.watch(postDetailNotifierProvider(widget.post));
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
 
-    return ColoredBox(
+    final body = ColoredBox(
       color: theme.background,
       child: SafeArea(
+        bottom: false,
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
-            child: feedAsync.when(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: detailAsync.when(
               loading: () => const _CenteredSpinner(),
               error: (err, _) => _ErrorView(
                 message: _errorMessage(err),
-                onRetry: () =>
-                    ref.read(feedNotifierProvider.notifier).refresh(),
+                onRetry: () => ref
+                    .read(postDetailNotifierProvider(widget.post).notifier)
+                    .refresh(),
               ),
-              data: (state) => _FeedList(
+              data: (state) => _PostDetailList(
                 state: state,
                 scrollController: _scrollController,
-                onRefresh: () =>
-                    ref.read(feedNotifierProvider.notifier).refresh(),
+                showInlineHeader: !isMobile,
+                onBack: () => Navigator.of(context).maybePop(),
+                onRefresh: () => ref
+                    .read(postDetailNotifierProvider(widget.post).notifier)
+                    .refresh(),
               ),
             ),
           ),
         ),
       ),
     );
+
+    if (!isMobile) {
+      return Scaffold(backgroundColor: theme.background, body: body);
+    }
+
+    return Scaffold(
+      backgroundColor: theme.background,
+      appBar: AppBar(
+        backgroundColor: theme.background,
+        foregroundColor: theme.foreground,
+        surfaceTintColor: theme.background,
+        title: Text(
+          'ENTRY',
+          style: theme.mainFont.copyWith(
+            color: theme.foreground,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      body: body,
+    );
   }
 }
 
-String _errorMessage(Object err) {
-  if (err is CyberspaceApiException) return err.message;
-  return 'Something went wrong.';
-}
-
-class _FeedList extends StatelessWidget {
-  final FeedState state;
+class _PostDetailList extends StatelessWidget {
+  final PostDetailState state;
   final ScrollController scrollController;
+  final bool showInlineHeader;
+  final VoidCallback onBack;
   final Future<void> Function() onRefresh;
 
-  const _FeedList({
+  const _PostDetailList({
     required this.state,
     required this.scrollController,
+    required this.showInlineHeader,
+    required this.onBack,
     required this.onRefresh,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (state.posts.isEmpty) {
-      return RefreshIndicator(
-        onRefresh: onRefresh,
-        child: ListView(
-          controller: scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: const [
-            SizedBox(height: 120),
-            Center(child: _DimmedText('No posts yet.')),
-          ],
-        ),
-      );
-    }
-
-    final itemCount = state.posts.length + 1;
+    final headerOffset = showInlineHeader ? 1 : 0;
+    final postIndex = headerOffset;
+    final repliesHeaderIndex = postIndex + 1;
+    final firstReplyIndex = repliesHeaderIndex + 1;
+    final footerIndex = firstReplyIndex + state.replies.length;
+    final itemCount = footerIndex + 1;
 
     return RefreshIndicator(
       onRefresh: onRefresh,
@@ -115,22 +134,78 @@ class _FeedList extends StatelessWidget {
         itemCount: itemCount,
         separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
-          if (index < state.posts.length) {
-            final post = state.posts[index];
-            return PostCard(
-              post: post,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => PostDetailPage(post: post)),
-              ),
-            );
+          if (showInlineHeader && index == 0) {
+            return _InlineHeader(onBack: onBack);
           }
+
+          if (index == postIndex) {
+            return PostCard(post: state.post, full: true);
+          }
+
+          if (index == repliesHeaderIndex) {
+            return _RepliesHeader(count: state.post.repliesCount);
+          }
+
+          final replyIndex = index - firstReplyIndex;
+          if (replyIndex < state.replies.length) {
+            return ReplyCard(reply: state.replies[replyIndex]);
+          }
+
           if (state.isLoadingMore) return const _InlineSpinner();
           if (state.hasMore) return const SizedBox.shrink();
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(child: _DimmedText('— end of feed —')),
-          );
+
+          return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+}
+
+class _InlineHeader extends StatelessWidget {
+  final VoidCallback onBack;
+
+  const _InlineHeader({required this.onBack});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    return Row(
+      children: [
+        IconButton(
+          onPressed: onBack,
+          icon: const Icon(LucideIcons.arrowLeft),
+          color: theme.foreground,
+          tooltip: 'Back',
+        ),
+        const SizedBox(width: 4),
+        Text(
+          'Post',
+          style: theme.mainFont.copyWith(
+            color: theme.foreground,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RepliesHeader extends StatelessWidget {
+  final int count;
+
+  const _RepliesHeader({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    return Text(
+      count == 1 ? '1 REPLY' : '$count REPLIES',
+      style: TextStyle(
+        fontFamily: 'monospace',
+        fontSize: 12,
+        color: theme.dimmed,
+        letterSpacing: 0.5,
       ),
     );
   }
@@ -189,7 +264,6 @@ class _ErrorView extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               '[ERROR]',
@@ -262,20 +336,7 @@ class _RetryButtonState extends State<_RetryButton> {
   }
 }
 
-class _DimmedText extends StatelessWidget {
-  final String text;
-  const _DimmedText(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontFamily: 'monospace',
-        fontSize: 12,
-        color: context.theme.dimmed,
-        letterSpacing: 0.5,
-      ),
-    );
-  }
+String _errorMessage(Object err) {
+  if (err is CyberspaceApiException) return err.message;
+  return 'Something went wrong.';
 }

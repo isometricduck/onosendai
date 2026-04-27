@@ -5,8 +5,15 @@ import 'package:onosendai/core/theme/theme.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
+  final VoidCallback? onTap;
+  final bool full;
 
-  const PostCard({super.key, required this.post});
+  const PostCard({
+    super.key,
+    required this.post,
+    this.onTap,
+    this.full = false,
+  });
 
   @override
   State<PostCard> createState() => _PostCardState();
@@ -14,15 +21,22 @@ class PostCard extends StatefulWidget {
 
 class _PostCardState extends State<PostCard> {
   bool _expanded = false;
+  bool _full = false;
 
   static const _truncateAt = 512;
+
+  @override
+  void initState() {
+    super.initState();
+    _full = widget.full;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
     final post = widget.post;
 
-    return Container(
+    final card = Container(
       decoration: BoxDecoration(
         color: theme.background,
         border: Border.all(color: theme.border, width: 1),
@@ -72,6 +86,17 @@ class _PostCardState extends State<PostCard> {
         ],
       ),
     );
+
+    if (widget.onTap == null) return card;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.deferToChild,
+        onTap: widget.onTap,
+        child: card,
+      ),
+    );
   }
 
   Widget _buildContent(BuildContext context, Post post) {
@@ -84,7 +109,7 @@ class _PostCardState extends State<PostCard> {
     );
 
     final content = post.content.replaceAll('&amp;', '&');
-    final truncated = !_expanded && content.length > _truncateAt;
+    final truncated = !_full && content.length > _truncateAt;
     final displayText = truncated
         ? '${content.substring(0, _truncateAt)}…'
         : content;
@@ -96,17 +121,17 @@ class _PostCardState extends State<PostCard> {
         for (final (index, segment) in segments.indexed) ...[
           if (index > 0) const SizedBox(height: 8),
           switch (segment) {
-            _TextSegment(:final text) => SelectableText(
-              text,
-              style: contentStyle,
-            ),
+            _TextSegment(:final text) =>
+              widget.onTap == null
+                  ? SelectableText(text, style: contentStyle)
+                  : Text(text, style: contentStyle),
             _ImageSegment(:final altText, :final url) => _PostImage(
               altText: altText,
               url: url,
             ),
           },
         ],
-        if (truncated || _expanded) ...[
+        if (!_full && (truncated || _expanded)) ...[
           const SizedBox(height: 4),
           GestureDetector(
             onTap: () => setState(() => _expanded = !_expanded),
@@ -126,9 +151,56 @@ class _PostCardState extends State<PostCard> {
   }
 }
 
+class ReplyCard extends StatelessWidget {
+  final Reply reply;
+
+  const ReplyCard({super.key, required this.reply});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.background,
+        border: Border.all(color: theme.border, width: 1),
+      ),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _ReplyHeader(reply: reply),
+          const SizedBox(height: 10),
+          if (reply.deleted)
+            Text(
+              '[reply deleted]',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 13,
+                color: theme.dimmed,
+                fontStyle: FontStyle.italic,
+              ),
+            )
+          else
+            SelectableText(
+              reply.content.replaceAll('&amp;', '&'),
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 14,
+                color: theme.foreground,
+                height: 1.4,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 sealed class _PostContentSegment {
   const _PostContentSegment();
 
+  // ignore: deprecated_member_use
   static final _imagePattern = RegExp(r'!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)');
 
   static List<_PostContentSegment> parse(String content) {
@@ -273,6 +345,43 @@ class _Header extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           '${_relativeTime(post.createdAt)} · ${post.content.length} · ${post.repliesCount}',
+          textAlign: TextAlign.right,
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 12,
+            color: theme.dimmed,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReplyHeader extends StatelessWidget {
+  final Reply reply;
+  const _ReplyHeader({required this.reply});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            '@${reply.authorUsername}',
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 13,
+              color: theme.foreground,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          _relativeTime(reply.createdAt),
           textAlign: TextAlign.right,
           style: TextStyle(
             fontFamily: 'monospace',
