@@ -1,23 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onosendai/core/theme/brutalist_theme.dart';
+import 'package:onosendai/core/theme/bubblegum_theme.dart';
+import 'package:onosendai/core/theme/c64_theme.dart';
+import 'package:onosendai/core/theme/crypt_theme.dart';
 import 'package:onosendai/core/theme/dark_theme.dart';
+import 'package:onosendai/core/theme/grid_theme.dart';
+import 'package:onosendai/core/theme/lcd_theme.dart';
+import 'package:onosendai/core/theme/light_theme.dart';
+import 'package:onosendai/core/theme/matrix_theme.dart';
+import 'package:onosendai/core/theme/poetry_theme.dart';
 import 'package:onosendai/core/theme/vt320_theme.dart';
 
-enum AppThemeId { dark, vt320 }
+enum AppThemeId {
+  dark,
+  light,
+  lcd,
+  c64,
+  matrix,
+  poetry,
+  brutalist,
+  grid,
+  crypt,
+  bubblegum,
+  vt320,
+}
 
 final appThemeProvider = StateProvider<AppThemeId>((ref) => AppThemeId.dark);
 
 extension AppThemeIdX on AppThemeId {
   String get label {
     return switch (this) {
-      AppThemeId.dark => 'dark',
+      AppThemeId.dark => 'Dark',
+      AppThemeId.light => 'Light',
+      AppThemeId.lcd => 'LCD',
+      AppThemeId.c64 => 'C64',
       AppThemeId.vt320 => 'VT320',
+      AppThemeId.matrix => 'Matrix',
+      AppThemeId.poetry => 'Poetry',
+      AppThemeId.brutalist => 'Brutalist',
+      AppThemeId.grid => 'Grid',
+      AppThemeId.crypt => 'Crypt',
+      AppThemeId.bubblegum => 'Bubblegum',
     };
   }
 
   Theme get theme {
     return switch (this) {
       AppThemeId.dark => DarkTheme(),
+      AppThemeId.light => LightTheme(),
+      AppThemeId.lcd => LcdTheme(),
+      AppThemeId.c64 => C64Theme(),
+      AppThemeId.matrix => MatrixTheme(),
+      AppThemeId.poetry => PoetryTheme(),
+      AppThemeId.brutalist => BrutalistTheme(),
+      AppThemeId.grid => GridTheme(),
+      AppThemeId.crypt => CryptTheme(),
+      AppThemeId.bubblegum => BubblegumTheme(),
       AppThemeId.vt320 => Vt320Theme(),
     };
   }
@@ -44,10 +83,10 @@ extension AppColorsX on BuildContext {
 }
 
 abstract class Theme {
+  IconData get icon;
   Color get foreground;
   Color get background;
   Color get dimmed;
   Color get border;
   TextStyle get mainFont;
-  TextStyle get codeFont;
 }

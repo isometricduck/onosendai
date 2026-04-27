@@ -20,7 +20,11 @@ class _AppShellState extends ConsumerState<AppShell> {
     final destination = _destinations[index];
 
     if (destination.sheet != null) {
-      showModalBottomSheet<void>(context: context, builder: destination.sheet!);
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        builder: destination.sheet!,
+      );
       return;
     }
 
@@ -83,25 +87,30 @@ class _ThemeBottomSheet extends ConsumerWidget {
     final theme = context.theme;
     final selectedTheme = ref.watch(appThemeProvider);
 
-    return Material(
-      color: theme.background,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final appTheme in AppThemeId.values)
-                _ThemeOption(
-                  appTheme: appTheme,
-                  selected: appTheme == selectedTheme,
-                  onSelected: () {
-                    ref.read(appThemeProvider.notifier).state = appTheme;
-                    Navigator.pop(context);
-                  },
-                ),
-            ],
+    return SizedBox(
+      height: MediaQuery.sizeOf(context).height * 0.9,
+      child: Material(
+        color: theme.background,
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final appTheme in AppThemeId.values)
+                    _ThemeOption(
+                      appTheme: appTheme,
+                      selected: appTheme == selectedTheme,
+                      onSelected: () {
+                        ref.read(appThemeProvider.notifier).state = appTheme;
+                        Navigator.pop(context);
+                      },
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -123,26 +132,46 @@ class _ThemeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
+    final contentColor = selected ? theme.background : theme.dimmed;
 
-    return InkWell(
-      onTap: onSelected,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        child: Row(
-          children: [
-            Icon(
-              selected ? LucideIcons.circleDot : LucideIcons.circle,
-              color: selected ? theme.foreground : theme.dimmed,
-            ),
-            const SizedBox(width: 14),
-            Text(
-              appTheme.label,
-              style: theme.mainFont.copyWith(
-                color: selected ? theme.foreground : theme.dimmed,
+    return SizedBox(
+      height: 52,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(flex: 3, child: ColoredBox(color: theme.background)),
+          Expanded(
+            flex: 4,
+            child: InkWell(
+              onTap: onSelected,
+              child: ColoredBox(
+                color: selected ? theme.foreground : Colors.transparent,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(appTheme.theme.icon, color: contentColor),
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Text(
+                          appTheme.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                          style: theme.mainFont.copyWith(color: contentColor),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+          Expanded(flex: 3, child: ColoredBox(color: theme.background)),
+        ],
       ),
     );
   }

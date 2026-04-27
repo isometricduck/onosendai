@@ -2,10 +2,15 @@ import 'dart:ui';
 
 // ignore: implementation_imports
 import 'package:flutter/src/painting/text_style.dart';
+import 'package:flutter/widgets.dart' show IconData;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
 
 class Vt320Theme extends Theme {
+  @override
+  IconData get icon => LucideIcons.monitor;
+
   @override
   Color get foreground => Color(int.parse('#ff9a10'.replaceAll('#', '0xFF')));
 
@@ -13,22 +18,16 @@ class Vt320Theme extends Theme {
   Color get background => Color(int.parse('#170800'.replaceAll('#', '0xFF')));
 
   @override
-  Color get border => Color(int.parse('#ff9b00'.replaceAll('#', '0xFF'))).withOpacity(0.27);
+  Color get border => Color(
+    int.parse('#ff9b00'.replaceAll('#', '0xFF')),
+  ).withValues(alpha: 0.27);
 
   @override
   Color get dimmed => Color(int.parse('#ff9100'.replaceAll('#', '0xFF')));
 
   @override
-  TextStyle get mainFont => GoogleFonts.vt323(
-      fontSize: 16,
-      fontWeight: FontWeight.w400
-    );
-
-  @override
-  TextStyle get codeFont => GoogleFonts.vt323(
-      fontSize: 16,
-      fontWeight: FontWeight.w400
-    );
+  TextStyle get mainFont =>
+      GoogleFonts.vt323(fontSize: 16, fontWeight: FontWeight.w400);
 }
 
 /*
