@@ -84,19 +84,34 @@ class PostDetailNotifier extends FamilyAsyncNotifier<PostDetailState, Post> {
     );
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh({bool fetchPost = false}) async {
     final currentPost = arg;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      final post = fetchPost
+          ? await ref
+                .read(cyberspaceClientProvider)
+                .posts
+                .get(currentPost.postId)
+          : currentPost;
       final page = await ref
           .read(fetchPostRepliesUseCaseProvider)
-          .call(currentPost.postId, limit: _pageSize);
+          .call(post.postId, limit: _pageSize);
       return PostDetailState(
-        post: currentPost,
+        post: post,
         replies: page.data,
         nextCursor: page.cursor,
       );
     });
+  }
+
+  Future<void> createReply(String content) async {
+    await ref
+        .read(cyberspaceClientProvider)
+        .replies
+        .create(postId: arg.postId, content: content);
+    await refresh(fetchPost: true);
+    ref.invalidate(feedNotifierProvider);
   }
 
   Future<void> loadMore() async {

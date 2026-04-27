@@ -18,7 +18,10 @@ class PostDetailPage extends ConsumerStatefulWidget {
 
 class _PostDetailPageState extends ConsumerState<PostDetailPage> {
   final _scrollController = ScrollController();
+  final _replyController = TextEditingController();
   static const _loadMoreThreshold = 400.0;
+  var _isReplying = false;
+  var _isSubmittingReply = false;
 
   @override
   void initState() {
@@ -31,6 +34,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
+    _replyController.dispose();
     super.dispose();
   }
 
@@ -39,6 +43,35 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     final position = _scrollController.position;
     if (position.pixels >= position.maxScrollExtent - _loadMoreThreshold) {
       ref.read(postDetailNotifierProvider(widget.post).notifier).loadMore();
+    }
+  }
+
+  Future<void> _submitReply() async {
+    final content = _replyController.text.trim();
+    if (content.isEmpty || _isSubmittingReply) return;
+
+    setState(() => _isSubmittingReply = true);
+    try {
+      await ref
+          .read(postDetailNotifierProvider(widget.post).notifier)
+          .createReply(content);
+      _replyController.clear();
+      if (!mounted) return;
+      setState(() => _isReplying = false);
+    } catch (error) {
+      if (!mounted) return;
+      final theme = context.theme;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _errorMessage(error),
+            style: theme.mainFont.copyWith(color: theme.background),
+          ),
+          backgroundColor: theme.foreground,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmittingReply = false);
     }
   }
 
@@ -67,6 +100,12 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                 state: state,
                 scrollController: _scrollController,
                 showInlineHeader: !isMobile,
+                showReplyComposer: _isReplying,
+                replyController: _replyController,
+                isSubmittingReply: _isSubmittingReply,
+                onReplyChanged: () => setState(() {}),
+                onStartReply: () => setState(() => _isReplying = true),
+                onSubmitReply: _submitReply,
                 onBack: () => Navigator.of(context).maybePop(),
                 onRefresh: () => ref
                     .read(postDetailNotifierProvider(widget.post).notifier)
@@ -105,6 +144,12 @@ class _PostDetailList extends StatelessWidget {
   final PostDetailState state;
   final ScrollController scrollController;
   final bool showInlineHeader;
+  final bool showReplyComposer;
+  final TextEditingController replyController;
+  final bool isSubmittingReply;
+  final VoidCallback onReplyChanged;
+  final VoidCallback onStartReply;
+  final VoidCallback onSubmitReply;
   final VoidCallback onBack;
   final Future<void> Function() onRefresh;
 
@@ -112,6 +157,12 @@ class _PostDetailList extends StatelessWidget {
     required this.state,
     required this.scrollController,
     required this.showInlineHeader,
+    required this.showReplyComposer,
+    required this.replyController,
+    required this.isSubmittingReply,
+    required this.onReplyChanged,
+    required this.onStartReply,
+    required this.onSubmitReply,
     required this.onBack,
     required this.onRefresh,
   });
@@ -121,9 +172,12 @@ class _PostDetailList extends StatelessWidget {
     final headerOffset = showInlineHeader ? 1 : 0;
     final postIndex = headerOffset;
     final repliesHeaderIndex = postIndex + 1;
-    final firstReplyIndex = repliesHeaderIndex + 1;
+    final composerOffset = showReplyComposer ? 1 : 0;
+    final replyComposerIndex = repliesHeaderIndex + 1;
+    final firstReplyIndex = replyComposerIndex + composerOffset;
     final footerIndex = firstReplyIndex + state.replies.length;
     final itemCount = footerIndex + 1;
+    final canSubmitReply = replyController.text.trim().isNotEmpty;
 
     return RefreshIndicator(
       onRefresh: onRefresh,
@@ -143,7 +197,21 @@ class _PostDetailList extends StatelessWidget {
           }
 
           if (index == repliesHeaderIndex) {
-            return _RepliesHeader(count: state.post.repliesCount);
+            return _RepliesHeader(
+              count: state.post.repliesCount,
+              showReplyButton: !showReplyComposer,
+              onStartReply: onStartReply,
+            );
+          }
+
+          if (showReplyComposer && index == replyComposerIndex) {
+            return _ReplyComposer(
+              controller: replyController,
+              canSubmit: canSubmitReply,
+              isSubmitting: isSubmittingReply,
+              onChanged: onReplyChanged,
+              onSubmit: onSubmitReply,
+            );
           }
 
           final replyIndex = index - firstReplyIndex;
@@ -193,20 +261,123 @@ class _InlineHeader extends StatelessWidget {
 
 class _RepliesHeader extends StatelessWidget {
   final int count;
+  final bool showReplyButton;
+  final VoidCallback onStartReply;
 
-  const _RepliesHeader({required this.count});
+  const _RepliesHeader({
+    required this.count,
+    required this.showReplyButton,
+    required this.onStartReply,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    return Text(
-      count == 1 ? '1 REPLY' : '$count REPLIES',
-      style: TextStyle(
-        fontFamily: 'monospace',
-        fontSize: 12,
-        color: theme.dimmed,
-        letterSpacing: 0.5,
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            count == 1 ? '1 REPLY' : '$count REPLIES',
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 12,
+              color: theme.dimmed,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+        if (showReplyButton) _ReplyTextButton(onTap: onStartReply),
+      ],
+    );
+  }
+}
+
+class _ReplyComposer extends StatelessWidget {
+  final TextEditingController controller;
+  final bool canSubmit;
+  final bool isSubmitting;
+  final VoidCallback onChanged;
+  final VoidCallback onSubmit;
+
+  const _ReplyComposer({
+    required this.controller,
+    required this.canSubmit,
+    required this.isSubmitting,
+    required this.onChanged,
+    required this.onSubmit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          controller: controller,
+          minLines: 4,
+          maxLines: 8,
+          onChanged: (_) => onChanged(),
+          style: theme.mainFont.copyWith(color: theme.foreground),
+          cursorColor: theme.foreground,
+          decoration: InputDecoration(
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(4),
+              borderSide: BorderSide(color: theme.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(4),
+              borderSide: BorderSide(color: theme.foreground),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Align(
+          alignment: Alignment.centerRight,
+          child: _ReplyTextButton(
+            onTap: canSubmit && !isSubmitting ? onSubmit : null,
+            isLoading: isSubmitting,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReplyTextButton extends StatelessWidget {
+  final VoidCallback? onTap;
+  final bool isLoading;
+
+  const _ReplyTextButton({required this.onTap, this.isLoading = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    final enabled = onTap != null;
+    return TextButton(
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+        foregroundColor: enabled ? theme.foreground : theme.dimmed,
+        textStyle: TextStyle(
+          fontFamily: 'monospace',
+          fontSize: 12,
+          letterSpacing: 0.5,
+        ),
+        visualDensity: VisualDensity.compact,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        minimumSize: const Size(0, 32),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
+      child: isLoading
+          ? SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 1.5,
+                color: theme.dimmed,
+              ),
+            )
+          : const Text('[R]EPLY'),
     );
   }
 }
