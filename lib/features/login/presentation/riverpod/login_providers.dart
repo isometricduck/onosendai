@@ -12,14 +12,16 @@ final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
   return LoginUseCase(ref.read(authRepositoryProvider));
 });
 
-final loginNotifierProvider =
-    AsyncNotifierProvider<LoginNotifier, void>(LoginNotifier.new);
+final loginNotifierProvider = AsyncNotifierProvider<LoginNotifier, void>(
+  LoginNotifier.new,
+);
 
 class LoginNotifier extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
   Future<void> login({required String email, required String password}) async {
+    ref.read(authMessageProvider.notifier).state = null;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final tokens = await ref

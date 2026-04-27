@@ -1,9 +1,9 @@
 import 'dart:ui';
 
 // ignore: implementation_imports
-import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/widgets.dart' show IconData;
+import 'package:flutter/material.dart' show Colors;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';

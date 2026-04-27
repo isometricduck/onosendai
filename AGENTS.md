@@ -70,14 +70,15 @@ All icons are taken from the `lucide_icons` package.
 ### Feed
 
 This is an infinite scroll of posts. Code is under the "feed" feature.
-Icon: square-menu
 
 ### Write
 
 Create a post.
-Icon: square-pen
+
+### Themes
+
+Modal sheet: change the current theme
 
 ### Settings
 
 Change settings
-Icon: wrench

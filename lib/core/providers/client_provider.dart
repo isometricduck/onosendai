@@ -16,6 +16,8 @@ final authTokensProvider =
       AuthTokensNotifier.new,
     );
 
+final authMessageProvider = StateProvider<String?>((ref) => null);
+
 class AuthTokensNotifier extends AsyncNotifier<AuthTokens?> {
   @override
   Future<AuthTokens?> build() async {
@@ -41,12 +43,14 @@ class AuthTokensNotifier extends AsyncNotifier<AuthTokens?> {
           refreshToken: tokens.refreshToken,
           rtdbToken: tokens.rtdbToken,
         );
+    ref.read(authMessageProvider.notifier).state = null;
     state = AsyncData(tokens);
   }
 
-  Future<void> clear() async {
+  Future<void> clear({String? message}) async {
     await ref.read(tokenStorageProvider).clear();
     ref.read(cyberspaceClientProvider).clearToken();
+    ref.read(authMessageProvider.notifier).state = message;
     state = const AsyncData(null);
   }
 }
@@ -84,7 +88,9 @@ class _RiverpodAuthTokenProvider implements AuthTokenProvider {
 
   @override
   Future<void> onUnauthorized() async {
-    await _ref.read(authTokensProvider.notifier).clear();
+    await _ref
+        .read(authTokensProvider.notifier)
+        .clear(message: 'Your session expired. Please log in again.');
   }
 }
 

@@ -85,9 +85,10 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
     });
 
     final loginState = ref.watch(loginNotifierProvider);
+    final authMessage = ref.watch(authMessageProvider);
     final isLoading = loginState.isLoading;
     final error = loginState.error;
-    String? errorMessage;
+    var errorMessage = authMessage;
     if (loginState.hasError) {
       errorMessage = error != null
           ? error.toString()
@@ -276,10 +277,7 @@ class _LoginTextField extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             color: context.theme.background,
-            border: Border.all(
-              color: context.theme.border,
-              width: 1,
-            ),
+            border: Border.all(color: context.theme.border, width: 1),
           ),
           child: TextField(
             controller: controller,
