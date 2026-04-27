@@ -69,7 +69,6 @@ class _PostCardState extends State<PostCard> {
             ),
           ],
           const SizedBox(height: 10),
-          _Footer(post: post),
         ],
       ),
     );
@@ -112,7 +111,7 @@ class _PostCardState extends State<PostCard> {
           GestureDetector(
             onTap: () => setState(() => _expanded = !_expanded),
             child: Text(
-              truncated ? '[+ show more]' : '[- show less]',
+              truncated ? '[E]xpand' : '[C]ollapse',
               style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 12,
@@ -258,7 +257,7 @@ class _Header extends StatelessWidget {
     final theme = context.theme;
     return Row(
       children: [
-        Flexible(
+        Expanded(
           child: Text(
             '@${post.authorUsername}',
             style: TextStyle(
@@ -273,7 +272,8 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Text(
-          '· ${_relativeTime(post.createdAt)}',
+          '${_relativeTime(post.createdAt)} · ${post.content.length} · ${post.repliesCount}',
+          textAlign: TextAlign.right,
           style: TextStyle(
             fontFamily: 'monospace',
             fontSize: 12,
@@ -306,29 +306,6 @@ class _TopicChip extends StatelessWidget {
           letterSpacing: 0.3,
         ),
       ),
-    );
-  }
-}
-
-class _Footer extends StatelessWidget {
-  final Post post;
-  const _Footer({required this.post});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-    final style = TextStyle(
-      fontFamily: 'monospace',
-      fontSize: 12,
-      color: theme.dimmed,
-      letterSpacing: 0.4,
-    );
-    return Row(
-      children: [
-        Text('R:${post.repliesCount}', style: style),
-        const SizedBox(width: 16),
-        Text('B:${post.bookmarksCount}', style: style),
-      ],
     );
   }
 }
