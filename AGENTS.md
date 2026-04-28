@@ -75,10 +75,14 @@ This is an infinite scroll of posts. Code is under the "feed" feature.
 
 Create a post.
 
+### Journal
+
+Read private notes.
+
 ### Themes
 
-Modal sheet: change the current theme
+Modal sheet: change the current theme.
 
 ### Settings
 
-Change settings
+Change settings.

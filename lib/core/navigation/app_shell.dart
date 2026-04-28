@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
 import 'package:onosendai/features/feed/presentation/pages/feed_page.dart';
+import 'package:onosendai/features/journal/presentation/pages/journal_page.dart';
 import 'package:onosendai/features/settings/presentation/pages/settings_page.dart';
 import 'package:onosendai/features/write/presentation/pages/write_page.dart';
 
@@ -58,21 +59,45 @@ class _AppShellState extends ConsumerState<AppShell> {
 
 class _AppDestination {
   final IconData icon;
+  final String label;
   final Widget? page;
   final WidgetBuilder? sheet;
 
-  const _AppDestination({required this.icon, required this.page})
-    : sheet = null;
+  const _AppDestination({
+    required this.icon,
+    required this.label,
+    required this.page,
+  }) : sheet = null;
 
-  const _AppDestination.sheet({required this.icon, required this.sheet})
-    : page = null;
+  const _AppDestination.sheet({
+    required this.icon,
+    required this.label,
+    required this.sheet,
+  }) : page = null;
 }
 
 const _destinations = <_AppDestination>[
-  _AppDestination(icon: LucideIcons.menuSquare, page: FeedPage()),
-  _AppDestination(icon: LucideIcons.pencil, page: WritePage()),
-  _AppDestination.sheet(icon: LucideIcons.eye, sheet: _themeBottomSheet),
-  _AppDestination(icon: LucideIcons.wrench, page: SettingsPage()),
+  _AppDestination(
+    icon: LucideIcons.menuSquare,
+    label: 'Feed',
+    page: FeedPage(),
+  ),
+  _AppDestination(icon: LucideIcons.pencil, label: 'Write', page: WritePage()),
+  _AppDestination(
+    icon: LucideIcons.book,
+    label: 'Journal',
+    page: JournalPage(),
+  ),
+  _AppDestination.sheet(
+    icon: LucideIcons.eye,
+    label: 'Themes',
+    sheet: _themeBottomSheet,
+  ),
+  _AppDestination(
+    icon: LucideIcons.wrench,
+    label: 'Settings',
+    page: SettingsPage(),
+  ),
 ];
 
 Widget _themeBottomSheet(BuildContext context) {
@@ -215,7 +240,7 @@ class _MobileShell extends StatelessWidget {
               NavigationDestination(
                 icon: Icon(destination.icon),
                 selectedIcon: Icon(destination.icon),
-                label: '',
+                label: destination.label,
               ),
           ],
         ),
@@ -312,7 +337,7 @@ class _RailBody extends StatelessWidget {
               NavigationRailDestination(
                 icon: Icon(destination.icon),
                 selectedIcon: Icon(destination.icon),
-                label: Text(''),
+                label: Text(destination.label),
               ),
           ],
         ),

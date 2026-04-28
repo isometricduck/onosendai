@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/theme/theme.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
+import 'package:onosendai/features/journal/presentation/riverpod/journal_providers.dart';
 
 enum _WriteDestination { journal, feed }
 
@@ -39,6 +40,7 @@ class _WritePageState extends ConsumerState<WritePage> {
       switch (_destination) {
         case _WriteDestination.journal:
           await client.notes.create(content: content);
+          ref.invalidate(journalNotifierProvider);
         case _WriteDestination.feed:
           await client.posts.create(content: content, isPublic: true);
           ref.invalidate(feedNotifierProvider);
