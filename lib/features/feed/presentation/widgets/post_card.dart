@@ -256,10 +256,15 @@ class _PostImage extends StatelessWidget {
         child: DitheredNetworkImage(
           url: url,
           fit: BoxFit.contain,
-          settings: DitherShaderSettings(
-            foreground: theme.foreground,
-            background: theme.background,
-          ),
+          settings: theme.isDark
+              ? DitherShaderSettings(
+                  foreground: theme.foreground,
+                  background: theme.background,
+                )
+              : DitherShaderSettings(
+                  foreground: theme.background,
+                  background: theme.foreground,
+                ),
           placeholderBuilder: (_) => const _PostImagePlaceholder(),
           errorBuilder: (_) => const _PostImageError(),
         ),

@@ -10,6 +10,9 @@ import 'package:onosendai/core/theme/theme.dart';
 
 class LightTheme extends Theme {
   @override
+  bool get isDark => false;
+
+  @override
   IconData get icon => LucideIcons.sun;
 
   @override
@@ -25,7 +28,7 @@ class LightTheme extends Theme {
   Color get dimmed => Color(int.parse('#3a3a3a'.replaceAll('#', '0xFF')));
 
   @override
-  TextStyle get mainFont =>
+  TextStyle get font =>
       GoogleFonts.jetBrainsMono(fontSize: 16, fontWeight: FontWeight.w400);
 }
 

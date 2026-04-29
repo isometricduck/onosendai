@@ -10,6 +10,9 @@ import 'package:onosendai/core/theme/theme.dart';
 
 class C64Theme extends Theme {
   @override
+  bool get isDark => true;
+  
+  @override
   IconData get icon => LucideIcons.moon;
 
   @override
@@ -25,7 +28,7 @@ class C64Theme extends Theme {
   Color get dimmed => Colors.white.withValues(alpha: 0.4);
 
   @override
-  TextStyle get mainFont =>
+  TextStyle get font =>
       GoogleFonts.spaceMono(fontSize: 16, fontWeight: FontWeight.w400);
 }
 

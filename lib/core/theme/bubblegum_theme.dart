@@ -9,6 +9,9 @@ import 'package:onosendai/core/theme/theme.dart';
 
 class BubblegumTheme extends Theme {
   @override
+  bool get isDark => false;
+
+  @override
   IconData get icon => LucideIcons.candy;
 
   @override
@@ -24,7 +27,7 @@ class BubblegumTheme extends Theme {
   Color get dimmed => Color(int.parse('#b86b93'.replaceAll('#', '0xFF')));
 
   @override
-  TextStyle get mainFont =>
+  TextStyle get font =>
       GoogleFonts.sniglet(fontSize: 16, fontWeight: FontWeight.w400);
 }
 

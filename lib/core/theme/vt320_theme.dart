@@ -9,6 +9,9 @@ import 'package:onosendai/core/theme/theme.dart';
 
 class Vt320Theme extends Theme {
   @override
+  bool get isDark => true;
+  
+  @override
   IconData get icon => LucideIcons.monitor;
 
   @override
@@ -26,7 +29,7 @@ class Vt320Theme extends Theme {
   Color get dimmed => Color(int.parse('#ff9100'.replaceAll('#', '0xFF')));
 
   @override
-  TextStyle get mainFont =>
+  TextStyle get font =>
       GoogleFonts.vt323(fontSize: 16, fontWeight: FontWeight.w400);
 }
 

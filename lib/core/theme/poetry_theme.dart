@@ -10,6 +10,9 @@ import 'package:onosendai/core/theme/theme.dart';
 
 class PoetryTheme extends Theme {
   @override
+  bool get isDark => false;
+
+  @override
   IconData get icon => LucideIcons.bookOpen;
 
   @override
@@ -25,7 +28,7 @@ class PoetryTheme extends Theme {
   Color get dimmed => Color(int.parse('#666666'.replaceAll('#', '0xFF')));
 
   @override
-  TextStyle get mainFont =>
+  TextStyle get font =>
       GoogleFonts.ebGaramond(fontSize: 16, fontWeight: FontWeight.w400);
 }
 

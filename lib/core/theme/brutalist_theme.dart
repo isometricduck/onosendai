@@ -9,6 +9,9 @@ import 'package:onosendai/core/theme/theme.dart';
 
 class BrutalistTheme extends Theme {
   @override
+  bool get isDark => true;
+  
+  @override
   IconData get icon => LucideIcons.piSquare;
 
   @override
@@ -26,7 +29,7 @@ class BrutalistTheme extends Theme {
   Color get dimmed => Color(int.parse('#99a9bf'.replaceAll('#', '0xFF')));
 
   @override
-  TextStyle get mainFont =>
+  TextStyle get font =>
       GoogleFonts.shareTechMono(fontSize: 16, fontWeight: FontWeight.w400);
 }
 

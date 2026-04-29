@@ -9,6 +9,9 @@ import 'package:onosendai/core/theme/theme.dart';
 
 class DarkTheme extends Theme {
   @override
+  bool get isDark => true;
+
+  @override
   IconData get icon => LucideIcons.moon;
 
   @override
@@ -18,13 +21,13 @@ class DarkTheme extends Theme {
   Color get background => Color(int.parse('#000000'.replaceAll('#', '0xFF')));
 
   @override
-  Color get border => Color(int.parse('#a89984'.replaceAll('#', '0xFF')));
+  Color get border => Color(int.parse('#3a3a3a'.replaceAll('#', '0xFF')));
 
   @override
   Color get dimmed => Color(int.parse('#a89984'.replaceAll('#', '0xFF')));
 
   @override
-  TextStyle get mainFont =>
+  TextStyle get font =>
       GoogleFonts.jetBrainsMono(fontSize: 16, fontWeight: FontWeight.w400);
 }
 

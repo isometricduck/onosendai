@@ -10,6 +10,9 @@ import 'package:onosendai/core/theme/theme.dart';
 
 class CryptTheme extends Theme {
   @override
+  bool get isDark => true;
+
+  @override
   IconData get icon => LucideIcons.skull;
 
   @override
@@ -25,7 +28,7 @@ class CryptTheme extends Theme {
   Color get dimmed => Colors.red.withValues(alpha: 0.8);
 
   @override
-  TextStyle get mainFont =>
+  TextStyle get font =>
       GoogleFonts.jetBrainsMono(fontSize: 16, fontWeight: FontWeight.w400);
 }
 

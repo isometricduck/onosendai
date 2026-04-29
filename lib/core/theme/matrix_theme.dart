@@ -10,6 +10,9 @@ import 'package:onosendai/core/theme/theme.dart';
 
 class MatrixTheme extends Theme {
   @override
+  bool get isDark => true;
+  
+  @override
   IconData get icon => LucideIcons.terminal;
 
   @override
@@ -32,7 +35,7 @@ class MatrixTheme extends Theme {
 
 
   @override
-  TextStyle get mainFont =>
+  TextStyle get font =>
       GoogleFonts.vt323(fontSize: 16, fontWeight: FontWeight.w400);
 }
 

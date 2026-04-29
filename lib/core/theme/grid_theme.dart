@@ -9,6 +9,9 @@ import 'package:onosendai/core/theme/theme.dart';
 
 class GridTheme extends Theme {
   @override
+  bool get isDark => true;
+
+  @override
   IconData get icon => LucideIcons.grid;
 
   @override
@@ -28,7 +31,7 @@ class GridTheme extends Theme {
   ).withValues(alpha: 0.6);
 
   @override
-  TextStyle get mainFont =>
+  TextStyle get font =>
       GoogleFonts.shareTechMono(fontSize: 16, fontWeight: FontWeight.w400);
 }
 

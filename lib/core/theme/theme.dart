@@ -83,10 +83,13 @@ extension AppColorsX on BuildContext {
 }
 
 abstract class Theme {
+  bool get isDark; // True if background is darker than foreground
   IconData get icon;
   Color get foreground;
   Color get background;
   Color get dimmed;
   Color get border;
-  TextStyle get mainFont;
+  TextStyle get font;
+
+  TextStyle get mainFont => font.copyWith(color: foreground);
 }
