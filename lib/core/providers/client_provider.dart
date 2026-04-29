@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cyberspace_client/cyberspace_client.dart';
@@ -18,19 +19,66 @@ final authTokensProvider =
 
 final authMessageProvider = StateProvider<String?>((ref) => null);
 
+bool _isTokenExpired(String idToken) {
+  try {
+    final parts = idToken.split('.');
+    if (parts.length != 3) return true;
+    var payload = parts[1];
+    payload += '=' * ((4 - payload.length % 4) % 4);
+    final claims =
+        jsonDecode(utf8.decode(base64Url.decode(payload))) as Map<String, dynamic>;
+    final exp = claims['exp'];
+    if (exp is! int) return true;
+    // Treat tokens expiring within 30 seconds as already expired.
+    return DateTime.now().millisecondsSinceEpoch >= (exp - 30) * 1000;
+  } catch (_) {
+    return true;
+  }
+}
+
 class AuthTokensNotifier extends AsyncNotifier<AuthTokens?> {
   @override
   Future<AuthTokens?> build() async {
-    final tokens = await ref.read(tokenStorageProvider).read();
-    if (tokens != null) {
-      ref
-          .read(cyberspaceClientProvider)
-          .setToken(
-            tokens.idToken,
-            refreshToken: tokens.refreshToken,
-            rtdbToken: tokens.rtdbToken,
-          );
+    final storage = ref.read(tokenStorageProvider);
+    final tokens = await storage.read();
+    if (tokens == null) return null;
+
+    if (_isTokenExpired(tokens.idToken)) {
+      try {
+        final refreshed = await ref
+            .read(cyberspaceClientProvider)
+            .auth
+            .refreshToken(tokens.refreshToken);
+        final newTokens = AuthTokens(
+          idToken: refreshed.idToken,
+          refreshToken: tokens.refreshToken,
+          rtdbToken: refreshed.rtdbToken,
+        );
+        await storage.write(newTokens);
+        ref.read(cyberspaceClientProvider).setToken(
+          newTokens.idToken,
+          refreshToken: newTokens.refreshToken,
+          rtdbToken: newTokens.rtdbToken,
+        );
+        return newTokens;
+      } on CyberspaceApiException catch (e) {
+        if (e.statusCode == 401) {
+          await storage.clear();
+          ref.read(authMessageProvider.notifier).state =
+              'Your session expired. Please log in again.';
+          return null;
+        }
+        // Server error — fall through with the expired token; reactive path will retry.
+      } catch (_) {
+        // Network error — fall through with the expired token; reactive path will retry.
+      }
     }
+
+    ref.read(cyberspaceClientProvider).setToken(
+      tokens.idToken,
+      refreshToken: tokens.refreshToken,
+      rtdbToken: tokens.rtdbToken,
+    );
     return tokens;
   }
 
