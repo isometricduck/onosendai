@@ -62,6 +62,7 @@ class _WritePageState extends ConsumerState<WritePage> {
   }
 
   String _errorMessage(Object error) {
+    debugPrint('Write submit error: $error (${error.runtimeType})');
     if (error is CyberspaceClientException) return error.message;
     return 'Something went wrong.';
   }

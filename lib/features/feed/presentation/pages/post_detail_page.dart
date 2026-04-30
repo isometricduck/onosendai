@@ -508,6 +508,7 @@ class _RetryButtonState extends State<_RetryButton> {
 }
 
 String _errorMessage(Object err) {
+  debugPrint('Post detail load error: $err');
   if (err is CyberspaceApiException) return err.message;
   return 'Something went wrong.';
 }

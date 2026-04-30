@@ -72,6 +72,7 @@ class _JournalPageState extends ConsumerState<JournalPage> {
 }
 
 String _errorMessage(Object err) {
+  debugPrint('Journal load error: $err');
   if (err is CyberspaceApiException) return err.message;
   return 'Something went wrong.';
 }

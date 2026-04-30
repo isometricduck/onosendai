@@ -6,6 +6,12 @@ import 'package:onosendai/core/theme/theme.dart';
 import 'package:onosendai/features/login/presentation/login_dialog.dart';
 
 void main() {
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint(details.exceptionAsString());
+    if (details.stack != null) debugPrintStack(stackTrace: details.stack);
+  };
+
   runApp(const ProviderScope(child: MainApp()));
 }
 

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cyberspace_client/cyberspace_client.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/auth/file_token_storage.dart';
 import 'package:onosendai/core/auth/secure_storage_token_storage.dart';
@@ -28,6 +29,7 @@ bool _isTokenExpired(String idToken) {
     final claims =
         jsonDecode(utf8.decode(base64Url.decode(payload))) as Map<String, dynamic>;
     final exp = claims['exp'];
+    debugPrint('Token exp: $exp, now: ${DateTime.now().millisecondsSinceEpoch ~/ 1000}');
     if (exp is! int) return true;
     // Treat tokens expiring within 30 seconds as already expired.
     return DateTime.now().millisecondsSinceEpoch >= (exp - 30) * 1000;

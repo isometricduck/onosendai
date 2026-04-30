@@ -72,8 +72,9 @@ class _FeedPageState extends ConsumerState<FeedPage> {
   }
 }
 
-String _errorMessage(Object err) {
-  if (err is CyberspaceApiException) return err.message;
+String _errorMessage(Object error) {
+  debugPrint('Feed load error: $error (${error.runtimeType})');
+  if (error is CyberspaceApiException) return error.message;
   return 'Something went wrong.';
 }
 
