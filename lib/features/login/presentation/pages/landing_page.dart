@@ -135,7 +135,7 @@ class _LandingImage extends StatelessWidget {
         ),
         clipBehavior: Clip.hardEdge,
         child: DitheredImage(
-          imageProvider: const AssetImage('assets/images/cyber_hamlet.jpg'),
+          imageProvider: const AssetImage('assets/images/caveman_hamlet.jpg'),
           fit: BoxFit.contain,
           settings: theme.isDark
               ? DitherShaderSettings(
