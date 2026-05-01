@@ -23,6 +23,9 @@ class _LoadedFeedRepository implements FeedRepository {
     int limit = 20,
     String? cursor,
   }) async => const PagedResult(data: [], cursor: null);
+
+  @override
+  Future<void> deleteReply(String replyId) async {}
 }
 
 void main() {

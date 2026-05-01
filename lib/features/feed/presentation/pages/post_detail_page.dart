@@ -22,6 +22,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
   static const _loadMoreThreshold = 400.0;
   var _isReplying = false;
   var _isSubmittingReply = false;
+  String? _deletingReplyId;
 
   @override
   void initState() {
@@ -75,10 +76,37 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     }
   }
 
+  Future<void> _deleteReply(Reply reply) async {
+    if (_deletingReplyId != null) return;
+
+    setState(() => _deletingReplyId = reply.replyId);
+    try {
+      await ref
+          .read(postDetailNotifierProvider(widget.post).notifier)
+          .deleteReply(reply.replyId);
+    } catch (error) {
+      if (!mounted) return;
+      final theme = context.theme;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _errorMessage(error),
+            style: theme.mainFont.copyWith(color: theme.background),
+          ),
+          backgroundColor: theme.foreground,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _deletingReplyId = null);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
     final detailAsync = ref.watch(postDetailNotifierProvider(widget.post));
+    final currentUser = ref.watch(currentUserProfileProvider).valueOrNull;
+    debugPrint("Current user: $currentUser");
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     final body = ColoredBox(
@@ -103,9 +131,12 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                 showReplyComposer: _isReplying,
                 replyController: _replyController,
                 isSubmittingReply: _isSubmittingReply,
+                currentUserId: currentUser?.userId,
+                deletingReplyId: _deletingReplyId,
                 onReplyChanged: () => setState(() {}),
                 onStartReply: () => setState(() => _isReplying = true),
                 onSubmitReply: _submitReply,
+                onDeleteReply: _deleteReply,
                 onBack: () => Navigator.of(context).maybePop(),
                 onRefresh: () => ref
                     .read(postDetailNotifierProvider(widget.post).notifier)
@@ -147,9 +178,12 @@ class _PostDetailList extends StatelessWidget {
   final bool showReplyComposer;
   final TextEditingController replyController;
   final bool isSubmittingReply;
+  final String? currentUserId;
+  final String? deletingReplyId;
   final VoidCallback onReplyChanged;
   final VoidCallback onStartReply;
   final VoidCallback onSubmitReply;
+  final ValueChanged<Reply> onDeleteReply;
   final VoidCallback onBack;
   final Future<void> Function() onRefresh;
 
@@ -160,9 +194,12 @@ class _PostDetailList extends StatelessWidget {
     required this.showReplyComposer,
     required this.replyController,
     required this.isSubmittingReply,
+    required this.currentUserId,
+    required this.deletingReplyId,
     required this.onReplyChanged,
     required this.onStartReply,
     required this.onSubmitReply,
+    required this.onDeleteReply,
     required this.onBack,
     required this.onRefresh,
   });
@@ -216,7 +253,15 @@ class _PostDetailList extends StatelessWidget {
 
           final replyIndex = index - firstReplyIndex;
           if (replyIndex < state.replies.length) {
-            return ReplyCard(reply: state.replies[replyIndex]);
+            final reply = state.replies[replyIndex];
+            debugPrint("Current user id: $currentUserId and author id: ${reply.authorId}");
+            final canDelete =
+                currentUserId != null && reply.authorId == currentUserId;
+            return ReplyCard(
+              reply: reply,
+              isDeleting: deletingReplyId == reply.replyId,
+              onDelete: canDelete ? () => onDeleteReply(reply) : null,
+            );
           }
 
           if (state.isLoadingMore) return const _InlineSpinner();

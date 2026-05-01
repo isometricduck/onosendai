@@ -5,6 +5,7 @@ import 'package:onosendai/features/feed/data/repositories/feed_repository_impl.d
 import 'package:onosendai/features/feed/domain/entities/feed_state.dart';
 import 'package:onosendai/features/feed/domain/entities/post_detail_state.dart';
 import 'package:onosendai/features/feed/domain/repositories/feed_repository.dart';
+import 'package:onosendai/features/feed/domain/usecases/delete_reply_usecase.dart';
 import 'package:onosendai/features/feed/domain/usecases/fetch_feed_usecase.dart';
 import 'package:onosendai/features/feed/domain/usecases/fetch_post_replies_usecase.dart';
 
@@ -20,6 +21,14 @@ final fetchPostRepliesUseCaseProvider = Provider<FetchPostRepliesUseCase>((
   ref,
 ) {
   return FetchPostRepliesUseCase(ref.read(feedRepositoryProvider));
+});
+
+final deleteReplyUseCaseProvider = Provider<DeleteReplyUseCase>((ref) {
+  return DeleteReplyUseCase(ref.read(feedRepositoryProvider));
+});
+
+final currentUserProfileProvider = FutureProvider<UserProfile>((ref) {
+  return ref.read(cyberspaceClientProvider).users.getMe();
 });
 
 final feedNotifierProvider = AsyncNotifierProvider<FeedNotifier, FeedState>(
@@ -110,6 +119,12 @@ class PostDetailNotifier extends FamilyAsyncNotifier<PostDetailState, Post> {
         .read(cyberspaceClientProvider)
         .replies
         .create(postId: arg.postId, content: content);
+    await refresh(fetchPost: true);
+    ref.invalidate(feedNotifierProvider);
+  }
+
+  Future<void> deleteReply(String replyId) async {
+    await ref.read(deleteReplyUseCaseProvider)(replyId);
     await refresh(fetchPost: true);
     ref.invalidate(feedNotifierProvider);
   }

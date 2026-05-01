@@ -40,25 +40,11 @@ All navigation state lives in a single top-level `AppShell` widget.
 | Tablet   | 600 – 840dp   | `NavigationRail`, icons only (`extended: false`) |
 | Desktop  | > 840dp       | `NavigationRail` with labels (`extended: true`)  |
 
-### Rules
-
-- Use `MediaQuery.sizeOf(context).width` inside `build()` to determine the active variant. Do not use `LayoutBuilder` for this.
-- The three layout variants are separate private widgets: `_MobileShell`, `_TabletShell`, `_DesktopShell`. `AppShell` only selects between them.
-- Navigation destinations must be defined once as a `const List` and shared across all three variants.
-- Labels are always visible on mobile (`NavigationBar` default). On tablet, hide them (`extended: false`). On desktop, show them (`extended: true`).
-- The `NavigationRail` on tablet/desktop is separated from the content area with a `VerticalDivider(width: 1)`.
-
 
 ### AppBar
 
 - **Mobile**: standard `AppBar` in the page scaffold.
 - **Tablet/Desktop**: no `AppBar`. Page titles and actions are rendered inline within the content area.
-
-### What not to do
-
-- Do not use the `adaptive_navigation` package.
-- Do not share a single `Scaffold` across variants — each shell widget has its own.
-- Do not put navigation logic (index state, destination list) inside individual pages.
 
 ## Theming
 
@@ -83,6 +69,6 @@ Read private notes.
 
 Modal sheet: change the current theme.
 
-### Settings
+### Notifications
 
-Change settings.
+Show notifications.

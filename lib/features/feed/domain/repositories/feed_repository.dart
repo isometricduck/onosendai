@@ -8,4 +8,6 @@ abstract class FeedRepository {
     int limit = 20,
     String? cursor,
   });
+
+  Future<void> deleteReply(String replyId);
 }

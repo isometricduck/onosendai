@@ -1,5 +1,6 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/images/images.dart';
 import 'package:onosendai/core/theme/theme.dart';
 
@@ -148,8 +149,15 @@ class _PostCardState extends State<PostCard> {
 
 class ReplyCard extends StatelessWidget {
   final Reply reply;
+  final VoidCallback? onDelete;
+  final bool isDeleting;
 
-  const ReplyCard({super.key, required this.reply});
+  const ReplyCard({
+    super.key,
+    required this.reply,
+    this.onDelete,
+    this.isDeleting = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +172,11 @@ class ReplyCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _ReplyHeader(reply: reply),
+          _ReplyHeader(
+            reply: reply,
+            onDelete: reply.deleted || isDeleting ? null : onDelete,
+            isDeleting: isDeleting,
+          ),
           const SizedBox(height: 10),
           if (reply.deleted)
             Text(
@@ -359,7 +371,14 @@ class _Header extends StatelessWidget {
 
 class _ReplyHeader extends StatelessWidget {
   final Reply reply;
-  const _ReplyHeader({required this.reply});
+  final VoidCallback? onDelete;
+  final bool isDeleting;
+
+  const _ReplyHeader({
+    required this.reply,
+    this.onDelete,
+    this.isDeleting = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -389,6 +408,28 @@ class _ReplyHeader extends StatelessWidget {
             color: theme.dimmed,
           ),
         ),
+        if (onDelete != null || isDeleting) ...[
+          const SizedBox(width: 4),
+          IconButton(
+            onPressed: isDeleting ? null : onDelete,
+            tooltip: 'Delete reply',
+            icon: isDeleting
+                ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      color: theme.dimmed,
+                    ),
+                  )
+                : const Icon(LucideIcons.trash2),
+            color: theme.dimmed,
+            hoverColor: theme.foreground.withValues(alpha: 0.08),
+            focusColor: theme.foreground.withValues(alpha: 0.08),
+            splashColor: theme.foreground.withValues(alpha: 0.12),
+            visualDensity: VisualDensity.compact,
+          ),
+        ],
       ],
     );
   }
