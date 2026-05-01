@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/core/theme/brutalist_theme.dart';
 import 'package:onosendai/core/theme/bubblegum_theme.dart';
 import 'package:onosendai/core/theme/c64_theme.dart';
@@ -26,9 +29,46 @@ enum AppThemeId {
   vt320,
 }
 
-final appThemeProvider = StateProvider<AppThemeId>((ref) => AppThemeId.dark);
+const _appThemeIdPrefsKey = 'app_theme_id';
+
+final appThemeProvider = NotifierProvider<AppThemeNotifier, AppThemeId>(
+  AppThemeNotifier.new,
+);
+
+class AppThemeNotifier extends Notifier<AppThemeId> {
+  @override
+  AppThemeId build() {
+    unawaited(_loadTheme());
+    return AppThemeId.dark;
+  }
+
+  Future<void> _loadTheme() async {
+    final raw = await ref.read(appPrefsProvider).getString(_appThemeIdPrefsKey);
+    final themeId = AppThemeIdX.fromPrefsValue(raw);
+    if (themeId != null) state = themeId;
+  }
+
+  Future<void> setTheme(AppThemeId themeId) async {
+    state = themeId;
+    await ref
+        .read(appPrefsProvider)
+        .setString(_appThemeIdPrefsKey, themeId.prefsValue);
+  }
+}
 
 extension AppThemeIdX on AppThemeId {
+  static AppThemeId? fromPrefsValue(String? value) {
+    if (value == null) return null;
+
+    for (final themeId in AppThemeId.values) {
+      if (themeId.prefsValue == value) return themeId;
+    }
+
+    return null;
+  }
+
+  String get prefsValue => name;
+
   String get label {
     return switch (this) {
       AppThemeId.dark => 'Dark',

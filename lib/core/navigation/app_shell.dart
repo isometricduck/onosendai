@@ -128,9 +128,11 @@ class _ThemeBottomSheet extends ConsumerWidget {
                     _ThemeOption(
                       appTheme: appTheme,
                       selected: appTheme == selectedTheme,
-                      onSelected: () {
-                        ref.read(appThemeProvider.notifier).state = appTheme;
-                        Navigator.pop(context);
+                      onSelected: () async {
+                        await ref
+                            .read(appThemeProvider.notifier)
+                            .setTheme(appTheme);
+                        if (context.mounted) Navigator.pop(context);
                       },
                     ),
                 ],
