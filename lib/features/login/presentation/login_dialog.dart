@@ -1,4 +1,3 @@
-import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
@@ -74,16 +73,15 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+
+    if (!mounted) return;
+    if (!ref.read(loginNotifierProvider).hasError) {
+      Navigator.of(context).pop(true);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<AuthTokens?>>(authTokensProvider, (_, next) {
-      if (next.valueOrNull != null && context.mounted) {
-        Navigator.of(context).pop();
-      }
-    });
-
     final loginState = ref.watch(loginNotifierProvider);
     final authMessage = ref.watch(authMessageProvider);
     final isLoading = loginState.isLoading;
@@ -124,7 +122,9 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: isLoading ? null : () => Navigator.of(context).pop(),
+                    onTap: isLoading
+                        ? null
+                        : () => Navigator.of(context).pop(false),
                     child: Text(
                       '[ESC]',
                       style: TextStyle(

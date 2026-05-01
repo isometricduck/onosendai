@@ -4,7 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
 import 'package:onosendai/features/feed/presentation/pages/feed_page.dart';
 import 'package:onosendai/features/journal/presentation/pages/journal_page.dart';
-import 'package:onosendai/features/settings/presentation/pages/settings_page.dart';
+import 'package:onosendai/features/login/presentation/logout_dialog.dart';
 import 'package:onosendai/features/write/presentation/pages/write_page.dart';
 
 class AppShell extends ConsumerStatefulWidget {
@@ -24,7 +24,15 @@ class _AppShellState extends ConsumerState<AppShell> {
       showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
-        builder: destination.sheet!,
+        builder: (context) => destination.sheet!(context, _selectDestination),
+      );
+      return;
+    }
+
+    if (destination.dialog != null) {
+      showDialog<void>(
+        context: context,
+        builder: (context) => destination.dialog!(context, _selectDestination),
       );
       return;
     }
@@ -57,23 +65,44 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 }
 
+typedef _AppDestinationSheetBuilder =
+    Widget Function(
+      BuildContext context,
+      ValueChanged<int> onDestinationSelected,
+    );
+typedef _AppDestinationDialogBuilder =
+    Widget Function(
+      BuildContext context,
+      ValueChanged<int> onDestinationSelected,
+    );
+
 class _AppDestination {
   final IconData icon;
   final String label;
   final Widget? page;
-  final WidgetBuilder? sheet;
+  final _AppDestinationSheetBuilder? sheet;
+  final _AppDestinationDialogBuilder? dialog;
 
   const _AppDestination({
     required this.icon,
     required this.label,
     required this.page,
-  }) : sheet = null;
+  }) : sheet = null,
+       dialog = null;
 
   const _AppDestination.sheet({
     required this.icon,
     required this.label,
     required this.sheet,
-  }) : page = null;
+  }) : page = null,
+       dialog = null;
+
+  const _AppDestination.dialog({
+    required this.icon,
+    required this.label,
+    required this.dialog,
+  }) : page = null,
+       sheet = null;
 }
 
 const _destinations = <_AppDestination>[
@@ -93,15 +122,112 @@ const _destinations = <_AppDestination>[
     label: 'Themes',
     sheet: _themeBottomSheet,
   ),
-  _AppDestination(
-    icon: LucideIcons.wrench,
-    label: 'Settings',
-    page: SettingsPage(),
+  _AppDestination.sheet(
+    icon: LucideIcons.menu,
+    label: 'Menu',
+    sheet: _menuBottomSheet,
+  ),
+  _AppDestination.dialog(
+    icon: LucideIcons.logOut,
+    label: 'Log out',
+    dialog: _logoutDialog,
   ),
 ];
 
-Widget _themeBottomSheet(BuildContext context) {
+const _primaryNavigationDestinationCount = 5;
+
+Widget _logoutDialog(
+  BuildContext context,
+  ValueChanged<int> onDestinationSelected,
+) {
+  return const LogoutDialog();
+}
+
+Widget _menuBottomSheet(
+  BuildContext context,
+  ValueChanged<int> onDestinationSelected,
+) {
+  return _MenuBottomSheet(onDestinationSelected: onDestinationSelected);
+}
+
+Widget _themeBottomSheet(
+  BuildContext context,
+  ValueChanged<int> onDestinationSelected,
+) {
   return const _ThemeBottomSheet();
+}
+
+class _MenuBottomSheet extends StatelessWidget {
+  final ValueChanged<int> onDestinationSelected;
+
+  const _MenuBottomSheet({required this.onDestinationSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return Material(
+      color: theme.background,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: GridView.count(
+            crossAxisCount: 3,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            childAspectRatio: 1,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            children: [
+              for (var index = 0; index < _destinations.length; index++)
+                _MenuDestinationTile(
+                  destination: _destinations[index],
+                  onTap: () {
+                    Navigator.pop(context);
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      onDestinationSelected(index);
+                    });
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuDestinationTile extends StatelessWidget {
+  final _AppDestination destination;
+  final VoidCallback onTap;
+
+  const _MenuDestinationTile({required this.destination, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return InkWell(
+      onTap: onTap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(border: Border.all(color: theme.border)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(destination.icon, color: theme.foreground),
+            const SizedBox(height: 8),
+            Text(
+              destination.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.mainFont.copyWith(color: theme.foreground),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _ThemeBottomSheet extends ConsumerWidget {
@@ -238,11 +364,13 @@ class _MobileShell extends StatelessWidget {
           backgroundColor: theme.background,
           indicatorColor: theme.dimmed,
           destinations: [
-            for (final destination in _destinations)
+            for (final destination in _destinations.take(
+              _primaryNavigationDestinationCount,
+            ))
               NavigationDestination(
                 icon: Icon(destination.icon),
                 selectedIcon: Icon(destination.icon),
-                label: destination.label,
+                label: '',
               ),
           ],
         ),
@@ -335,7 +463,9 @@ class _RailBody extends StatelessWidget {
             color: theme.dimmed,
           ),
           destinations: [
-            for (final destination in _destinations)
+            for (final destination in _destinations.take(
+              _primaryNavigationDestinationCount,
+            ))
               NavigationRailDestination(
                 icon: Icon(destination.icon),
                 selectedIcon: Icon(destination.icon),

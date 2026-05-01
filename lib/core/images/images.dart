@@ -83,19 +83,58 @@ class DitheredNetworkImage extends StatefulWidget {
 }
 
 class _DitheredNetworkImageState extends State<DitheredNetworkImage> {
+  @override
+  Widget build(BuildContext context) {
+    return DitheredImage(
+      imageProvider: CachedNetworkImageProvider(widget.url),
+      fit: widget.fit,
+      width: widget.width,
+      height: widget.height,
+      placeholderBuilder: widget.placeholderBuilder,
+      errorBuilder: widget.errorBuilder,
+      settings: widget.settings,
+    );
+  }
+}
+
+class DitheredImage extends StatefulWidget {
+  final ImageProvider imageProvider;
+  final BoxFit fit;
+  final double? width;
+  final double? height;
+  final WidgetBuilder placeholderBuilder;
+  final WidgetBuilder errorBuilder;
+  final DitherShaderSettings settings;
+
+  const DitheredImage({
+    super.key,
+    required this.imageProvider,
+    required this.placeholderBuilder,
+    required this.errorBuilder,
+    this.fit = BoxFit.contain,
+    this.width,
+    this.height,
+    this.settings = const DitherShaderSettings(),
+  });
+
+  @override
+  State<DitheredImage> createState() => _DitheredImageState();
+}
+
+class _DitheredImageState extends State<DitheredImage> {
   late Future<(ui.FragmentProgram, ui.Image)> _imageFuture;
 
   @override
   void initState() {
     super.initState();
-    _imageFuture = _loadShaderImage(widget.url);
+    _imageFuture = _loadShaderImage(widget.imageProvider);
   }
 
   @override
-  void didUpdateWidget(DitheredNetworkImage oldWidget) {
+  void didUpdateWidget(DitheredImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.url != oldWidget.url) {
-      _imageFuture = _loadShaderImage(widget.url);
+    if (widget.imageProvider != oldWidget.imageProvider) {
+      _imageFuture = _loadShaderImage(widget.imageProvider);
     }
   }
 
@@ -165,10 +204,12 @@ Size _imagePaintSize({
   return Size(paintWidth, paintHeight);
 }
 
-Future<(ui.FragmentProgram, ui.Image)> _loadShaderImage(String url) async {
+Future<(ui.FragmentProgram, ui.Image)> _loadShaderImage(
+  ImageProvider imageProvider,
+) async {
   final results = await Future.wait<Object>([
     loadDitherFragmentProgram(),
-    loadNetworkImageAsUiImage(url),
+    loadImageProviderAsUiImage(imageProvider),
   ]);
 
   return (results[0] as ui.FragmentProgram, results[1] as ui.Image);

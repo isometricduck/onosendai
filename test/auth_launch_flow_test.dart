@@ -1,9 +1,11 @@
+import 'dart:convert';
+
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:onosendai/core/auth/secure_storage_token_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:onosendai/core/auth/token_storage.dart';
 import 'package:onosendai/core/navigation/app_shell.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
@@ -90,15 +92,57 @@ class _MemoryAppPrefs implements AppPrefs {
   }
 }
 
+class _MemoryTokenStorage implements TokenStorage {
+  AuthTokens? tokens;
+  int reads = 0;
+  int writes = 0;
+
+  _MemoryTokenStorage(this.tokens);
+
+  @override
+  Future<AuthTokens?> read() async {
+    reads += 1;
+    return tokens;
+  }
+
+  @override
+  Future<void> write(AuthTokens tokens) async {
+    this.tokens = tokens;
+    writes += 1;
+  }
+
+  @override
+  Future<void> clear() async {
+    tokens = null;
+  }
+}
+
+class _NoopAuthTokenProvider implements AuthTokenProvider {
+  @override
+  Future<String?> getToken() async => null;
+
+  @override
+  Future<String?> getRefreshToken() async => null;
+
+  @override
+  Future<void> onTokensRefreshed(RefreshedTokens tokens) async {}
+
+  @override
+  Future<void> onUnauthorized() async {}
+}
+
+String _jwtWithExp(int exp) {
+  String encodePart(Map<String, Object> value) =>
+      base64Url.encode(utf8.encode(jsonEncode(value))).replaceAll('=', '');
+
+  return '${encodePart({'alg': 'none'})}.${encodePart({'exp': exp})}.sig';
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  tearDown(() {
-    FlutterSecureStorage.setMockInitialValues({});
-  });
-
   testWidgets(
-    'mobile cold launch uses secure-storage tokens and skips login dialog',
+    'mobile cold launch shows entry buttons without validating tokens',
     (tester) async {
       tester.view
         ..physicalSize = const Size(390, 844)
@@ -106,21 +150,20 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      const tokens = AuthTokens(
-        idToken: 'id-token',
-        refreshToken: 'refresh-token',
-        rtdbToken: 'rtdb-token',
+      final storage = _MemoryTokenStorage(
+        AuthTokens(
+          idToken: _jwtWithExp(
+            DateTime.now().millisecondsSinceEpoch ~/ 1000 + 3600,
+          ),
+          refreshToken: 'refresh-token',
+          rtdbToken: 'rtdb-token',
+        ),
       );
-      FlutterSecureStorage.setMockInitialValues({
-        'auth_tokens': encodeAuthTokens(tokens),
-      });
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            tokenStorageProvider.overrideWithValue(
-              SecureStorageTokenStorage(const FlutterSecureStorage()),
-            ),
+            tokenStorageProvider.overrideWithValue(storage),
             appPrefsProvider.overrideWithValue(_MemoryAppPrefs()),
             feedRepositoryProvider.overrideWithValue(_LoadedFeedRepository()),
           ],
@@ -130,6 +173,28 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      expect(find.text('Login'), findsOneWidget);
+      expect(find.text('feed'), findsOneWidget);
+      expect(storage.reads, 0);
+      expect(find.byType(AppShell), findsNothing);
+      expect(find.byType(LoginDialog), findsNothing);
+
+      await tester.tap(find.text('Login'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LoginDialog), findsOneWidget);
+      expect(storage.reads, 0);
+
+      await tester.tap(find.text('[ESC]'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LoginDialog), findsNothing);
+      expect(storage.reads, 0);
+
+      await tester.tap(find.text('feed'));
+      await tester.pumpAndSettle();
+
+      expect(storage.reads, 1);
       expect(find.byType(AppShell), findsOneWidget);
       expect(find.byType(NavigationBar), findsOneWidget);
       expect(find.byType(LoginDialog), findsNothing);
@@ -151,6 +216,54 @@ void main() {
 
     expect(container.read(appThemeProvider), AppThemeId.c64);
     expect(await prefs.getString('app_theme_id'), 'c64');
+  });
+
+  test('auth token refresh stores the refreshed token version', () async {
+    final storage = _MemoryTokenStorage(
+      AuthTokens(
+        idToken: _jwtWithExp(1),
+        refreshToken: 'stored-refresh-token',
+        rtdbToken: 'old-rtdb-token',
+      ),
+    );
+    final client = CyberspaceClient(
+      authTokenProvider: _NoopAuthTokenProvider(),
+      httpClient: MockClient((request) async {
+        expect(request.method, 'POST');
+        expect(request.url.path, '/v1/auth/refresh');
+        expect(jsonDecode(request.body), {
+          'refreshToken': 'stored-refresh-token',
+        });
+
+        return http.Response(
+          jsonEncode({
+            'idToken': 'new-id-token',
+            'rtdbToken': 'new-rtdb-token',
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+    final container = ProviderContainer(
+      overrides: [
+        tokenStorageProvider.overrideWithValue(storage),
+        cyberspaceClientProvider.overrideWithValue(client),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final tokens = await container.read(authTokensProvider.future);
+
+    expect(tokens?.idToken, 'new-id-token');
+    expect(tokens?.refreshToken, 'stored-refresh-token');
+    expect(tokens?.rtdbToken, 'new-rtdb-token');
+    expect(storage.writes, 1);
+    expect(storage.tokens?.idToken, 'new-id-token');
+    expect(storage.tokens?.refreshToken, 'stored-refresh-token');
+    expect(storage.tokens?.rtdbToken, 'new-rtdb-token');
+    expect(client.getRefreshToken(), 'stored-refresh-token');
+    expect(client.rtdbToken, 'new-rtdb-token');
   });
 
   testWidgets('login dialog displays auth messages', (tester) async {

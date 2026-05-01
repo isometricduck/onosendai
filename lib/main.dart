@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/navigation/app_shell.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/theme/theme.dart';
-import 'package:onosendai/features/login/presentation/login_dialog.dart';
+import 'package:onosendai/features/login/presentation/pages/landing_page.dart';
 
 void main() {
   FlutterError.onError = (details) {
@@ -24,46 +24,44 @@ class MainApp extends ConsumerWidget {
 
     return AppThemeScope(
       theme: appTheme.theme,
-      child: const MaterialApp(home: _HomePage()),
+      child: const MaterialApp(home: _AuthGate()),
     );
   }
 }
 
-class _HomePage extends ConsumerStatefulWidget {
-  const _HomePage();
+class _AuthGate extends ConsumerWidget {
+  const _AuthGate();
 
   @override
-  ConsumerState<_HomePage> createState() => _HomePageState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tokens = ref.watch(authTokensProvider);
+
+    return tokens.when(
+      loading: () => const _LoadingPage(),
+      error: (_, _) => const LandingPage(),
+      data: (tokens) => tokens == null ? const LandingPage() : const AppShell(),
+    );
+  }
 }
 
-class _HomePageState extends ConsumerState<_HomePage> {
-  bool _dialogOpen = false;
-
-  void _showLoginDialog() {
-    if (_dialogOpen) return;
-    _dialogOpen = true;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const LoginDialog(),
-    ).whenComplete(() => _dialogOpen = false);
-  }
+class _LoadingPage extends StatelessWidget {
+  const _LoadingPage();
 
   @override
   Widget build(BuildContext context) {
-    final tokensAsync = ref.watch(authTokensProvider);
-    final blank = Scaffold(body: Container(color: context.theme.background));
+    final theme = context.theme;
 
-    return tokensAsync.when(
-      loading: () => blank,
-      error: (_, _) => blank,
-      data: (tokens) {
-        if (tokens != null) return const AppShell();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _showLoginDialog();
-        });
-        return blank;
-      },
+    return Scaffold(
+      backgroundColor: theme.background,
+      body: Center(
+        child: SizedBox.square(
+          dimension: 28,
+          child: CircularProgressIndicator(
+            color: theme.foreground,
+            strokeWidth: 2,
+          ),
+        ),
+      ),
     );
   }
 }
