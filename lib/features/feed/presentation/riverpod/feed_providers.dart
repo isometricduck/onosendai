@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
@@ -10,6 +12,7 @@ import 'package:onosendai/features/feed/domain/usecases/delete_post_usecase.dart
 import 'package:onosendai/features/feed/domain/usecases/delete_reply_usecase.dart';
 import 'package:onosendai/features/feed/domain/usecases/fetch_feed_usecase.dart';
 import 'package:onosendai/features/feed/domain/usecases/fetch_post_replies_usecase.dart';
+import 'package:onosendai/features/notifications/presentation/riverpod/notifications_providers.dart';
 
 final feedRepositoryProvider = Provider<FeedRepository>((ref) {
   return FeedRepositoryImpl(ref.read(cyberspaceClientProvider));
@@ -50,15 +53,37 @@ class FeedNotifier extends AsyncNotifier<FeedState> {
   @override
   Future<FeedState> build() async {
     final page = await ref.read(fetchFeedUseCaseProvider)();
+    _refreshNotificationsSoon();
     return FeedState(posts: page.data, nextCursor: page.cursor);
   }
 
   Future<void> refresh() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      final notificationsRefresh = _refreshNotifications();
       final page = await ref.read(fetchFeedUseCaseProvider)();
+      await notificationsRefresh;
       return FeedState(posts: page.data, nextCursor: page.cursor);
     });
+  }
+
+  void _refreshNotificationsSoon() {
+    unawaited(
+      Future<void>.delayed(Duration.zero, () async {
+        await _refreshNotifications();
+      }),
+    );
+  }
+
+  Future<void> _refreshNotifications() async {
+    try {
+      final notificationsRefresh = ref.refresh(
+        notificationsNotifierProvider.future,
+      );
+      await notificationsRefresh;
+    } catch (_) {
+      // Keep feed loading independent from notification fetch failures.
+    }
   }
 
   Future<void> loadMore() async {
