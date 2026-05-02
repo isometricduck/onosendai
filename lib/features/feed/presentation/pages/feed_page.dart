@@ -63,6 +63,9 @@ class _FeedPageState extends ConsumerState<FeedPage> {
                 scrollController: _scrollController,
                 onRefresh: () =>
                     ref.read(feedNotifierProvider.notifier).refresh(),
+                onDeletePost: (post) => ref
+                    .read(feedNotifierProvider.notifier)
+                    .deletePost(post.postId),
               ),
             ),
           ),
@@ -82,11 +85,13 @@ class _FeedList extends StatelessWidget {
   final FeedState state;
   final ScrollController scrollController;
   final Future<void> Function() onRefresh;
+  final Future<void> Function(Post post) onDeletePost;
 
   const _FeedList({
     required this.state,
     required this.scrollController,
     required this.onRefresh,
+    required this.onDeletePost,
   });
 
   @override
@@ -120,6 +125,7 @@ class _FeedList extends StatelessWidget {
             final post = state.posts[index];
             return PostCard(
               post: post,
+              onDelete: onDeletePost,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => PostDetailPage(post: post)),
               ),

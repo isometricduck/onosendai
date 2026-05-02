@@ -33,6 +33,9 @@ class _LoadedFeedRepository implements FeedRepository {
   }) async => const PagedResult(data: [], cursor: null);
 
   @override
+  Future<void> deletePost(String postId) async {}
+
+  @override
   Future<void> deleteReply(String replyId) async {}
 }
 

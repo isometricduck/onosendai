@@ -1,10 +1,12 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
+import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/features/feed/data/repositories/feed_repository_impl.dart';
 import 'package:onosendai/features/feed/domain/entities/feed_state.dart';
 import 'package:onosendai/features/feed/domain/entities/post_detail_state.dart';
 import 'package:onosendai/features/feed/domain/repositories/feed_repository.dart';
+import 'package:onosendai/features/feed/domain/usecases/delete_post_usecase.dart';
 import 'package:onosendai/features/feed/domain/usecases/delete_reply_usecase.dart';
 import 'package:onosendai/features/feed/domain/usecases/fetch_feed_usecase.dart';
 import 'package:onosendai/features/feed/domain/usecases/fetch_post_replies_usecase.dart';
@@ -21,6 +23,10 @@ final fetchPostRepliesUseCaseProvider = Provider<FetchPostRepliesUseCase>((
   ref,
 ) {
   return FetchPostRepliesUseCase(ref.read(feedRepositoryProvider));
+});
+
+final deletePostUseCaseProvider = Provider<DeletePostUseCase>((ref) {
+  return DeletePostUseCase(ref.read(feedRepositoryProvider));
 });
 
 final deleteReplyUseCaseProvider = Provider<DeleteReplyUseCase>((ref) {
@@ -76,6 +82,23 @@ class FeedNotifier extends AsyncNotifier<FeedState> {
       rethrow;
     }
   }
+
+  Future<void> deletePost(String postId) async {
+    await ref.read(deletePostUseCaseProvider)(postId);
+    await ref.read(bookmarkedItemsPrefsProvider).removePostBookmark(postId);
+
+    final current = state.valueOrNull;
+    if (current == null) return;
+
+    state = AsyncData(
+      current.copyWith(
+        posts: [
+          for (final post in current.posts)
+            if (post.postId != postId) post,
+        ],
+      ),
+    );
+  }
 }
 
 class PostDetailNotifier extends FamilyAsyncNotifier<PostDetailState, Post> {
@@ -126,6 +149,12 @@ class PostDetailNotifier extends FamilyAsyncNotifier<PostDetailState, Post> {
   Future<void> deleteReply(String replyId) async {
     await ref.read(deleteReplyUseCaseProvider)(replyId);
     await refresh(fetchPost: true);
+    ref.invalidate(feedNotifierProvider);
+  }
+
+  Future<void> deletePost() async {
+    await ref.read(deletePostUseCaseProvider)(arg.postId);
+    await ref.read(bookmarkedItemsPrefsProvider).removePostBookmark(arg.postId);
     ref.invalidate(feedNotifierProvider);
   }
 

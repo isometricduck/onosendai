@@ -9,5 +9,7 @@ abstract class FeedRepository {
     String? cursor,
   });
 
+  Future<void> deletePost(String postId);
+
   Future<void> deleteReply(String replyId);
 }

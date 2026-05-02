@@ -85,6 +85,9 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
   Future<void> _deleteReply(Reply reply) async {
     if (_deletingReplyId != null) return;
 
+    final confirmed = await _confirmDeleteReply(context);
+    if (!confirmed || !mounted) return;
+
     setState(() => _deletingReplyId = reply.replyId);
     try {
       await ref
@@ -105,6 +108,14 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     } finally {
       if (mounted) setState(() => _deletingReplyId = null);
     }
+  }
+
+  Future<void> _deletePost(Post post) async {
+    await ref
+        .read(postDetailNotifierProvider(widget.post).notifier)
+        .deletePost();
+    if (!mounted) return;
+    Navigator.of(context).maybePop();
   }
 
   @override
@@ -142,6 +153,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                 onReplyChanged: () => setState(() {}),
                 onStartReply: () => setState(() => _isReplying = true),
                 onSubmitReply: _submitReply,
+                onDeletePost: _deletePost,
                 onDeleteReply: _deleteReply,
                 onBack: () => Navigator.of(context).maybePop(),
                 onRefresh: () => ref
@@ -189,6 +201,7 @@ class _PostDetailList extends StatelessWidget {
   final VoidCallback onReplyChanged;
   final VoidCallback onStartReply;
   final VoidCallback onSubmitReply;
+  final Future<void> Function(Post post) onDeletePost;
   final ValueChanged<Reply> onDeleteReply;
   final VoidCallback onBack;
   final Future<void> Function() onRefresh;
@@ -205,6 +218,7 @@ class _PostDetailList extends StatelessWidget {
     required this.onReplyChanged,
     required this.onStartReply,
     required this.onSubmitReply,
+    required this.onDeletePost,
     required this.onDeleteReply,
     required this.onBack,
     required this.onRefresh,
@@ -240,6 +254,7 @@ class _PostDetailList extends StatelessWidget {
               post: state.post,
               full: true,
               onReply: onStartReply,
+              onDelete: onDeletePost,
             );
           }
 
@@ -280,6 +295,52 @@ class _PostDetailList extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<bool> _confirmDeleteReply(BuildContext context) async {
+  final theme = context.theme;
+  return await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: theme.background,
+          surfaceTintColor: theme.background,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+            side: BorderSide(color: theme.border),
+          ),
+          title: Text(
+            'Delete reply?',
+            style: theme.mainFont.copyWith(
+              color: theme.foreground,
+              fontSize: 18,
+            ),
+          ),
+          content: Text(
+            'This reply will be removed from the post.',
+            style: theme.mainFont.copyWith(color: theme.dimmed),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              style: TextButton.styleFrom(
+                foregroundColor: theme.dimmed,
+                textStyle: theme.mainFont,
+              ),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(
+                backgroundColor: theme.foreground,
+                foregroundColor: theme.background,
+                textStyle: theme.mainFont,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      ) ??
+      false;
 }
 
 class _InlineHeader extends StatelessWidget {

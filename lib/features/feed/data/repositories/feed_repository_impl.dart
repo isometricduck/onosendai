@@ -18,5 +18,8 @@ class FeedRepositoryImpl implements FeedRepository {
   }) => _client.replies.list(postId, limit: limit, cursor: cursor);
 
   @override
+  Future<void> deletePost(String postId) => _client.posts.delete(postId);
+
+  @override
   Future<void> deleteReply(String replyId) => _client.replies.delete(replyId);
 }

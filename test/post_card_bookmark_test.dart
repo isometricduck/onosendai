@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/auth/token_storage.dart';
+import 'package:onosendai/core/prefs/current_user_prefs.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/core/prefs/app_prefs.dart';
@@ -148,7 +149,9 @@ void main() {
           cyberspaceClientProvider.overrideWithValue(client),
         ],
         child: MaterialApp(
-          home: Scaffold(body: PostCard(post: buildPost())),
+          home: Scaffold(
+            body: PostCard(post: buildPost(), onDelete: (_) async {}),
+          ),
         ),
       ),
     );
@@ -198,7 +201,9 @@ void main() {
           cyberspaceClientProvider.overrideWithValue(client),
         ],
         child: MaterialApp(
-          home: Scaffold(body: PostCard(post: buildPost())),
+          home: Scaffold(
+            body: PostCard(post: buildPost(), onDelete: (_) async {}),
+          ),
         ),
       ),
     );
@@ -213,5 +218,151 @@ void main() {
     expect(requests, ['DELETE /v1/bookmarks/bookmark-post-1']);
     expect(await prefs.getStringList(bookmarkedPostsPrefsKey), isEmpty);
     expect(find.byIcon(LucideIcons.bookmark), findsOneWidget);
+  });
+
+  testWidgets('owned post renders a right-aligned delete action', (
+    tester,
+  ) async {
+    final prefs = _MemoryAppPrefs();
+    await prefs.setString(
+      currentUserProfilePrefsKey,
+      jsonEncode({
+        'userId': 'user-1',
+        'username': 'case',
+        'displayName': null,
+        'bio': null,
+        'pinnedPostId': null,
+        'websiteUrl': null,
+        'websiteName': null,
+        'websiteImageUrl': null,
+        'locationLatitude': null,
+        'locationLongitude': null,
+        'locationName': null,
+        'createdAt': null,
+      }),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appPrefsProvider.overrideWithValue(prefs),
+          tokenStorageProvider.overrideWithValue(_MemoryTokenStorage()),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: PostCard(post: buildPost(), onDelete: (_) async {}),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.byIcon(LucideIcons.trash2), findsOneWidget);
+    final deleteCenter = tester.getCenter(find.byIcon(LucideIcons.trash2));
+    final replyCenter = tester.getCenter(
+      find.byIcon(LucideIcons.messageSquare),
+    );
+
+    expect(deleteCenter.dx, greaterThan(replyCenter.dx));
+  });
+
+  testWidgets('post by another author hides delete action', (tester) async {
+    final prefs = _MemoryAppPrefs();
+    await prefs.setString(
+      currentUserProfilePrefsKey,
+      jsonEncode({
+        'userId': 'user-2',
+        'username': 'molly',
+        'displayName': null,
+        'bio': null,
+        'pinnedPostId': null,
+        'websiteUrl': null,
+        'websiteName': null,
+        'websiteImageUrl': null,
+        'locationLatitude': null,
+        'locationLongitude': null,
+        'locationName': null,
+        'createdAt': null,
+      }),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appPrefsProvider.overrideWithValue(prefs),
+          tokenStorageProvider.overrideWithValue(_MemoryTokenStorage()),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: PostCard(post: buildPost(), onDelete: (_) async {}),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.byIcon(LucideIcons.trash2), findsNothing);
+  });
+
+  testWidgets('delete action asks for confirmation before deleting post', (
+    tester,
+  ) async {
+    final prefs = _MemoryAppPrefs();
+    await prefs.setString(
+      currentUserProfilePrefsKey,
+      jsonEncode({
+        'userId': 'user-1',
+        'username': 'case',
+        'displayName': null,
+        'bio': null,
+        'pinnedPostId': null,
+        'websiteUrl': null,
+        'websiteName': null,
+        'websiteImageUrl': null,
+        'locationLatitude': null,
+        'locationLongitude': null,
+        'locationName': null,
+        'createdAt': null,
+      }),
+    );
+    final deletedPostIds = <String>[];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appPrefsProvider.overrideWithValue(prefs),
+          tokenStorageProvider.overrideWithValue(_MemoryTokenStorage()),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: PostCard(
+              post: buildPost(),
+              onDelete: (post) async => deletedPostIds.add(post.postId),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(find.byIcon(LucideIcons.trash2));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Delete post?'), findsOneWidget);
+    expect(deletedPostIds, isEmpty);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(deletedPostIds, isEmpty);
+
+    await tester.tap(find.byIcon(LucideIcons.trash2));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+
+    expect(deletedPostIds, ['post-1']);
   });
 }

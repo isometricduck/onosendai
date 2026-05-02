@@ -13,6 +13,7 @@ class PostCard extends ConsumerStatefulWidget {
   final Post post;
   final VoidCallback? onTap;
   final VoidCallback? onReply;
+  final Future<void> Function(Post post)? onDelete;
   final bool full;
 
   const PostCard({
@@ -20,6 +21,7 @@ class PostCard extends ConsumerStatefulWidget {
     required this.post,
     this.onTap,
     this.onReply,
+    this.onDelete,
     this.full = false,
   });
 
@@ -31,7 +33,9 @@ class _PostCardState extends ConsumerState<PostCard> {
   bool _expanded = false;
   bool _full = false;
   bool _savingBookmark = false;
+  bool _deletingPost = false;
   String? _bookmarkId;
+  String? _currentUserId;
 
   static const _truncateAt = 512;
   static const _cardPadding = EdgeInsets.fromLTRB(14, 12, 14, 12);
@@ -42,12 +46,18 @@ class _PostCardState extends ConsumerState<PostCard> {
     super.initState();
     _full = widget.full;
     _loadBookmarkState();
+    _loadCurrentUser();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
     final post = widget.post;
+    final showDelete =
+        widget.onDelete != null &&
+        _currentUserId != null &&
+        post.authorId == _currentUserId &&
+        !post.deleted;
 
     final card = Container(
       decoration: BoxDecoration(
@@ -110,6 +120,9 @@ class _PostCardState extends ConsumerState<PostCard> {
             onRemoveSaveTap: _removeBookmark,
             savingBookmark: _savingBookmark,
             bookmarked: _bookmarkId != null,
+            showDelete: showDelete,
+            deletingPost: _deletingPost,
+            onDeleteTap: _deletePost,
           ),
         ],
       ),
@@ -186,6 +199,15 @@ class _PostCardState extends ConsumerState<PostCard> {
     });
   }
 
+  Future<void> _loadCurrentUser() async {
+    final profile = await ref.read(currentUserPrefsProvider).getProfile();
+    if (!mounted) return;
+
+    setState(() {
+      _currentUserId = profile?.userId;
+    });
+  }
+
   Future<void> _saveBookmark() async {
     if (_savingBookmark || _bookmarkId != null) return;
 
@@ -236,6 +258,26 @@ class _PostCardState extends ConsumerState<PostCard> {
     }
   }
 
+  Future<void> _deletePost() async {
+    if (_deletingPost || widget.onDelete == null) return;
+
+    final confirmed = await _confirmDeletePost(context);
+    if (!confirmed || !mounted) return;
+
+    setState(() => _deletingPost = true);
+    try {
+      await widget.onDelete!(widget.post);
+      if (!mounted) return;
+      setState(() => _deletingPost = false);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _deletingPost = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Could not delete post.')));
+    }
+  }
+
   String _decodePostContent(String content) {
     return content
         .replaceAll('&amp;', '&')
@@ -268,6 +310,9 @@ class _PostActionBar extends StatelessWidget {
   final VoidCallback onRemoveSaveTap;
   final bool savingBookmark;
   final bool bookmarked;
+  final bool showDelete;
+  final bool deletingPost;
+  final VoidCallback onDeleteTap;
 
   const _PostActionBar({
     required this.visible,
@@ -278,6 +323,9 @@ class _PostActionBar extends StatelessWidget {
     required this.onRemoveSaveTap,
     required this.savingBookmark,
     required this.bookmarked,
+    required this.showDelete,
+    required this.deletingPost,
+    required this.onDeleteTap,
   });
 
   @override
@@ -310,9 +358,63 @@ class _PostActionBar extends StatelessWidget {
             onTap: onExpandTap,
           ),
         ),
+        const Spacer(),
+        if (showDelete)
+          _PostActionIcon(
+            icon: LucideIcons.trash2,
+            tooltip: 'Delete post',
+            onTap: onDeleteTap,
+            busy: deletingPost,
+          ),
       ],
     );
   }
+}
+
+Future<bool> _confirmDeletePost(BuildContext context) async {
+  final theme = context.theme;
+  return await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: theme.background,
+          surfaceTintColor: theme.background,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+            side: BorderSide(color: theme.border),
+          ),
+          title: Text(
+            'Delete post?',
+            style: theme.mainFont.copyWith(
+              color: theme.foreground,
+              fontSize: 18,
+            ),
+          ),
+          content: Text(
+            'This post and its replies will be removed.',
+            style: theme.mainFont.copyWith(color: theme.dimmed),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              style: TextButton.styleFrom(
+                foregroundColor: theme.dimmed,
+                textStyle: theme.mainFont,
+              ),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(
+                backgroundColor: theme.foreground,
+                foregroundColor: theme.background,
+                textStyle: theme.mainFont,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      ) ??
+      false;
 }
 
 class _PostActionIcon extends StatelessWidget {

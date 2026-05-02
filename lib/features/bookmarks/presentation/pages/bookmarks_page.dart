@@ -2,10 +2,12 @@ import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/core/theme/theme.dart';
 import 'package:onosendai/features/bookmarks/domain/entities/bookmarks_state.dart';
 import 'package:onosendai/features/bookmarks/presentation/riverpod/bookmarks_providers.dart';
 import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
+import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
 import 'package:onosendai/features/feed/presentation/widgets/post_card.dart';
 
 class BookmarksPage extends ConsumerWidget {
@@ -36,6 +38,14 @@ class BookmarksPage extends ConsumerWidget {
                 showInlineHeader: !isMobile,
                 onRefresh: () =>
                     ref.read(bookmarksNotifierProvider.notifier).refresh(),
+                onDeletePost: (post) async {
+                  await ref.read(deletePostUseCaseProvider)(post.postId);
+                  await ref
+                      .read(bookmarkedItemsPrefsProvider)
+                      .removePostBookmark(post.postId);
+                  ref.invalidate(feedNotifierProvider);
+                  await ref.read(bookmarksNotifierProvider.notifier).refresh();
+                },
               ),
             ),
           ),
@@ -70,11 +80,13 @@ class _BookmarksList extends StatelessWidget {
   final BookmarksState state;
   final bool showInlineHeader;
   final Future<void> Function() onRefresh;
+  final Future<void> Function(Post post) onDeletePost;
 
   const _BookmarksList({
     required this.state,
     required this.showInlineHeader,
     required this.onRefresh,
+    required this.onDeletePost,
   });
 
   @override
@@ -124,6 +136,7 @@ class _BookmarksList extends StatelessWidget {
             final post = state.posts[postIndex];
             return PostCard(
               post: post,
+              onDelete: onDeletePost,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => PostDetailPage(post: post)),
               ),
