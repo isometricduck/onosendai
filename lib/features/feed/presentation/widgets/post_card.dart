@@ -1,8 +1,10 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/images/images.dart';
 import 'package:onosendai/core/theme/theme.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -103,8 +105,9 @@ class _PostCardState extends State<PostCard> {
   Widget _buildContent(BuildContext context, Post post) {
     final theme = context.theme;
     final contentStyle = theme.mainFont;
+    final audioAttachment = _AudioAttachment.fromPost(post);
 
-    final content = post.content.replaceAll('&amp;', '&');
+    final content = _decodePostContent(post.content);
     final truncated = !_full && content.length > _truncateAt;
     final displayText = truncated
         ? '${content.substring(0, _truncateAt)}…'
@@ -117,15 +120,20 @@ class _PostCardState extends State<PostCard> {
         for (final (index, segment) in segments.indexed) ...[
           if (index > 0) const SizedBox(height: 8),
           switch (segment) {
-            _TextSegment(:final text) =>
-              widget.onTap == null
-                  ? SelectableText(text, style: contentStyle)
-                  : Text(text, style: contentStyle),
+            _TextSegment(:final text) => _PostText(
+              text: text,
+              style: contentStyle,
+              selectable: widget.onTap == null,
+            ),
             _ImageSegment(:final altText, :final url) => _PostImage(
               altText: altText,
               url: url,
             ),
           },
+        ],
+        if (audioAttachment != null) ...[
+          if (segments.isNotEmpty) const SizedBox(height: 10),
+          _AudioAttachmentBox(attachment: audioAttachment),
         ],
         if (!_full && (truncated || _expanded)) ...[
           const SizedBox(height: 4),
@@ -143,6 +151,268 @@ class _PostCardState extends State<PostCard> {
           ),
         ],
       ],
+    );
+  }
+
+  String _decodePostContent(String content) {
+    return content
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&nbsp;', '\n');
+  }
+}
+
+class _InlineLink {
+  final String text;
+  final Uri uri;
+
+  const _InlineLink({required this.text, required this.uri});
+}
+
+sealed class _InlineTextSegment {
+  const _InlineTextSegment();
+
+  static final _linkPattern = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
+
+  static List<_InlineTextSegment> parse(String text) {
+    final segments = <_InlineTextSegment>[];
+    var cursor = 0;
+
+    for (final match in _linkPattern.allMatches(text)) {
+      if (match.start > cursor) {
+        segments.add(_PlainInlineText(text.substring(cursor, match.start)));
+      }
+
+      final linkedText = match.group(1)?.trim() ?? '';
+      final uri = _parseLinkUri(match.group(2));
+      if (linkedText.isEmpty || uri == null) {
+        segments.add(_PlainInlineText(match.group(0) ?? ''));
+      } else {
+        segments.add(
+          _LinkedInlineText(_InlineLink(text: linkedText, uri: uri)),
+        );
+      }
+
+      cursor = match.end;
+    }
+
+    if (cursor < text.length) {
+      segments.add(_PlainInlineText(text.substring(cursor)));
+    }
+
+    return segments;
+  }
+
+  static Uri? _parseLinkUri(String? raw) {
+    final text = raw?.trim() ?? '';
+    if (text.isEmpty) return null;
+
+    final uri = Uri.tryParse(text);
+    if (uri == null) return null;
+    if (uri.hasScheme) return uri;
+
+    return Uri.tryParse('https://$text');
+  }
+}
+
+class _PlainInlineText extends _InlineTextSegment {
+  final String text;
+
+  const _PlainInlineText(this.text);
+}
+
+class _LinkedInlineText extends _InlineTextSegment {
+  final _InlineLink link;
+
+  const _LinkedInlineText(this.link);
+}
+
+class _PostText extends StatefulWidget {
+  final String text;
+  final TextStyle style;
+  final bool selectable;
+
+  const _PostText({
+    required this.text,
+    required this.style,
+    required this.selectable,
+  });
+
+  @override
+  State<_PostText> createState() => _PostTextState();
+}
+
+class _PostTextState extends State<_PostText> {
+  late List<_InlineTextSegment> _segments;
+  final _linkRecognizers = <_InlineLink, TapGestureRecognizer>{};
+
+  @override
+  void initState() {
+    super.initState();
+    _syncSegments();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PostText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.text != oldWidget.text) _syncSegments();
+  }
+
+  @override
+  void dispose() {
+    _disposeRecognizers();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    final linkStyle = widget.style.copyWith(
+      color: theme.foreground,
+      decoration: TextDecoration.underline,
+      decorationColor: theme.foreground,
+    );
+
+    final spans = [
+      for (final segment in _segments)
+        switch (segment) {
+          _PlainInlineText(:final text) => TextSpan(text: text),
+          _LinkedInlineText(:final link) => TextSpan(
+            text: link.text,
+            style: linkStyle,
+            recognizer: _linkRecognizers[link],
+          ),
+        },
+    ];
+
+    final textSpan = TextSpan(style: widget.style, children: spans);
+
+    if (widget.selectable) return SelectableText.rich(textSpan);
+
+    return Text.rich(textSpan);
+  }
+
+  void _syncSegments() {
+    _disposeRecognizers();
+    _segments = _InlineTextSegment.parse(widget.text);
+    for (final segment in _segments) {
+      if (segment is! _LinkedInlineText) continue;
+      _linkRecognizers[segment.link] = TapGestureRecognizer()
+        ..onTap = () => launchUrl(segment.link.uri);
+    }
+  }
+
+  void _disposeRecognizers() {
+    for (final recognizer in _linkRecognizers.values) {
+      recognizer.dispose();
+    }
+    _linkRecognizers.clear();
+  }
+}
+
+class _AudioAttachment {
+  final String title;
+  final String artist;
+  final Uri src;
+
+  const _AudioAttachment({
+    required this.title,
+    required this.artist,
+    required this.src,
+  });
+
+  static _AudioAttachment? fromPost(Post post) {
+    if (!post.hasAudioAttachment) return null;
+
+    for (final attachment in post.attachments) {
+      if (attachment is! Map) continue;
+      if (attachment['type'] != 'audio') continue;
+
+      final src = Uri.tryParse('${attachment['src'] ?? ''}');
+      if (src == null || !src.hasScheme) continue;
+
+      return _AudioAttachment(
+        title: _stringValue(attachment['title'], fallback: '[untitled audio]'),
+        artist: _stringValue(
+          attachment['artist'],
+          fallback: '[unknown artist]',
+        ),
+        src: src,
+      );
+    }
+
+    return null;
+  }
+
+  static String _stringValue(Object? value, {required String fallback}) {
+    final text = value?.toString().trim() ?? '';
+    return text.isEmpty ? fallback : text;
+  }
+}
+
+class _AudioAttachmentBox extends StatelessWidget {
+  final _AudioAttachment attachment;
+
+  const _AudioAttachmentBox({required this.attachment});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return Semantics(
+      button: true,
+      label: 'Open audio ${attachment.title} by ${attachment.artist}',
+      child: InkWell(
+        onTap: () => launchUrl(attachment.src),
+        hoverColor: theme.foreground.withValues(alpha: 0.08),
+        focusColor: theme.foreground.withValues(alpha: 0.08),
+        splashColor: theme.foreground.withValues(alpha: 0.12),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: theme.border, width: 1),
+          ),
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Icon(LucideIcons.music, size: 18, color: theme.foreground),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      attachment.title,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 13,
+                        color: theme.foreground,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      attachment.artist,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        color: theme.dimmed,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Icon(LucideIcons.externalLink, size: 16, color: theme.dimmed),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

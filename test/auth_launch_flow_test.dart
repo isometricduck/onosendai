@@ -11,10 +11,12 @@ import 'package:onosendai/core/navigation/app_shell.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/core/prefs/app_prefs.dart';
+import 'package:onosendai/core/prefs/current_user_prefs.dart';
 import 'package:onosendai/core/theme/theme.dart';
 import 'package:onosendai/features/feed/domain/repositories/feed_repository.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
 import 'package:onosendai/features/login/presentation/login_dialog.dart';
+import 'package:onosendai/features/login/presentation/riverpod/login_providers.dart';
 import 'package:onosendai/main.dart';
 
 class _LoadedFeedRepository implements FeedRepository {
@@ -123,6 +125,26 @@ class _NoopAuthTokenProvider implements AuthTokenProvider {
 
   @override
   Future<String?> getRefreshToken() async => null;
+
+  @override
+  Future<void> onTokensRefreshed(RefreshedTokens tokens) async {}
+
+  @override
+  Future<void> onUnauthorized() async {}
+}
+
+class _ContainerAuthTokenProvider implements AuthTokenProvider {
+  final ProviderContainer Function() _container;
+
+  _ContainerAuthTokenProvider(this._container);
+
+  @override
+  Future<String?> getToken() async =>
+      _container().read(authTokensProvider).valueOrNull?.idToken;
+
+  @override
+  Future<String?> getRefreshToken() async =>
+      _container().read(authTokensProvider).valueOrNull?.refreshToken;
 
   @override
   Future<void> onTokensRefreshed(RefreshedTokens tokens) async {}
@@ -264,6 +286,99 @@ void main() {
     expect(storage.tokens?.rtdbToken, 'new-rtdb-token');
     expect(client.getRefreshToken(), 'stored-refresh-token');
     expect(client.rtdbToken, 'new-rtdb-token');
+  });
+
+  test('login fetches current user and stores profile in prefs', () async {
+    final prefs = _MemoryAppPrefs();
+    final storage = _MemoryTokenStorage(null);
+    final requests = <String>[];
+    late final ProviderContainer container;
+
+    final client = CyberspaceClient(
+      authTokenProvider: _ContainerAuthTokenProvider(() => container),
+      httpClient: MockClient((request) async {
+        requests.add('${request.method} ${request.url.path}');
+
+        if (request.url.path == '/v1/auth/login') {
+          expect(request.method, 'POST');
+          expect(jsonDecode(request.body), {
+            'email': 'case@ono.test',
+            'password': 'correct-horse',
+          });
+
+          return http.Response(
+            jsonEncode({
+              'data': {
+                'idToken': 'id-token',
+                'refreshToken': 'refresh-token',
+                'rtdbToken': 'rtdb-token',
+              },
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+
+        if (request.url.path == '/v1/users/me') {
+          expect(request.method, 'GET');
+          expect(request.headers['Authorization'], 'Bearer id-token');
+
+          return http.Response(
+            jsonEncode({
+              'data': {
+                'userId': 'user-1',
+                'username': 'case',
+                'displayName': 'Case',
+                'bio': 'Terminal poet',
+                'pinnedPostId': 'post-1',
+                'websiteUrl': 'https://example.test',
+                'websiteName': 'Example',
+                'websiteImageUrl': 'https://example.test/card.png',
+                'locationLatitude': 12.5,
+                'locationLongitude': -45.25,
+                'locationName': 'The grid',
+                'createdAt': '2026-04-30T12:34:56.000Z',
+              },
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+
+        return http.Response(
+          jsonEncode({
+            'error': {'code': 'not_found', 'message': 'Not found'},
+          }),
+          404,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+
+    container = ProviderContainer(
+      overrides: [
+        appPrefsProvider.overrideWithValue(prefs),
+        tokenStorageProvider.overrideWithValue(storage),
+        cyberspaceClientProvider.overrideWithValue(client),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await container
+        .read(loginNotifierProvider.notifier)
+        .login(email: 'case@ono.test', password: 'correct-horse');
+
+    expect(requests, ['POST /v1/auth/login', 'GET /v1/users/me']);
+    expect(storage.tokens?.idToken, 'id-token');
+
+    final stored = await prefs.getString(currentUserProfilePrefsKey);
+    expect(stored, isNotNull);
+
+    final storedJson = jsonDecode(stored!) as Map<String, dynamic>;
+    expect(storedJson['userId'], 'user-1');
+    expect(storedJson['username'], 'case');
+    expect(storedJson['displayName'], 'Case');
+    expect(storedJson['createdAt'], '2026-04-30T12:34:56.000Z');
   });
 
   testWidgets('login dialog displays auth messages', (tester) async {

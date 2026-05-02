@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
+import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/features/login/data/repositories/auth_repository_impl.dart';
 import 'package:onosendai/features/login/domain/repositories/auth_repository.dart';
 import 'package:onosendai/features/login/domain/usecases/login_usecase.dart';
@@ -28,6 +29,13 @@ class LoginNotifier extends AsyncNotifier<void> {
           .read(loginUseCaseProvider)
           .call(email: email, password: password);
       await ref.read(authTokensProvider.notifier).set(tokens);
+      try {
+        final profile = await ref.read(cyberspaceClientProvider).users.getMe();
+        await ref.read(currentUserPrefsProvider).setProfile(profile);
+      } catch (_) {
+        await ref.read(authTokensProvider.notifier).clear();
+        rethrow;
+      }
     });
   }
 }

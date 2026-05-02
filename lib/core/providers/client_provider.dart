@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/auth/file_token_storage.dart';
 import 'package:onosendai/core/auth/secure_storage_token_storage.dart';
 import 'package:onosendai/core/auth/token_storage.dart';
+import 'package:onosendai/core/providers/prefs_provider.dart';
 
 final tokenStorageProvider = Provider<TokenStorage>((ref) {
   if (Platform.isLinux || Platform.isMacOS) return FileTokenStorage();
@@ -29,10 +30,13 @@ bool _isTokenExpired(String idToken) {
     payload += '=' * ((4 - payload.length % 4) % 4);
     debugPrint("Payload: $payload");
     final claims =
-        jsonDecode(utf8.decode(base64Url.decode(payload))) as Map<String, dynamic>;
+        jsonDecode(utf8.decode(base64Url.decode(payload)))
+            as Map<String, dynamic>;
     debugPrint("Claims: $claims");
     final exp = claims['exp'];
-    debugPrint('Token exp: $exp, now: ${DateTime.now().millisecondsSinceEpoch ~/ 1000}');
+    debugPrint(
+      'Token exp: $exp, now: ${DateTime.now().millisecondsSinceEpoch ~/ 1000}',
+    );
     if (exp is! int) return true;
     // Treat tokens expiring within 30 seconds as already expired.
     return DateTime.now().millisecondsSinceEpoch >= (exp - 30) * 1000;
@@ -67,11 +71,13 @@ class AuthTokensNotifier extends AsyncNotifier<AuthTokens?> {
           rtdbToken: refreshed.rtdbToken,
         );
         await storage.write(newTokens);
-        ref.read(cyberspaceClientProvider).setToken(
-          newTokens.idToken,
-          refreshToken: newTokens.refreshToken,
-          rtdbToken: newTokens.rtdbToken,
-        );
+        ref
+            .read(cyberspaceClientProvider)
+            .setToken(
+              newTokens.idToken,
+              refreshToken: newTokens.refreshToken,
+              rtdbToken: newTokens.rtdbToken,
+            );
         return newTokens;
       } on CyberspaceApiException catch (e) {
         debugPrint("API exception on refresh: ${e.statusCode} $e");
@@ -90,11 +96,13 @@ class AuthTokensNotifier extends AsyncNotifier<AuthTokens?> {
       debugPrint("Not expired token");
     }
 
-    ref.read(cyberspaceClientProvider).setToken(
-      tokens.idToken,
-      refreshToken: tokens.refreshToken,
-      rtdbToken: tokens.rtdbToken,
-    );
+    ref
+        .read(cyberspaceClientProvider)
+        .setToken(
+          tokens.idToken,
+          refreshToken: tokens.refreshToken,
+          rtdbToken: tokens.rtdbToken,
+        );
     return tokens;
   }
 
@@ -113,6 +121,7 @@ class AuthTokensNotifier extends AsyncNotifier<AuthTokens?> {
 
   Future<void> clear({String? message}) async {
     await ref.read(tokenStorageProvider).clear();
+    await ref.read(currentUserPrefsProvider).clear();
     ref.read(cyberspaceClientProvider).clearToken();
     ref.read(authMessageProvider.notifier).state = message;
     state = const AsyncData(null);
@@ -159,5 +168,7 @@ class _RiverpodAuthTokenProvider implements AuthTokenProvider {
 }
 
 final cyberspaceClientProvider = Provider<CyberspaceClient>((ref) {
-  return CyberspaceClient(authTokenProvider: _RiverpodAuthTokenProvider(ref)); //, baseUrl: "http://10.0.2.2:6000");
+  return CyberspaceClient(
+    authTokenProvider: _RiverpodAuthTokenProvider(ref),
+  ); //, baseUrl: "http://10.0.2.2:6000");
 });
