@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/about/presentation/pages/about_page.dart';
 import 'package:onosendai/features/bookmarks/presentation/pages/bookmarks_page.dart';
 import 'package:onosendai/features/feed/presentation/pages/feed_page.dart';
 import 'package:onosendai/features/journal/presentation/pages/journal_page.dart';
@@ -150,6 +151,7 @@ const _destinations = <_AppDestination>[
     label: 'Netiquette',
     page: NetiquettePage(),
   ),
+  _AppDestination(icon: LucideIcons.info, label: 'About', page: AboutPage()),
   _AppDestination.dialog(
     icon: LucideIcons.logOut,
     label: 'Log out',

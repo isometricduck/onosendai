@@ -126,7 +126,7 @@ class _LandingImage extends StatelessWidget {
     final theme = context.theme;
 
     return Semantics(
-      label: 'Cyber Hamlet',
+      label: 'Caveman Hamlet',
       image: true,
       child: Container(
         constraints: const BoxConstraints(maxHeight: 420),
