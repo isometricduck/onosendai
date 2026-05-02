@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cyberspace_client/cyberspace_client.dart';
-import 'package:flutter/foundation.dart';
 import 'package:onosendai/core/auth/token_storage.dart';
 
 class FileTokenStorage implements TokenStorage {
@@ -12,7 +11,6 @@ class FileTokenStorage implements TokenStorage {
   static File _defaultFile() {
     final env = Platform.environment;
     final configHome = env['XDG_CONFIG_HOME'] ?? '${env['HOME']}/.config';
-    debugPrint("Default file is $configHome/onosendai/config.json");
     return File('$configHome/onosendai/config.json');
   }
 

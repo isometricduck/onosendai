@@ -159,5 +159,5 @@ class _RiverpodAuthTokenProvider implements AuthTokenProvider {
 final cyberspaceClientProvider = Provider<CyberspaceClient>((ref) {
   return CyberspaceClient(
     authTokenProvider: _RiverpodAuthTokenProvider(ref),
-  ); //, baseUrl: "http://10.0.2.2:6000");
+  );
 });
