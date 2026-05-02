@@ -267,31 +267,33 @@ class _ThemeBottomSheet extends ConsumerWidget {
     final theme = context.theme;
     final selectedTheme = ref.watch(appThemeProvider);
 
-    return SizedBox(
-      height: MediaQuery.sizeOf(context).height * 0.9,
-      child: Material(
-        color: theme.background,
-        child: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (final appTheme in AppThemeId.values)
-                    _ThemeOption(
-                      appTheme: appTheme,
-                      selected: appTheme == selectedTheme,
-                      onSelected: () async {
-                        await ref
-                            .read(appThemeProvider.notifier)
-                            .setTheme(appTheme);
-                        if (context.mounted) Navigator.pop(context);
-                      },
-                    ),
-                ],
-              ),
+    return Material(
+      color: theme.background,
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              childAspectRatio: 1,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              children: [
+                for (final appTheme in AppThemeId.values)
+                  _ThemeOption(
+                    appTheme: appTheme,
+                    selected: appTheme == selectedTheme,
+                    onSelected: () async {
+                      await ref
+                          .read(appThemeProvider.notifier)
+                          .setTheme(appTheme);
+                      if (context.mounted) Navigator.pop(context);
+                    },
+                  ),
+              ],
             ),
           ),
         ),
@@ -314,46 +316,28 @@ class _ThemeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    final contentColor = selected ? theme.background : theme.dimmed;
+    final contentColor = selected ? theme.background : theme.foreground;
 
-    return SizedBox(
-      height: 52,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(flex: 3, child: ColoredBox(color: theme.background)),
-          Expanded(
-            flex: 4,
-            child: InkWell(
-              onTap: onSelected,
-              child: ColoredBox(
-                color: selected ? theme.foreground : Colors.transparent,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 14,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(appTheme.theme.icon, color: contentColor),
-                      const SizedBox(width: 10),
-                      Flexible(
-                        child: Text(
-                          appTheme.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                          style: theme.mainFont.copyWith(color: contentColor),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+    return InkWell(
+      onTap: onSelected,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: selected ? theme.foreground : Colors.transparent,
+          border: Border.all(color: theme.border),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(appTheme.theme.icon, color: contentColor),
+            const SizedBox(height: 8),
+            Text(
+              appTheme.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.mainFont.copyWith(color: contentColor),
             ),
-          ),
-          Expanded(flex: 3, child: ColoredBox(color: theme.background)),
-        ],
+          ],
+        ),
       ),
     );
   }
