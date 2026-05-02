@@ -43,7 +43,7 @@ All navigation state lives in a single top-level `AppShell` widget.
 
 ### AppBar
 
-- **Mobile**: standard `AppBar` in the page scaffold.
+- **Mobile**: standard `AppBar` in the page scaffold. Only the first 5 destinations get icopns in the nav bar.
 - **Tablet/Desktop**: no `AppBar`. Page titles and actions are rendered inline within the content area.
 
 ## Theming

@@ -121,7 +121,10 @@ class AuthTokensNotifier extends AsyncNotifier<AuthTokens?> {
 
   Future<void> clear({String? message}) async {
     await ref.read(tokenStorageProvider).clear();
-    await ref.read(currentUserPrefsProvider).clear();
+    await Future.wait([
+      ref.read(currentUserPrefsProvider).clear(),
+      ref.read(bookmarkedItemsPrefsProvider).clear(),
+    ]);
     ref.read(cyberspaceClientProvider).clearToken();
     ref.read(authMessageProvider.notifier).state = message;
     state = const AsyncData(null);

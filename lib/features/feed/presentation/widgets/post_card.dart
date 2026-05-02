@@ -1,12 +1,15 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/images/images.dart';
+import 'package:onosendai/core/providers/client_provider.dart';
+import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/core/theme/theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class PostCard extends StatefulWidget {
+class PostCard extends ConsumerStatefulWidget {
   final Post post;
   final VoidCallback? onTap;
   final VoidCallback? onReply;
@@ -21,12 +24,14 @@ class PostCard extends StatefulWidget {
   });
 
   @override
-  State<PostCard> createState() => _PostCardState();
+  ConsumerState<PostCard> createState() => _PostCardState();
 }
 
-class _PostCardState extends State<PostCard> {
+class _PostCardState extends ConsumerState<PostCard> {
   bool _expanded = false;
   bool _full = false;
+  bool _savingBookmark = false;
+  String? _bookmarkId;
 
   static const _truncateAt = 512;
   static const _cardPadding = EdgeInsets.fromLTRB(14, 12, 14, 12);
@@ -36,6 +41,7 @@ class _PostCardState extends State<PostCard> {
   void initState() {
     super.initState();
     _full = widget.full;
+    _loadBookmarkState();
   }
 
   @override
@@ -100,6 +106,10 @@ class _PostCardState extends State<PostCard> {
             expanded: _expanded,
             onReplyTap: widget.onReply,
             onExpandTap: () => setState(() => _expanded = !_expanded),
+            onSaveTap: _saveBookmark,
+            onRemoveSaveTap: _removeBookmark,
+            savingBookmark: _savingBookmark,
+            bookmarked: _bookmarkId != null,
           ),
         ],
       ),
@@ -157,6 +167,75 @@ class _PostCardState extends State<PostCard> {
   bool _canExpand(Post post) =>
       !_full && _decodePostContent(post.content).length > _truncateAt;
 
+  Future<void> _loadBookmarkState() async {
+    final bookmarks = await ref
+        .read(bookmarkedItemsPrefsProvider)
+        .getBookmarkedPosts();
+    if (!mounted) return;
+
+    String? bookmarkId;
+    for (final bookmark in bookmarks) {
+      if (bookmark.postId == widget.post.postId) {
+        bookmarkId = bookmark.bookmarkId;
+        break;
+      }
+    }
+
+    setState(() {
+      _bookmarkId = bookmarkId;
+    });
+  }
+
+  Future<void> _saveBookmark() async {
+    if (_savingBookmark || _bookmarkId != null) return;
+
+    setState(() => _savingBookmark = true);
+    try {
+      final bookmarkId = await ref
+          .read(cyberspaceClientProvider)
+          .bookmarks
+          .bookmarkPost(widget.post.postId);
+      await ref
+          .read(bookmarkedItemsPrefsProvider)
+          .addPostBookmark(bookmarkId: bookmarkId, postId: widget.post.postId);
+      if (!mounted) return;
+      setState(() {
+        _savingBookmark = false;
+        _bookmarkId = bookmarkId;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _savingBookmark = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Could not save bookmark.')));
+    }
+  }
+
+  Future<void> _removeBookmark() async {
+    final bookmarkId = _bookmarkId;
+    if (_savingBookmark || bookmarkId == null) return;
+
+    setState(() => _savingBookmark = true);
+    try {
+      await ref.read(cyberspaceClientProvider).bookmarks.remove(bookmarkId);
+      await ref
+          .read(bookmarkedItemsPrefsProvider)
+          .removePostBookmark(widget.post.postId);
+      if (!mounted) return;
+      setState(() {
+        _savingBookmark = false;
+        _bookmarkId = null;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _savingBookmark = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not remove bookmark.')),
+      );
+    }
+  }
+
   String _decodePostContent(String content) {
     return content
         .replaceAll('&amp;', '&')
@@ -185,19 +264,32 @@ class _PostActionBar extends StatelessWidget {
   final bool expanded;
   final VoidCallback? onReplyTap;
   final VoidCallback onExpandTap;
+  final VoidCallback onSaveTap;
+  final VoidCallback onRemoveSaveTap;
+  final bool savingBookmark;
+  final bool bookmarked;
 
   const _PostActionBar({
     required this.visible,
     required this.expanded,
     required this.onReplyTap,
     required this.onExpandTap,
+    required this.onSaveTap,
+    required this.onRemoveSaveTap,
+    required this.savingBookmark,
+    required this.bookmarked,
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const _PostActionIcon(icon: LucideIcons.bookmark, tooltip: 'Save'),
+        _PostActionIcon(
+          icon: bookmarked ? LucideIcons.bookmarkMinus : LucideIcons.bookmark,
+          tooltip: bookmarked ? 'Remove bookmark' : 'Save',
+          onTap: bookmarked ? onRemoveSaveTap : onSaveTap,
+          busy: savingBookmark,
+        ),
         const SizedBox(width: 18),
         _PostActionIcon(
           icon: LucideIcons.messageSquare,
@@ -227,11 +319,13 @@ class _PostActionIcon extends StatelessWidget {
   final IconData icon;
   final String tooltip;
   final VoidCallback? onTap;
+  final bool busy;
 
   const _PostActionIcon({
     required this.icon,
     required this.tooltip,
     this.onTap,
+    this.busy = false,
   });
 
   @override
@@ -245,7 +339,17 @@ class _PostActionIcon extends StatelessWidget {
         onTap: onTap ?? () {},
         child: SizedBox.square(
           dimension: 28,
-          child: Center(child: Icon(icon, size: 24, color: theme.dimmed)),
+          child: Center(
+            child: busy
+                ? SizedBox.square(
+                    dimension: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: theme.dimmed,
+                    ),
+                  )
+                : Icon(icon, size: 24, color: theme.dimmed),
+          ),
         ),
       ),
     );

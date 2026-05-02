@@ -1,0 +1,306 @@
+import 'package:cyberspace_client/cyberspace_client.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/bookmarks/domain/entities/bookmarks_state.dart';
+import 'package:onosendai/features/bookmarks/presentation/riverpod/bookmarks_providers.dart';
+import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
+import 'package:onosendai/features/feed/presentation/widgets/post_card.dart';
+
+class BookmarksPage extends ConsumerWidget {
+  const BookmarksPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = context.theme;
+    final bookmarksAsync = ref.watch(bookmarksNotifierProvider);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
+    final body = ColoredBox(
+      color: theme.background,
+      child: SafeArea(
+        bottom: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: bookmarksAsync.when(
+              loading: () => const _CenteredSpinner(),
+              error: (err, _) => _ErrorView(
+                message: _errorMessage(err),
+                onRetry: () =>
+                    ref.read(bookmarksNotifierProvider.notifier).refresh(),
+              ),
+              data: (state) => _BookmarksList(
+                state: state,
+                showInlineHeader: !isMobile,
+                onRefresh: () =>
+                    ref.read(bookmarksNotifierProvider.notifier).refresh(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (!isMobile) {
+      return Scaffold(backgroundColor: theme.background, body: body);
+    }
+
+    return Scaffold(
+      backgroundColor: theme.background,
+      appBar: AppBar(
+        backgroundColor: theme.background,
+        foregroundColor: theme.foreground,
+        surfaceTintColor: theme.background,
+        title: Text(
+          'BOOKMARKS',
+          style: theme.mainFont.copyWith(
+            color: theme.foreground,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      body: body,
+    );
+  }
+}
+
+class _BookmarksList extends StatelessWidget {
+  final BookmarksState state;
+  final bool showInlineHeader;
+  final Future<void> Function() onRefresh;
+
+  const _BookmarksList({
+    required this.state,
+    required this.showInlineHeader,
+    required this.onRefresh,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (state.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: onRefresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          children: [
+            if (showInlineHeader) const _InlineHeader(),
+            const SizedBox(height: 120),
+            const Center(child: _DimmedText('No bookmarks yet.')),
+          ],
+        ),
+      );
+    }
+
+    final itemCount =
+        (showInlineHeader ? 1 : 0) +
+        1 +
+        state.posts.length +
+        1 +
+        state.replies.length;
+
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        itemCount: itemCount,
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          var cursor = 0;
+
+          if (showInlineHeader) {
+            if (index == cursor) return const _InlineHeader();
+            cursor += 1;
+          }
+
+          if (index == cursor) return _SectionHeader(label: 'POSTS');
+          cursor += 1;
+
+          final postIndex = index - cursor;
+          if (postIndex >= 0 && postIndex < state.posts.length) {
+            final post = state.posts[postIndex];
+            return PostCard(
+              post: post,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => PostDetailPage(post: post)),
+              ),
+              onReply: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      PostDetailPage(post: post, initiallyReplying: true),
+                ),
+              ),
+            );
+          }
+          cursor += state.posts.length;
+
+          if (index == cursor) return _SectionHeader(label: 'REPLIES');
+          cursor += 1;
+
+          final replyIndex = index - cursor;
+          final reply = state.replies[replyIndex];
+          return _BookmarkedReplyCard(reply: reply);
+        },
+      ),
+    );
+  }
+}
+
+class _BookmarkedReplyCard extends StatelessWidget {
+  final Reply reply;
+
+  const _BookmarkedReplyCard({required this.reply});
+
+  @override
+  Widget build(BuildContext context) {
+    return ReplyCard(reply: reply);
+  }
+}
+
+class _InlineHeader extends StatelessWidget {
+  const _InlineHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return Row(
+      children: [
+        Icon(LucideIcons.bookmark, color: theme.foreground),
+        const SizedBox(width: 10),
+        Text(
+          'Bookmarks',
+          style: theme.mainFont.copyWith(
+            color: theme.foreground,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String label;
+
+  const _SectionHeader({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return Text(
+      label,
+      style: TextStyle(
+        fontFamily: 'monospace',
+        fontSize: 12,
+        color: theme.dimmed,
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+}
+
+class _CenteredSpinner extends StatelessWidget {
+  const _CenteredSpinner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        width: 18,
+        height: 18,
+        child: CircularProgressIndicator(
+          strokeWidth: 1.5,
+          color: context.theme.dimmed,
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _ErrorView({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('[ERROR]', style: theme.mainFont),
+            const SizedBox(height: 12),
+            Text(message, textAlign: TextAlign.center, style: theme.mainFont),
+            const SizedBox(height: 20),
+            _RetryButton(onTap: onRetry),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RetryButton extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const _RetryButton({required this.onTap});
+
+  @override
+  State<_RetryButton> createState() => _RetryButtonState();
+}
+
+class _RetryButtonState extends State<_RetryButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: _hovered ? theme.foreground : theme.dimmed,
+              width: 1,
+            ),
+          ),
+          child: Text('Retry', style: theme.mainFont),
+        ),
+      ),
+    );
+  }
+}
+
+class _DimmedText extends StatelessWidget {
+  final String text;
+
+  const _DimmedText(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(text, style: context.theme.mainFont);
+  }
+}
+
+String _errorMessage(Object error) {
+  debugPrint('Bookmarks load error: $error (${error.runtimeType})');
+  if (error is CyberspaceApiException) return error.message;
+  return 'Something went wrong.';
+}

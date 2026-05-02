@@ -11,6 +11,7 @@ import 'package:onosendai/core/navigation/app_shell.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/core/prefs/app_prefs.dart';
+import 'package:onosendai/core/prefs/bookmarked_items_prefs.dart';
 import 'package:onosendai/core/prefs/current_user_prefs.dart';
 import 'package:onosendai/core/theme/theme.dart';
 import 'package:onosendai/features/feed/domain/repositories/feed_repository.dart';
@@ -345,6 +346,41 @@ void main() {
           );
         }
 
+        if (request.url.path == '/v1/bookmarks') {
+          expect(request.method, 'GET');
+          expect(request.headers['Authorization'], 'Bearer id-token');
+          expect(request.url.queryParameters['limit'], '20');
+
+          return http.Response(
+            jsonEncode({
+              'data': {
+                'data': [
+                  {
+                    'bookmarkId': 'bookmark-post-1',
+                    'type': 'post',
+                    'postId': 'post-1',
+                    'createdAt': '2026-04-30T12:35:56.000Z',
+                  },
+                  {
+                    'bookmarkId': 'bookmark-reply-1',
+                    'type': 'reply',
+                    'replyId': 'reply-1',
+                    'createdAt': '2026-04-30T12:36:56.000Z',
+                  },
+                  {
+                    'bookmarkId': 'bookmark-post-2',
+                    'type': 'post',
+                    'postId': 'post-2',
+                  },
+                ],
+                'cursor': null,
+              },
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+
         return http.Response(
           jsonEncode({
             'error': {'code': 'not_found', 'message': 'Not found'},
@@ -368,7 +404,11 @@ void main() {
         .read(loginNotifierProvider.notifier)
         .login(email: 'case@ono.test', password: 'correct-horse');
 
-    expect(requests, ['POST /v1/auth/login', 'GET /v1/users/me']);
+    expect(requests, [
+      'POST /v1/auth/login',
+      'GET /v1/users/me',
+      'GET /v1/bookmarks',
+    ]);
     expect(storage.tokens?.idToken, 'id-token');
 
     final stored = await prefs.getString(currentUserProfilePrefsKey);
@@ -379,6 +419,21 @@ void main() {
     expect(storedJson['username'], 'case');
     expect(storedJson['displayName'], 'Case');
     expect(storedJson['createdAt'], '2026-04-30T12:34:56.000Z');
+
+    final bookmarkedPosts = (await prefs.getStringList(
+      bookmarkedPostsPrefsKey,
+    ))!.map((value) => jsonDecode(value) as Map<String, dynamic>).toList();
+    expect(bookmarkedPosts, [
+      {'bookmarkId': 'bookmark-post-1', 'postId': 'post-1'},
+      {'bookmarkId': 'bookmark-post-2', 'postId': 'post-2'},
+    ]);
+
+    final bookmarkedReplies = (await prefs.getStringList(
+      bookmarkedRepliesPrefsKey,
+    ))!.map((value) => jsonDecode(value) as Map<String, dynamic>).toList();
+    expect(bookmarkedReplies, [
+      {'bookmarkId': 'bookmark-reply-1', 'replyId': 'reply-1'},
+    ]);
   });
 
   testWidgets('login dialog displays auth messages', (tester) async {

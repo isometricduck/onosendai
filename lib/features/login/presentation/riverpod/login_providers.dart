@@ -30,8 +30,14 @@ class LoginNotifier extends AsyncNotifier<void> {
           .call(email: email, password: password);
       await ref.read(authTokensProvider.notifier).set(tokens);
       try {
-        final profile = await ref.read(cyberspaceClientProvider).users.getMe();
-        await ref.read(currentUserPrefsProvider).setProfile(profile);
+        final client = ref.read(cyberspaceClientProvider);
+        final profile = await client.users.getMe();
+        final bookmarks = await client.bookmarks.list();
+
+        await Future.wait([
+          ref.read(currentUserPrefsProvider).setProfile(profile),
+          ref.read(bookmarkedItemsPrefsProvider).setBookmarks(bookmarks.data),
+        ]);
       } catch (_) {
         await ref.read(authTokensProvider.notifier).clear();
         rethrow;

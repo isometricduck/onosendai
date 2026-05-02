@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/bookmarks/presentation/pages/bookmarks_page.dart';
 import 'package:onosendai/features/feed/presentation/pages/feed_page.dart';
 import 'package:onosendai/features/journal/presentation/pages/journal_page.dart';
 import 'package:onosendai/features/login/presentation/logout_dialog.dart';
@@ -82,18 +83,21 @@ class _AppDestination {
   final Widget? page;
   final _AppDestinationSheetBuilder? sheet;
   final _AppDestinationDialogBuilder? dialog;
+  final bool includeInMenu;
 
   const _AppDestination({
     required this.icon,
     required this.label,
     required this.page,
   }) : sheet = null,
-       dialog = null;
+       dialog = null,
+       includeInMenu = true;
 
   const _AppDestination.sheet({
     required this.icon,
     required this.label,
     required this.sheet,
+    this.includeInMenu = true,
   }) : page = null,
        dialog = null;
 
@@ -102,7 +106,8 @@ class _AppDestination {
     required this.label,
     required this.dialog,
   }) : page = null,
-       sheet = null;
+       sheet = null,
+       includeInMenu = true;
 }
 
 const _destinations = <_AppDestination>[
@@ -126,6 +131,12 @@ const _destinations = <_AppDestination>[
     icon: LucideIcons.menu,
     label: 'Menu',
     sheet: _menuBottomSheet,
+    includeInMenu: false,
+  ),
+  _AppDestination(
+    icon: LucideIcons.bookmark,
+    label: 'Bookmarks',
+    page: BookmarksPage(),
   ),
   _AppDestination.dialog(
     icon: LucideIcons.logOut,
@@ -135,6 +146,11 @@ const _destinations = <_AppDestination>[
 ];
 
 const _primaryNavigationDestinationCount = 5;
+
+int _navigationSelectedIndex(int selectedIndex) {
+  if (selectedIndex < _primaryNavigationDestinationCount) return selectedIndex;
+  return _primaryNavigationDestinationCount - 1;
+}
 
 Widget _logoutDialog(
   BuildContext context,
@@ -181,15 +197,16 @@ class _MenuBottomSheet extends StatelessWidget {
             crossAxisSpacing: 8,
             children: [
               for (var index = 0; index < _destinations.length; index++)
-                _MenuDestinationTile(
-                  destination: _destinations[index],
-                  onTap: () {
-                    Navigator.pop(context);
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      onDestinationSelected(index);
-                    });
-                  },
-                ),
+                if (_destinations[index].includeInMenu)
+                  _MenuDestinationTile(
+                    destination: _destinations[index],
+                    onTap: () {
+                      Navigator.pop(context);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        onDestinationSelected(index);
+                      });
+                    },
+                  ),
             ],
           ),
         ),
@@ -342,6 +359,7 @@ class _MobileShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
+    final navigationSelectedIndex = _navigationSelectedIndex(selectedIndex);
 
     return Scaffold(
       backgroundColor: theme.background,
@@ -359,7 +377,7 @@ class _MobileShell extends StatelessWidget {
           ),
         ),
         child: NavigationBar(
-          selectedIndex: selectedIndex,
+          selectedIndex: navigationSelectedIndex,
           onDestinationSelected: onDestinationSelected,
           backgroundColor: theme.background,
           indicatorColor: theme.dimmed,
@@ -445,11 +463,12 @@ class _RailBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
+    final navigationSelectedIndex = _navigationSelectedIndex(selectedIndex);
 
     return Row(
       children: [
         NavigationRail(
-          selectedIndex: selectedIndex,
+          selectedIndex: navigationSelectedIndex,
           onDestinationSelected: onDestinationSelected,
           extended: extended,
           backgroundColor: theme.background,
