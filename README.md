@@ -1,2 +1,3 @@
-# onosendai
-A Flutter client for cyberspace.online
+# Ono-Sendai
+
+An Android client for the cyberspace.online network.

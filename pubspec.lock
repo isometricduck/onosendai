@@ -221,7 +221,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: main
       resolved-ref: "07629da2b0c40990271ee166881a119be9aa3943"
       url: "https://github.com/isometricduck/cyberspace_client"
     source: git
