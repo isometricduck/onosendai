@@ -6,6 +6,7 @@ import 'package:onosendai/features/bookmarks/presentation/pages/bookmarks_page.d
 import 'package:onosendai/features/feed/presentation/pages/feed_page.dart';
 import 'package:onosendai/features/journal/presentation/pages/journal_page.dart';
 import 'package:onosendai/features/login/presentation/logout_dialog.dart';
+import 'package:onosendai/features/netiquette/presentation/pages/netiquette_page.dart';
 import 'package:onosendai/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:onosendai/features/write/presentation/pages/write_page.dart';
 
@@ -143,6 +144,11 @@ const _destinations = <_AppDestination>[
     icon: LucideIcons.bookmark,
     label: 'Bookmarks',
     page: BookmarksPage(),
+  ),
+  _AppDestination(
+    icon: LucideIcons.scale,
+    label: 'Netiquette',
+    page: NetiquettePage(),
   ),
   _AppDestination.dialog(
     icon: LucideIcons.logOut,

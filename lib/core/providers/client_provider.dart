@@ -22,21 +22,15 @@ final authTokensProvider =
 final authMessageProvider = StateProvider<String?>((ref) => null);
 
 bool _isTokenExpired(String idToken) {
-  debugPrint("Checking if token is expired");
   try {
     final parts = idToken.split('.');
     if (parts.length != 3) return true;
     var payload = parts[1];
     payload += '=' * ((4 - payload.length % 4) % 4);
-    debugPrint("Payload: $payload");
     final claims =
         jsonDecode(utf8.decode(base64Url.decode(payload)))
             as Map<String, dynamic>;
-    debugPrint("Claims: $claims");
     final exp = claims['exp'];
-    debugPrint(
-      'Token exp: $exp, now: ${DateTime.now().millisecondsSinceEpoch ~/ 1000}',
-    );
     if (exp is! int) return true;
     // Treat tokens expiring within 30 seconds as already expired.
     return DateTime.now().millisecondsSinceEpoch >= (exp - 30) * 1000;
@@ -49,22 +43,16 @@ bool _isTokenExpired(String idToken) {
 class AuthTokensNotifier extends AsyncNotifier<AuthTokens?> {
   @override
   Future<AuthTokens?> build() async {
-    debugPrint("Building token notifier");
     final storage = ref.read(tokenStorageProvider);
-    debugPrint("Storage: $storage");
     final tokens = await storage.read();
-    debugPrint("Tokens: $tokens");
     if (tokens == null) return null;
 
     if (_isTokenExpired(tokens.idToken)) {
-      debugPrint("Expired token");
       try {
-        debugPrint("Refresh token: ${tokens.refreshToken}");
         final refreshed = await ref
             .read(cyberspaceClientProvider)
             .auth
             .refreshToken(tokens.refreshToken);
-        debugPrint("refreshed token: $refreshed");
         final newTokens = AuthTokens(
           idToken: refreshed.idToken,
           refreshToken: tokens.refreshToken,
@@ -92,8 +80,6 @@ class AuthTokensNotifier extends AsyncNotifier<AuthTokens?> {
         debugPrint("Other error when refreshing token: $e");
         // Network error — fall through with the expired token; reactive path will retry.
       }
-    } else {
-      debugPrint("Not expired token");
     }
 
     ref
