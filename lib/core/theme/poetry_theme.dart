@@ -29,8 +29,9 @@ class PoetryTheme extends Theme {
   @override
   TextStyle get font => TextStyle(
     fontFamily: 'EBGaramond',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: FontWeight.w400,
+    letterSpacing: 0.5,
   );
 }
 

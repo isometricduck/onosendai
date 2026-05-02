@@ -107,6 +107,30 @@ flutter:
       fonts:
         - asset: assets/fonts/ShareTechMono/ShareTechMono-Regular.ttf
           weight: 400
+    - family: DepartureMono
+      fonts:
+        - asset: assets/fonts/DepartureMono/DepartureMono-Regular.otf
+          weight: 400
+    - family: GeistMono
+      fonts:
+        - asset: assets/fonts/GeistMono/GeistMono-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/GeistMono/GeistMono-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/GeistMono/GeistMono-Light.ttf
+          weight: 300
+        - asset: assets/fonts/GeistMono/GeistMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/GeistMono/GeistMono-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/GeistMono/GeistMono-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/GeistMono/GeistMono-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/GeistMono/GeistMono-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/GeistMono/GeistMono-Black.ttf
+          weight: 900
     - family: Sniglet
       fonts:
         - asset: assets/fonts/Sniglet/Sniglet-Regular.ttf

@@ -29,9 +29,10 @@ class BrutalistTheme extends Theme {
 
   @override
   TextStyle get font => TextStyle(
-    fontFamily: 'ShareTechMono',
+    fontFamily: 'DepartureMono',
     fontSize: 16,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w600,
+    letterSpacing: -.1,
   );
 }
 

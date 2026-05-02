@@ -20,7 +20,7 @@ class MatrixTheme extends Theme {
   ).withValues(alpha: 0.9);
 
   @override
-  Color get background => Colors.transparent;
+  Color get background => Colors.black;
 
   @override
   Color get border => Color(
@@ -34,7 +34,12 @@ class MatrixTheme extends Theme {
 
   @override
   TextStyle get font =>
-      TextStyle(fontFamily: 'VT323', fontSize: 16, fontWeight: FontWeight.w400);
+      TextStyle(
+        fontFamily: 'VT323', 
+        fontSize: 24,
+        fontWeight: FontWeight.w500,
+        letterSpacing: -1.2,
+      );
 }
 
 /*

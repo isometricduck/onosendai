@@ -28,9 +28,10 @@ class C64Theme extends Theme {
 
   @override
   TextStyle get font => TextStyle(
-    fontFamily: 'SpaceMono',
-    fontSize: 16,
+    fontFamily: 'DepartureMono',
+    fontSize: 18,
     fontWeight: FontWeight.w400,
+    letterSpacing: -1.5,
   );
 }
 

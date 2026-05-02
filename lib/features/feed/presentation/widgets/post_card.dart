@@ -905,25 +905,23 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Text(
-            '@${post.authorUsername}',
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 13,
-              color: theme.foreground,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.4,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        const SizedBox(width: 8),
         Text(
-          '${_relativeTime(post.createdAt)} · ${post.content.length} · ${post.repliesCount}',
-          textAlign: TextAlign.right,
+          '@${post.authorUsername}',
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 13,
+            color: theme.foreground,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.4,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 3),
+        Text(
+          '${_relativeTime(post.createdAt)} ago · ${post.content.length} chars · ${post.repliesCount} replies',
           style: TextStyle(
             fontFamily: 'monospace',
             fontSize: 12,

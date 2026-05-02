@@ -365,7 +365,7 @@ class _MobileShell extends StatelessWidget {
           iconTheme: WidgetStateProperty.resolveWith((states) {
             final isSelected = states.contains(WidgetState.selected);
             return IconThemeData(
-              color: isSelected ? theme.foreground : theme.dimmed,
+              color: isSelected ? theme.background : theme.dimmed,
             );
           }),
           labelTextStyle: WidgetStateProperty.all(

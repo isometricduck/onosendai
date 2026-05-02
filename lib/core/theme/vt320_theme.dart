@@ -29,7 +29,11 @@ class Vt320Theme extends Theme {
 
   @override
   TextStyle get font =>
-      TextStyle(fontFamily: 'VT323', fontSize: 16, fontWeight: FontWeight.w400);
+      TextStyle(
+        fontFamily: 'VT323', 
+        fontSize: 20, 
+        fontWeight: FontWeight.w500,
+      );
 }
 
 /*

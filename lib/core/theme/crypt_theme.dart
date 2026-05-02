@@ -28,9 +28,10 @@ class CryptTheme extends Theme {
 
   @override
   TextStyle get font => TextStyle(
-    fontFamily: 'JetBrainsMono',
+    fontFamily: 'GeistMono',
     fontSize: 16,
     fontWeight: FontWeight.w400,
+    letterSpacing: 0.12,
   );
 }
 
