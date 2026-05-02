@@ -220,9 +220,11 @@ packages:
   cyberspace_client:
     dependency: "direct main"
     description:
-      path: "../cyberspace_client"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "07629da2b0c40990271ee166881a119be9aa3943"
+      url: "https://github.com/isometricduck/cyberspace_client"
+    source: git
     version: "0.0.1"
   dart_style:
     dependency: transitive
