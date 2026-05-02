@@ -51,24 +51,6 @@ All navigation state lives in a single top-level `AppShell` widget.
 The theme class defines the elements that go into a theme. For the time being, the dark theme is hardcoded.
 All icons are taken from the `lucide_icons` package.
 
-## Sections to navigate
+## Tools
 
-### Feed
-
-This is an infinite scroll of posts. Code is under the "feed" feature.
-
-### Write
-
-Create a post.
-
-### Journal
-
-Read private notes.
-
-### Themes
-
-Modal sheet: change the current theme.
-
-### Notifications
-
-Show notifications.
+Use 'fvm flutter' to run any flutter commands.

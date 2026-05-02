@@ -123,6 +123,12 @@ class _FeedList extends StatelessWidget {
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => PostDetailPage(post: post)),
               ),
+              onReply: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      PostDetailPage(post: post, initiallyReplying: true),
+                ),
+              ),
             );
           }
           if (state.isLoadingMore) return const _InlineSpinner();
@@ -192,16 +198,9 @@ class _ErrorView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              '[ERROR]',
-              style: theme.mainFont,
-            ),
+            Text('[ERROR]', style: theme.mainFont),
             const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.mainFont,
-            ),
+            Text(message, textAlign: TextAlign.center, style: theme.mainFont),
             const SizedBox(height: 20),
             _RetryButton(onTap: onRetry),
           ],
@@ -239,11 +238,7 @@ class _RetryButtonState extends State<_RetryButton> {
               width: 1,
             ),
           ),
-          child: Text(
-            'Retry',
-            style: theme.mainFont,
-
-          ),
+          child: Text('Retry', style: theme.mainFont),
         ),
       ),
     );
@@ -256,9 +251,6 @@ class _DimmedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: context.theme.mainFont,
-    );
+    return Text(text, style: context.theme.mainFont);
   }
 }

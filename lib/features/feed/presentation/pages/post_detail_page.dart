@@ -9,8 +9,13 @@ import 'package:onosendai/features/feed/presentation/widgets/post_card.dart';
 
 class PostDetailPage extends ConsumerStatefulWidget {
   final Post post;
+  final bool initiallyReplying;
 
-  const PostDetailPage({super.key, required this.post});
+  const PostDetailPage({
+    super.key,
+    required this.post,
+    this.initiallyReplying = false,
+  });
 
   @override
   ConsumerState<PostDetailPage> createState() => _PostDetailPageState();
@@ -27,6 +32,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
   @override
   void initState() {
     super.initState();
+    _isReplying = widget.initiallyReplying;
     _scrollController.addListener(_onScroll);
   }
 
@@ -230,15 +236,15 @@ class _PostDetailList extends StatelessWidget {
           }
 
           if (index == postIndex) {
-            return PostCard(post: state.post, full: true);
+            return PostCard(
+              post: state.post,
+              full: true,
+              onReply: onStartReply,
+            );
           }
 
           if (index == repliesHeaderIndex) {
-            return _RepliesHeader(
-              count: state.post.repliesCount,
-              showReplyButton: !showReplyComposer,
-              onStartReply: onStartReply,
-            );
+            return _RepliesHeader(count: state.post.repliesCount);
           }
 
           if (showReplyComposer && index == replyComposerIndex) {
@@ -254,7 +260,9 @@ class _PostDetailList extends StatelessWidget {
           final replyIndex = index - firstReplyIndex;
           if (replyIndex < state.replies.length) {
             final reply = state.replies[replyIndex];
-            debugPrint("Current user id: $currentUserId and author id: ${reply.authorId}");
+            debugPrint(
+              "Current user id: $currentUserId and author id: ${reply.authorId}",
+            );
             final canDelete =
                 currentUserId != null && reply.authorId == currentUserId;
             return ReplyCard(
@@ -306,33 +314,20 @@ class _InlineHeader extends StatelessWidget {
 
 class _RepliesHeader extends StatelessWidget {
   final int count;
-  final bool showReplyButton;
-  final VoidCallback onStartReply;
 
-  const _RepliesHeader({
-    required this.count,
-    required this.showReplyButton,
-    required this.onStartReply,
-  });
+  const _RepliesHeader({required this.count});
 
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            count == 1 ? '1 REPLY' : '$count REPLIES',
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 12,
-              color: theme.dimmed,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ),
-        if (showReplyButton) _ReplyTextButton(onTap: onStartReply),
-      ],
+    return Text(
+      count == 1 ? '1 REPLY' : '$count REPLIES',
+      style: TextStyle(
+        fontFamily: 'monospace',
+        fontSize: 12,
+        color: theme.dimmed,
+        letterSpacing: 0.5,
+      ),
     );
   }
 }

@@ -13,7 +13,7 @@ class C64Theme extends Theme {
   bool get isDark => true;
   
   @override
-  IconData get icon => LucideIcons.moon;
+  IconData get icon => LucideIcons.tv;
 
   @override
   Color get foreground => Colors.white.withValues(alpha: 0.75);

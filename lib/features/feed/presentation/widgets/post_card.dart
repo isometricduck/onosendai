@@ -9,12 +9,14 @@ import 'package:url_launcher/url_launcher.dart';
 class PostCard extends StatefulWidget {
   final Post post;
   final VoidCallback? onTap;
+  final VoidCallback? onReply;
   final bool full;
 
   const PostCard({
     super.key,
     required this.post,
     this.onTap,
+    this.onReply,
     this.full = false,
   });
 
@@ -27,6 +29,8 @@ class _PostCardState extends State<PostCard> {
   bool _full = false;
 
   static const _truncateAt = 512;
+  static const _cardPadding = EdgeInsets.fromLTRB(14, 12, 14, 12);
+  static const _sectionGap = 10.0;
 
   @override
   void initState() {
@@ -44,12 +48,14 @@ class _PostCardState extends State<PostCard> {
         color: theme.background,
         border: Border.all(color: theme.border, width: 1),
       ),
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      padding: _cardPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _Header(post: post),
-          const SizedBox(height: 10),
+          const SizedBox(height: _sectionGap),
+          const _PostSectionDivider(),
+          const SizedBox(height: _sectionGap),
           if (post.deleted)
             Text(
               '[post deleted]',
@@ -78,6 +84,7 @@ class _PostCardState extends State<PostCard> {
           if (post.topics.isNotEmpty) ...[
             const SizedBox(height: 10),
             Wrap(
+              alignment: WrapAlignment.end,
               spacing: 8,
               runSpacing: 6,
               children: [
@@ -85,7 +92,15 @@ class _PostCardState extends State<PostCard> {
               ],
             ),
           ],
-          const SizedBox(height: 10),
+          const SizedBox(height: _sectionGap),
+          const _PostSectionDivider(),
+          const SizedBox(height: _sectionGap),
+          _PostActionBar(
+            visible: _canExpand(post),
+            expanded: _expanded,
+            onReplyTap: widget.onReply,
+            onExpandTap: () => setState(() => _expanded = !_expanded),
+          ),
         ],
       ),
     );
@@ -108,7 +123,7 @@ class _PostCardState extends State<PostCard> {
     final audioAttachment = _AudioAttachment.fromPost(post);
 
     final content = _decodePostContent(post.content);
-    final truncated = !_full && content.length > _truncateAt;
+    final truncated = _canExpand(post) && !_expanded;
     final displayText = truncated
         ? '${content.substring(0, _truncateAt)}…'
         : content;
@@ -135,24 +150,12 @@ class _PostCardState extends State<PostCard> {
           if (segments.isNotEmpty) const SizedBox(height: 10),
           _AudioAttachmentBox(attachment: audioAttachment),
         ],
-        if (!_full && (truncated || _expanded)) ...[
-          const SizedBox(height: 4),
-          GestureDetector(
-            onTap: () => setState(() => _expanded = !_expanded),
-            child: Text(
-              truncated ? '[E]xpand' : '[C]ollapse',
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 12,
-                color: theme.dimmed,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-        ],
       ],
     );
   }
+
+  bool _canExpand(Post post) =>
+      !_full && _decodePostContent(post.content).length > _truncateAt;
 
   String _decodePostContent(String content) {
     return content
@@ -160,6 +163,92 @@ class _PostCardState extends State<PostCard> {
         .replaceAll('&lt;', '<')
         .replaceAll('&gt;', '>')
         .replaceAll('&nbsp;', '\n');
+  }
+}
+
+class _PostSectionDivider extends StatelessWidget {
+  const _PostSectionDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return SizedBox(
+      height: 1,
+      child: DecoratedBox(decoration: BoxDecoration(color: theme.border)),
+    );
+  }
+}
+
+class _PostActionBar extends StatelessWidget {
+  final bool visible;
+  final bool expanded;
+  final VoidCallback? onReplyTap;
+  final VoidCallback onExpandTap;
+
+  const _PostActionBar({
+    required this.visible,
+    required this.expanded,
+    required this.onReplyTap,
+    required this.onExpandTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const _PostActionIcon(icon: LucideIcons.bookmark, tooltip: 'Save'),
+        const SizedBox(width: 18),
+        _PostActionIcon(
+          icon: LucideIcons.messageSquare,
+          tooltip: 'Reply',
+          onTap: onReplyTap,
+        ),
+        const SizedBox(width: 18),
+        Visibility(
+          visible: visible,
+          maintainAnimation: true,
+          maintainSize: true,
+          maintainState: true,
+          child: _PostActionIcon(
+            icon: expanded
+                ? LucideIcons.foldVertical
+                : LucideIcons.unfoldVertical,
+            tooltip: expanded ? 'Collapse' : 'Expand',
+            onTap: onExpandTap,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PostActionIcon extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onTap;
+
+  const _PostActionIcon({
+    required this.icon,
+    required this.tooltip,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap ?? () {},
+        child: SizedBox.square(
+          dimension: 28,
+          child: Center(child: Icon(icon, size: 24, color: theme.dimmed)),
+        ),
+      ),
+    );
   }
 }
 
