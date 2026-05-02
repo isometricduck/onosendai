@@ -4,20 +4,19 @@ import 'dart:ui';
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/widgets.dart' show IconData;
 import 'package:flutter/material.dart' show Colors;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
 
 class MatrixTheme extends Theme {
   @override
   bool get isDark => true;
-  
+
   @override
   IconData get icon => LucideIcons.terminal;
 
   @override
   Color get foreground => Color(
-      int.parse('#a0e044'.replaceAll('#', '0xFF')),
+    int.parse('#a0e044'.replaceAll('#', '0xFF')),
   ).withValues(alpha: 0.9);
 
   @override
@@ -25,18 +24,17 @@ class MatrixTheme extends Theme {
 
   @override
   Color get border => Color(
-      int.parse('#a0e044'.replaceAll('#', '0xFF')),
+    int.parse('#a0e044'.replaceAll('#', '0xFF')),
   ).withValues(alpha: 0.4);
 
   @override
   Color get dimmed => Color(
-      int.parse('#a0e044'.replaceAll('#', '0xFF')),
+    int.parse('#a0e044'.replaceAll('#', '0xFF')),
   ).withValues(alpha: 0.5);
-
 
   @override
   TextStyle get font =>
-      GoogleFonts.vt323(fontSize: 16, fontWeight: FontWeight.w400);
+      TextStyle(fontFamily: 'VT323', fontSize: 16, fontWeight: FontWeight.w400);
 }
 
 /*

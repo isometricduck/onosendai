@@ -4,14 +4,13 @@ import 'dart:ui';
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/widgets.dart' show IconData;
 import 'package:flutter/material.dart' show Colors;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
 
 class LcdTheme extends Theme {
   @override
   bool get isDark => false;
-  
+
   @override
   IconData get icon => LucideIcons.calculator;
 
@@ -28,8 +27,11 @@ class LcdTheme extends Theme {
   Color get dimmed => Color(int.parse('#3a3a3a'.replaceAll('#', '0xFF')));
 
   @override
-  TextStyle get font =>
-      GoogleFonts.jetBrainsMono(fontSize: 16, fontWeight: FontWeight.w400);
+  TextStyle get font => TextStyle(
+    fontFamily: 'JetBrainsMono',
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+  );
 }
 
 /*

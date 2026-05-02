@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/widgets.dart' show IconData;
 import 'package:flutter/material.dart' show Colors;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
 
@@ -28,8 +27,11 @@ class CryptTheme extends Theme {
   Color get dimmed => Colors.red.withValues(alpha: 0.8);
 
   @override
-  TextStyle get font =>
-      GoogleFonts.jetBrainsMono(fontSize: 16, fontWeight: FontWeight.w400);
+  TextStyle get font => TextStyle(
+    fontFamily: 'JetBrainsMono',
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+  );
 }
 
 /*

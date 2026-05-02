@@ -3,7 +3,6 @@ import 'dart:ui';
 // ignore: implementation_imports
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/widgets.dart' show IconData;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
 
@@ -22,17 +21,20 @@ class GridTheme extends Theme {
 
   @override
   Color get border => Color(
-        int.parse('#ff9810'.replaceAll('#', '0xFF')),
+    int.parse('#ff9810'.replaceAll('#', '0xFF')),
   ).withValues(alpha: 0.22);
 
   @override
   Color get dimmed => Color(
-        int.parse('#ff9810'.replaceAll('#', '0xFF')),
+    int.parse('#ff9810'.replaceAll('#', '0xFF')),
   ).withValues(alpha: 0.6);
 
   @override
-  TextStyle get font =>
-      GoogleFonts.shareTechMono(fontSize: 16, fontWeight: FontWeight.w400);
+  TextStyle get font => TextStyle(
+    fontFamily: 'ShareTechMono',
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+  );
 }
 
 /*

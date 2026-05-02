@@ -3,14 +3,13 @@ import 'dart:ui';
 // ignore: implementation_imports
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/widgets.dart' show IconData;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
 
 class Vt320Theme extends Theme {
   @override
   bool get isDark => true;
-  
+
   @override
   IconData get icon => LucideIcons.monitor;
 
@@ -30,7 +29,7 @@ class Vt320Theme extends Theme {
 
   @override
   TextStyle get font =>
-      GoogleFonts.vt323(fontSize: 16, fontWeight: FontWeight.w400);
+      TextStyle(fontFamily: 'VT323', fontSize: 16, fontWeight: FontWeight.w400);
 }
 
 /*

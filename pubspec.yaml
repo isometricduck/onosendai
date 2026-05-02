@@ -16,7 +16,6 @@ dependencies:
   flutter_secure_storage: ^10.0.0
   shared_preferences: ^2.5.3
   lucide_icons: ^0.257.0
-  google_fonts: ^8.0.2
   cached_network_image: ^3.4.1
   url_launcher: ^6.3.2
 
@@ -34,3 +33,99 @@ flutter:
     - assets/images/caveman_hamlet.jpg
   shaders:
     - assets/shaders/dither.glsl
+  fonts:
+    - family: EBGaramond
+      fonts:
+        - asset: assets/fonts/EBGaramond/EBGaramond-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/EBGaramond/EBGaramond-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/EBGaramond/EBGaramond-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/EBGaramond/EBGaramond-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/EBGaramond/EBGaramond-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/EBGaramond/EBGaramond-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/EBGaramond/EBGaramond-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/EBGaramond/EBGaramond-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/EBGaramond/EBGaramond-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/EBGaramond/EBGaramond-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-ThinItalic.ttf
+          weight: 100
+          style: italic
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-ExtraLightItalic.ttf
+          weight: 200
+          style: italic
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-Light.ttf
+          weight: 300
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-LightItalic.ttf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/JetBrainsMono/JetBrainsMono-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+    - family: ShareTechMono
+      fonts:
+        - asset: assets/fonts/ShareTechMono/ShareTechMono-Regular.ttf
+          weight: 400
+    - family: Sniglet
+      fonts:
+        - asset: assets/fonts/Sniglet/Sniglet-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Sniglet/Sniglet-ExtraBold.ttf
+          weight: 800
+    - family: SpaceMono
+      fonts:
+        - asset: assets/fonts/SpaceMono/SpaceMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/SpaceMono/SpaceMono-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/SpaceMono/SpaceMono-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/SpaceMono/SpaceMono-BoldItalic.ttf
+          weight: 700
+          style: italic
+    - family: VT323
+      fonts:
+        - asset: assets/fonts/VT323/VT323-Regular.ttf
+          weight: 400

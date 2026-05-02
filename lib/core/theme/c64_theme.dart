@@ -4,14 +4,13 @@ import 'dart:ui';
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/widgets.dart' show IconData;
 import 'package:flutter/material.dart' show Colors;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
 
 class C64Theme extends Theme {
   @override
   bool get isDark => true;
-  
+
   @override
   IconData get icon => LucideIcons.tv;
 
@@ -28,8 +27,11 @@ class C64Theme extends Theme {
   Color get dimmed => Colors.white.withValues(alpha: 0.4);
 
   @override
-  TextStyle get font =>
-      GoogleFonts.spaceMono(fontSize: 16, fontWeight: FontWeight.w400);
+  TextStyle get font => TextStyle(
+    fontFamily: 'SpaceMono',
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+  );
 }
 
 /*
