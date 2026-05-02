@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   cyberspace_client:
     git: https://github.com/isometricduck/cyberspace_client
+    ref: main
   flutter_riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
   flutter_secure_storage: ^10.0.0
