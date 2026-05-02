@@ -277,14 +277,14 @@ class _PostCardState extends ConsumerState<PostCard> {
       ).showSnackBar(const SnackBar(content: Text('Could not delete post.')));
     }
   }
+}
 
-  String _decodePostContent(String content) {
-    return content
-        .replaceAll('&amp;', '&')
-        .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>')
-        .replaceAll('&nbsp;', '\n');
-  }
+String _decodePostContent(String content) {
+  return content
+      .replaceAll('&amp;', '&')
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&nbsp;', '\n');
 }
 
 class _PostSectionDivider extends StatelessWidget {
@@ -754,8 +754,9 @@ class ReplyCard extends StatelessWidget {
               ),
             )
           else
-            SelectableText(
-              reply.content.replaceAll('&amp;', '&'),
+            _PostText(
+              text: _decodePostContent(reply.content),
+              selectable: true,
               style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 14,

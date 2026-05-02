@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cyberspace_client/cyberspace_client.dart' as cyberspace;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -196,6 +198,16 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
     setState(() => _opening = true);
     try {
       final client = ref.read(cyberspaceClientProvider);
+      if (!notification.read) {
+        unawaited(
+          client.notifications.markRead(notification.notificationId).catchError(
+            (Object error, StackTrace stackTrace) {
+              debugPrint('Could not mark notification read: $error');
+            },
+          ),
+        );
+      }
+
       final post = await client.posts.get(postId);
       if (!mounted) return;
 
