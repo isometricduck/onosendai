@@ -1,13 +1,11 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide RichText;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/core/images/images.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/core/theme/theme.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:onosendai/core/widgets/rich_text.dart';
 
 class PostCard extends ConsumerStatefulWidget {
   final Post post;
@@ -143,42 +141,25 @@ class _PostCardState extends ConsumerState<PostCard> {
   Widget _buildContent(BuildContext context, Post post) {
     final theme = context.theme;
     final contentStyle = theme.mainFont;
-    final audioAttachment = _AudioAttachment.fromPost(post);
 
-    final content = _decodePostContent(post.content);
+    final content = RichText.decodeContent(post.content);
     final truncated = _canExpand(post) && !_expanded;
     final displayText = truncated
         ? '${content.substring(0, _truncateAt)}…'
         : content;
-    final segments = _PostContentSegment.parse(displayText);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final (index, segment) in segments.indexed) ...[
-          if (index > 0) const SizedBox(height: 8),
-          switch (segment) {
-            _TextSegment(:final text) => _PostText(
-              text: text,
-              style: contentStyle,
-              selectable: widget.onTap == null,
-            ),
-            _ImageSegment(:final altText, :final url) => _PostImage(
-              altText: altText,
-              url: url,
-            ),
-          },
-        ],
-        if (audioAttachment != null) ...[
-          if (segments.isNotEmpty) const SizedBox(height: 10),
-          _AudioAttachmentBox(attachment: audioAttachment),
-        ],
-      ],
+    return RichText(
+      content: displayText,
+      style: contentStyle,
+      selectable: widget.onTap == null,
+      attachments: post.attachments,
+      decodeHtml: false,
     );
   }
 
   bool _canExpand(Post post) =>
-      !_full && _decodePostContent(post.content).length > _truncateAt;
+      !_full &&
+      RichText.decodeContent(post.content).length > _truncateAt;
 
   Future<void> _loadBookmarkState() async {
     final bookmarks = await ref
@@ -277,14 +258,6 @@ class _PostCardState extends ConsumerState<PostCard> {
       ).showSnackBar(const SnackBar(content: Text('Could not delete post.')));
     }
   }
-}
-
-String _decodePostContent(String content) {
-  return content
-      .replaceAll('&amp;', '&')
-      .replaceAll('&lt;', '<')
-      .replaceAll('&gt;', '>')
-      .replaceAll('&nbsp;', '\n');
 }
 
 class _PostSectionDivider extends StatelessWidget {
@@ -458,260 +431,6 @@ class _PostActionIcon extends StatelessWidget {
   }
 }
 
-class _InlineLink {
-  final String text;
-  final Uri uri;
-
-  const _InlineLink({required this.text, required this.uri});
-}
-
-sealed class _InlineTextSegment {
-  const _InlineTextSegment();
-
-  static final _linkPattern = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
-
-  static List<_InlineTextSegment> parse(String text) {
-    final segments = <_InlineTextSegment>[];
-    var cursor = 0;
-
-    for (final match in _linkPattern.allMatches(text)) {
-      if (match.start > cursor) {
-        segments.add(_PlainInlineText(text.substring(cursor, match.start)));
-      }
-
-      final linkedText = match.group(1)?.trim() ?? '';
-      final uri = _parseLinkUri(match.group(2));
-      if (linkedText.isEmpty || uri == null) {
-        segments.add(_PlainInlineText(match.group(0) ?? ''));
-      } else {
-        segments.add(
-          _LinkedInlineText(_InlineLink(text: linkedText, uri: uri)),
-        );
-      }
-
-      cursor = match.end;
-    }
-
-    if (cursor < text.length) {
-      segments.add(_PlainInlineText(text.substring(cursor)));
-    }
-
-    return segments;
-  }
-
-  static Uri? _parseLinkUri(String? raw) {
-    final text = raw?.trim() ?? '';
-    if (text.isEmpty) return null;
-
-    final uri = Uri.tryParse(text);
-    if (uri == null) return null;
-    if (uri.hasScheme) return uri;
-
-    return Uri.tryParse('https://$text');
-  }
-}
-
-class _PlainInlineText extends _InlineTextSegment {
-  final String text;
-
-  const _PlainInlineText(this.text);
-}
-
-class _LinkedInlineText extends _InlineTextSegment {
-  final _InlineLink link;
-
-  const _LinkedInlineText(this.link);
-}
-
-class _PostText extends StatefulWidget {
-  final String text;
-  final TextStyle style;
-  final bool selectable;
-
-  const _PostText({
-    required this.text,
-    required this.style,
-    required this.selectable,
-  });
-
-  @override
-  State<_PostText> createState() => _PostTextState();
-}
-
-class _PostTextState extends State<_PostText> {
-  late List<_InlineTextSegment> _segments;
-  final _linkRecognizers = <_InlineLink, TapGestureRecognizer>{};
-
-  @override
-  void initState() {
-    super.initState();
-    _syncSegments();
-  }
-
-  @override
-  void didUpdateWidget(covariant _PostText oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.text != oldWidget.text) _syncSegments();
-  }
-
-  @override
-  void dispose() {
-    _disposeRecognizers();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-
-    final linkStyle = widget.style.copyWith(
-      color: theme.foreground,
-      decoration: TextDecoration.underline,
-      decorationColor: theme.foreground,
-    );
-
-    final spans = [
-      for (final segment in _segments)
-        switch (segment) {
-          _PlainInlineText(:final text) => TextSpan(text: text),
-          _LinkedInlineText(:final link) => TextSpan(
-            text: link.text,
-            style: linkStyle,
-            recognizer: _linkRecognizers[link],
-          ),
-        },
-    ];
-
-    final textSpan = TextSpan(style: widget.style, children: spans);
-
-    if (widget.selectable) return SelectableText.rich(textSpan);
-
-    return Text.rich(textSpan);
-  }
-
-  void _syncSegments() {
-    _disposeRecognizers();
-    _segments = _InlineTextSegment.parse(widget.text);
-    for (final segment in _segments) {
-      if (segment is! _LinkedInlineText) continue;
-      _linkRecognizers[segment.link] = TapGestureRecognizer()
-        ..onTap = () => launchUrl(segment.link.uri);
-    }
-  }
-
-  void _disposeRecognizers() {
-    for (final recognizer in _linkRecognizers.values) {
-      recognizer.dispose();
-    }
-    _linkRecognizers.clear();
-  }
-}
-
-class _AudioAttachment {
-  final String title;
-  final String artist;
-  final Uri src;
-
-  const _AudioAttachment({
-    required this.title,
-    required this.artist,
-    required this.src,
-  });
-
-  static _AudioAttachment? fromPost(Post post) {
-    if (!post.hasAudioAttachment) return null;
-
-    for (final attachment in post.attachments) {
-      if (attachment is! Map) continue;
-      if (attachment['type'] != 'audio') continue;
-
-      final src = Uri.tryParse('${attachment['src'] ?? ''}');
-      if (src == null || !src.hasScheme) continue;
-
-      return _AudioAttachment(
-        title: _stringValue(attachment['title'], fallback: '[untitled audio]'),
-        artist: _stringValue(
-          attachment['artist'],
-          fallback: '[unknown artist]',
-        ),
-        src: src,
-      );
-    }
-
-    return null;
-  }
-
-  static String _stringValue(Object? value, {required String fallback}) {
-    final text = value?.toString().trim() ?? '';
-    return text.isEmpty ? fallback : text;
-  }
-}
-
-class _AudioAttachmentBox extends StatelessWidget {
-  final _AudioAttachment attachment;
-
-  const _AudioAttachmentBox({required this.attachment});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-
-    return Semantics(
-      button: true,
-      label: 'Open audio ${attachment.title} by ${attachment.artist}',
-      child: InkWell(
-        onTap: () => launchUrl(attachment.src),
-        hoverColor: theme.foreground.withValues(alpha: 0.08),
-        focusColor: theme.foreground.withValues(alpha: 0.08),
-        splashColor: theme.foreground.withValues(alpha: 0.12),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: theme.border, width: 1),
-          ),
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: [
-              Icon(LucideIcons.music, size: 18, color: theme.foreground),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      attachment.title,
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 13,
-                        color: theme.foreground,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      attachment.artist,
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                        color: theme.dimmed,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              Icon(LucideIcons.externalLink, size: 16, color: theme.dimmed),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class ReplyCard extends StatelessWidget {
   final Reply reply;
   final VoidCallback? onDelete;
@@ -754,9 +473,8 @@ class ReplyCard extends StatelessWidget {
               ),
             )
           else
-            _PostText(
-              text: _decodePostContent(reply.content),
-              selectable: true,
+            RichText(
+              content: reply.content,
               style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 14,
@@ -765,134 +483,6 @@ class ReplyCard extends StatelessWidget {
               ),
             ),
         ],
-      ),
-    );
-  }
-}
-
-sealed class _PostContentSegment {
-  const _PostContentSegment();
-
-  // ignore: deprecated_member_use
-  static final _imagePattern = RegExp(r'!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)');
-
-  static List<_PostContentSegment> parse(String content) {
-    final segments = <_PostContentSegment>[];
-    var cursor = 0;
-
-    for (final match in _imagePattern.allMatches(content)) {
-      if (match.start > cursor) {
-        final text = content.substring(cursor, match.start);
-        if (text.isNotEmpty) segments.add(_TextSegment(text));
-      }
-
-      segments.add(_ImageSegment(match.group(1) ?? '', match.group(2)!));
-      cursor = match.end;
-    }
-
-    if (cursor < content.length) {
-      final text = content.substring(cursor);
-      if (text.isNotEmpty) segments.add(_TextSegment(text));
-    }
-
-    return segments;
-  }
-}
-
-class _TextSegment extends _PostContentSegment {
-  final String text;
-
-  const _TextSegment(this.text);
-}
-
-class _ImageSegment extends _PostContentSegment {
-  final String altText;
-  final String url;
-
-  const _ImageSegment(this.altText, this.url);
-}
-
-class _PostImage extends StatelessWidget {
-  final String altText;
-  final String url;
-
-  const _PostImage({required this.altText, required this.url});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-
-    return Semantics(
-      label: altText.isEmpty ? 'Post image' : altText,
-      image: true,
-      child: Container(
-        constraints: const BoxConstraints(maxHeight: 420),
-        decoration: BoxDecoration(
-          border: Border.all(color: theme.border, width: 1),
-        ),
-        clipBehavior: Clip.hardEdge,
-        child: DitheredNetworkImage(
-          url: url,
-          fit: BoxFit.contain,
-          settings: theme.isDark
-              ? DitherShaderSettings(
-                  foreground: theme.foreground,
-                  background: theme.background,
-                )
-              : DitherShaderSettings(
-                  foreground: theme.background,
-                  background: theme.foreground,
-                ),
-          placeholderBuilder: (_) => const _PostImagePlaceholder(),
-          errorBuilder: (_) => const _PostImageError(),
-        ),
-      ),
-    );
-  }
-}
-
-class _PostImagePlaceholder extends StatelessWidget {
-  const _PostImagePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-
-    return SizedBox(
-      height: 180,
-      child: Center(
-        child: SizedBox(
-          width: 14,
-          height: 14,
-          child: CircularProgressIndicator(
-            strokeWidth: 1.5,
-            color: theme.dimmed,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PostImageError extends StatelessWidget {
-  const _PostImageError();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-
-    return SizedBox(
-      height: 120,
-      child: Center(
-        child: Text(
-          '[image failed to load]',
-          style: TextStyle(
-            fontFamily: 'monospace',
-            fontSize: 12,
-            color: theme.dimmed,
-            letterSpacing: 0.4,
-          ),
-        ),
       ),
     );
   }
