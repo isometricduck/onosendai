@@ -1,7 +1,8 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide RichText;
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/core/widgets/rich_text.dart';
 
 class NoteCard extends StatelessWidget {
   final Note note;
@@ -45,10 +46,7 @@ class NoteCard extends StatelessWidget {
               ),
             )
           else
-            SelectableText(
-              note.content.replaceAll('&amp;', '&'),
-              style: theme.mainFont,
-            ),
+            RichText(content: note.content, style: theme.mainFont),
           if (note.topics.isNotEmpty) ...[
             const SizedBox(height: 10),
             Wrap(
