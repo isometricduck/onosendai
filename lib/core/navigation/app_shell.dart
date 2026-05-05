@@ -9,6 +9,7 @@ import 'package:onosendai/features/journal/presentation/pages/journal_page.dart'
 import 'package:onosendai/features/login/presentation/logout_dialog.dart';
 import 'package:onosendai/features/netiquette/presentation/pages/netiquette_page.dart';
 import 'package:onosendai/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:onosendai/features/settings/presentation/pages/settings_page.dart';
 import 'package:onosendai/features/write/presentation/pages/write_page.dart';
 
 class AppShell extends ConsumerStatefulWidget {
@@ -145,6 +146,11 @@ const _destinations = <_AppDestination>[
     icon: LucideIcons.bookmark,
     label: 'Bookmarks',
     page: BookmarksPage(),
+  ),
+  _AppDestination(
+    icon: LucideIcons.wrench,
+    label: 'Settings',
+    page: SettingsPage(),
   ),
   _AppDestination(
     icon: LucideIcons.scale,

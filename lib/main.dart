@@ -1,18 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/navigation/app_shell.dart';
+import 'package:onosendai/core/prefs/shared_preferences_app_prefs.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
+import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/boot/presentation/boot_glitch.dart';
+import 'package:onosendai/features/boot/presentation/riverpod/boot_animation_provider.dart';
 import 'package:onosendai/features/login/presentation/pages/landing_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
     debugPrint(details.exceptionAsString());
     if (details.stack != null) debugPrintStack(stackTrace: details.stack);
   };
 
-  runApp(const ProviderScope(child: MainApp()));
+  final appPrefs = SharedPreferencesAppPrefs();
+  final initialAppTheme = await _loadInitialAppTheme(appPrefs);
+  final initialBootAnimationEnabled = await _loadInitialBootAnimationEnabled(
+    appPrefs,
+  );
+
+  const app = MainApp();
+
+  //runApp(const ProviderScope(child: MainApp()));
+  runApp(
+    ProviderScope(
+      overrides: [
+        appPrefsProvider.overrideWithValue(appPrefs),
+        initialAppThemeProvider.overrideWithValue(initialAppTheme),
+        initialBootAnimationEnabledProvider.overrideWithValue(
+          initialBootAnimationEnabled,
+        ),
+      ],
+      child: initialBootAnimationEnabled
+          ? const GlitchBootAnimation(
+              duration: Duration(milliseconds: 1500),
+              child: app,
+            )
+          : app,
+    ),
+  );
+}
+
+Future<AppThemeId> _loadInitialAppTheme(SharedPreferencesAppPrefs prefs) async {
+  try {
+    final raw = await prefs.getString(appThemeIdPrefsKey);
+    return AppThemeIdX.fromPrefsValue(raw) ?? AppThemeId.dark;
+  } catch (error, stackTrace) {
+    debugPrint('Failed to load initial app theme: $error');
+    debugPrintStack(stackTrace: stackTrace);
+    return AppThemeId.dark;
+  }
+}
+
+Future<bool> _loadInitialBootAnimationEnabled(
+  SharedPreferencesAppPrefs prefs,
+) async {
+  try {
+    return await prefs.getBool(bootAnimationEnabledPrefsKey) ?? true;
+  } catch (error, stackTrace) {
+    debugPrint('Failed to load boot animation setting: $error');
+    debugPrintStack(stackTrace: stackTrace);
+    return true;
+  }
 }
 
 class MainApp extends ConsumerWidget {
