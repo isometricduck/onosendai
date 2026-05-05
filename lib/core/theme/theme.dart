@@ -29,7 +29,9 @@ enum AppThemeId {
   vt320,
 }
 
-const _appThemeIdPrefsKey = 'app_theme_id';
+const appThemeIdPrefsKey = 'app_theme_id';
+
+final initialAppThemeProvider = Provider<AppThemeId?>((ref) => null);
 
 final appThemeProvider = NotifierProvider<AppThemeNotifier, AppThemeId>(
   AppThemeNotifier.new,
@@ -38,12 +40,15 @@ final appThemeProvider = NotifierProvider<AppThemeNotifier, AppThemeId>(
 class AppThemeNotifier extends Notifier<AppThemeId> {
   @override
   AppThemeId build() {
+    final initialTheme = ref.watch(initialAppThemeProvider);
+    if (initialTheme != null) return initialTheme;
+
     unawaited(_loadTheme());
     return AppThemeId.dark;
   }
 
   Future<void> _loadTheme() async {
-    final raw = await ref.read(appPrefsProvider).getString(_appThemeIdPrefsKey);
+    final raw = await ref.read(appPrefsProvider).getString(appThemeIdPrefsKey);
     final themeId = AppThemeIdX.fromPrefsValue(raw);
     if (themeId != null) state = themeId;
   }
@@ -52,7 +57,7 @@ class AppThemeNotifier extends Notifier<AppThemeId> {
     state = themeId;
     await ref
         .read(appPrefsProvider)
-        .setString(_appThemeIdPrefsKey, themeId.prefsValue);
+        .setString(appThemeIdPrefsKey, themeId.prefsValue);
   }
 }
 
