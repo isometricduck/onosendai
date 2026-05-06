@@ -4,6 +4,6 @@
     <item android:drawable="@android:color/black" />
 
     <item
-        android:drawable="@drawable/ic_onosendai"
+        android:drawable="@drawable/ic_onosendai_black"
         android:gravity="center" />
 </layer-list>

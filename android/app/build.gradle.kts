@@ -36,6 +36,19 @@ android {
         versionName = flutter.versionName
     }
 
+    flavorDimensions += "device"
+
+    productFlavors {
+        create("standard") {
+            dimension = "device"
+        }
+
+        create("eink") {
+            dimension = "device"
+            applicationId = "dev.isometricduck.onosendai.eink"
+        }
+    }
+
     signingConfigs {
         create("release") {
             keyAlias = keystoreProperties["keyAlias"] as String
