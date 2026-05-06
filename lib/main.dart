@@ -18,15 +18,15 @@ Future<void> main() async {
     if (details.stack != null) debugPrintStack(stackTrace: details.stack);
   };
 
+  const isEink = bool.fromEnvironment('EINK');
   final appPrefs = SharedPreferencesAppPrefs();
-  final initialAppTheme = await _loadInitialAppTheme(appPrefs);
-  final initialBootAnimationEnabled = await _loadInitialBootAnimationEnabled(
+  final initialAppTheme = isEink ? AppThemeId.eink : await _loadInitialAppTheme(appPrefs);
+  final initialBootAnimationEnabled = isEink ? false : await _loadInitialBootAnimationEnabled(
     appPrefs,
   );
 
   const app = MainApp();
 
-  //runApp(const ProviderScope(child: MainApp()));
   runApp(
     ProviderScope(
       overrides: [

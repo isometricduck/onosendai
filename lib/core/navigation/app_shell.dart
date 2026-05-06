@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/theme/theme.dart';
 import 'package:onosendai/features/about/presentation/pages/about_page.dart';
 import 'package:onosendai/features/bookmarks/presentation/pages/bookmarks_page.dart';
+import 'package:onosendai/features/feed/presentation/pages/eink_feed_page.dart';
 import 'package:onosendai/features/feed/presentation/pages/feed_page.dart';
 import 'package:onosendai/features/journal/presentation/pages/journal_page.dart';
 import 'package:onosendai/features/login/presentation/logout_dialog.dart';
@@ -11,6 +12,13 @@ import 'package:onosendai/features/netiquette/presentation/pages/netiquette_page
 import 'package:onosendai/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:onosendai/features/settings/presentation/pages/settings_page.dart';
 import 'package:onosendai/features/write/presentation/pages/write_page.dart';
+
+part 'desktop_shell.dart';
+part 'destinations.dart';
+part 'eink_shell.dart';
+part 'mobile_shell.dart';
+part 'rail_body.dart';
+part 'tablet_shell.dart';
 
 class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
@@ -47,6 +55,10 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    if (const bool.fromEnvironment('EINK')) {
+      return const _EinkShell();
+    }
+
     final width = MediaQuery.sizeOf(context).width;
 
     if (width < 600) {
@@ -68,108 +80,6 @@ class _AppShellState extends ConsumerState<AppShell> {
       onDestinationSelected: _selectDestination,
     );
   }
-}
-
-typedef _AppDestinationSheetBuilder =
-    Widget Function(
-      BuildContext context,
-      ValueChanged<int> onDestinationSelected,
-    );
-typedef _AppDestinationDialogBuilder =
-    Widget Function(
-      BuildContext context,
-      ValueChanged<int> onDestinationSelected,
-    );
-
-class _AppDestination {
-  final IconData icon;
-  final String label;
-  final Widget? page;
-  final _AppDestinationSheetBuilder? sheet;
-  final _AppDestinationDialogBuilder? dialog;
-  final bool includeInMenu;
-
-  const _AppDestination({
-    required this.icon,
-    required this.label,
-    required this.page,
-  }) : sheet = null,
-       dialog = null,
-       includeInMenu = true;
-
-  const _AppDestination.sheet({
-    required this.icon,
-    required this.label,
-    required this.sheet,
-    this.includeInMenu = true,
-  }) : page = null,
-       dialog = null;
-
-  const _AppDestination.dialog({
-    required this.icon,
-    required this.label,
-    required this.dialog,
-  }) : page = null,
-       sheet = null,
-       includeInMenu = true;
-}
-
-const _destinations = <_AppDestination>[
-  _AppDestination(
-    icon: LucideIcons.menuSquare,
-    label: 'Feed',
-    page: FeedPage(),
-  ),
-  _AppDestination(icon: LucideIcons.pencil, label: 'Write', page: WritePage()),
-  _AppDestination.sheet(
-    icon: LucideIcons.eye,
-    label: 'Themes',
-    sheet: _themeBottomSheet,
-  ),
-  _AppDestination(
-    icon: LucideIcons.bell,
-    label: 'Notifications',
-    page: NotificationsPage(),
-  ),
-  _AppDestination.sheet(
-    icon: LucideIcons.menu,
-    label: 'Menu',
-    sheet: _menuBottomSheet,
-    includeInMenu: false,
-  ),
-  _AppDestination(
-    icon: LucideIcons.book,
-    label: 'Journal',
-    page: JournalPage(),
-  ),
-  _AppDestination(
-    icon: LucideIcons.bookmark,
-    label: 'Bookmarks',
-    page: BookmarksPage(),
-  ),
-  _AppDestination(
-    icon: LucideIcons.wrench,
-    label: 'Settings',
-    page: SettingsPage(),
-  ),
-  _AppDestination(
-    icon: LucideIcons.scale,
-    label: 'Netiquette',
-    page: NetiquettePage(),
-  ),
-  _AppDestination(icon: LucideIcons.info, label: 'About', page: AboutPage()),
-  _AppDestination.dialog(
-    icon: LucideIcons.logOut,
-    label: 'Log out',
-    dialog: _logoutDialog,
-  ),
-];
-
-const _primaryNavigationDestinationCount = 5;
-
-int _navigationSelectedIndex(int selectedIndex) {
-  if (selectedIndex < _primaryNavigationDestinationCount) return selectedIndex;
-  return _primaryNavigationDestinationCount - 1;
 }
 
 Widget _logoutDialog(
@@ -347,158 +257,6 @@ class _ThemeOption extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _MobileShell extends StatelessWidget {
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
-
-  const _MobileShell({
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-    final navigationSelectedIndex = _navigationSelectedIndex(selectedIndex);
-
-    return Scaffold(
-      backgroundColor: theme.background,
-      body: _destinations[selectedIndex].page!,
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          iconTheme: WidgetStateProperty.resolveWith((states) {
-            final isSelected = states.contains(WidgetState.selected);
-            return IconThemeData(
-              color: isSelected ? theme.background : theme.dimmed,
-            );
-          }),
-          labelTextStyle: WidgetStateProperty.all(
-            theme.mainFont.copyWith(color: theme.foreground, fontSize: 12),
-          ),
-        ),
-        child: NavigationBar(
-          selectedIndex: navigationSelectedIndex,
-          onDestinationSelected: onDestinationSelected,
-          backgroundColor: theme.background,
-          indicatorColor: theme.dimmed,
-          destinations: [
-            for (final destination in _destinations.take(
-              _primaryNavigationDestinationCount,
-            ))
-              NavigationDestination(
-                icon: Icon(destination.icon),
-                selectedIcon: Icon(destination.icon),
-                label: '',
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TabletShell extends StatelessWidget {
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
-
-  const _TabletShell({
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-
-    return Scaffold(
-      backgroundColor: theme.background,
-      body: SafeArea(
-        child: _RailBody(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: onDestinationSelected,
-          extended: false,
-        ),
-      ),
-    );
-  }
-}
-
-class _DesktopShell extends StatelessWidget {
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
-
-  const _DesktopShell({
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-
-    return Scaffold(
-      backgroundColor: theme.background,
-      body: SafeArea(
-        child: _RailBody(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: onDestinationSelected,
-          extended: true,
-        ),
-      ),
-    );
-  }
-}
-
-class _RailBody extends StatelessWidget {
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
-  final bool extended;
-
-  const _RailBody({
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-    required this.extended,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-    final navigationSelectedIndex = _navigationSelectedIndex(selectedIndex);
-
-    return Row(
-      children: [
-        NavigationRail(
-          selectedIndex: navigationSelectedIndex,
-          onDestinationSelected: onDestinationSelected,
-          extended: extended,
-          backgroundColor: theme.background,
-          indicatorColor: theme.dimmed,
-          selectedIconTheme: IconThemeData(color: theme.foreground),
-          unselectedIconTheme: IconThemeData(color: theme.dimmed),
-          selectedLabelTextStyle: theme.mainFont.copyWith(
-            color: theme.foreground,
-          ),
-          unselectedLabelTextStyle: theme.mainFont.copyWith(
-            color: theme.dimmed,
-          ),
-          destinations: [
-            for (final destination in _destinations.take(
-              _primaryNavigationDestinationCount,
-            ))
-              NavigationRailDestination(
-                icon: Icon(destination.icon),
-                selectedIcon: Icon(destination.icon),
-                label: Text(destination.label),
-              ),
-          ],
-        ),
-        VerticalDivider(width: 1, color: theme.border),
-        Expanded(child: _destinations[selectedIndex].page!),
-      ],
     );
   }
 }

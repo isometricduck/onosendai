@@ -26,7 +26,7 @@ class RichText extends StatefulWidget {
         .replaceAll('&amp;', '&')
         .replaceAll('&lt;', '<')
         .replaceAll('&gt;', '>')
-        .replaceAll('&nbsp;', '\n');
+        .replaceAll('&nbsp;', '');
   }
 
   @override

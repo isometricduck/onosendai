@@ -478,7 +478,9 @@ class _ReplyTextButton extends StatelessWidget {
                 color: theme.dimmed,
               ),
             )
-          : const Text('[R]EPLY'),
+          : Text(
+            '[R]EPLY',
+            style: context.theme.mainFont,),
     );
   }
 }
