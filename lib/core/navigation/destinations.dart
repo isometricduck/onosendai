@@ -112,12 +112,12 @@ const _einkDestinations = <_AppDestination>[
   _AppDestination(
     icon: LucideIcons.bookmark,
     label: 'Bookmarks',
-    page: EinkFeedPage(),
+    page: EinkFeedPage(source: EinkFeedSource.bookmarks),
   ),
-  _AppDestination(
-    icon: LucideIcons.info, 
-    label: 'About', 
-    page: AboutPage()
+  _AppDestination.dialog(
+    icon: LucideIcons.info,
+    label: 'About',
+    dialog: _aboutDialog,
   ),
   _AppDestination.dialog(
     icon: LucideIcons.logOut,

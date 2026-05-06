@@ -28,12 +28,15 @@ class _EinkShellState extends State<_EinkShell> {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    final destination = _destinations[_selectedIndex];
+    final destination = _einkDestinations[_selectedIndex];
+
+    final page = destination.page;
 
     return Scaffold(
       backgroundColor: theme.background,
-      body: switch (destination.label) {
-        'Feed' => EinkFeedPage(
+      body: switch (page) {
+        EinkFeedPage() => EinkFeedPage(
+          source: page.source,
           destinationSheetBuilder: (context, hideOverlay) =>
               _EinkDestinationSheet(
                 selectedIndex: _selectedIndex,
@@ -45,7 +48,7 @@ class _EinkShellState extends State<_EinkShell> {
                 },
               ),
         ),
-        _ => destination.page!,
+        _ => const SizedBox.shrink(),
       },
     );
   }
@@ -136,4 +139,11 @@ class _EinkDestinationButton extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _aboutDialog(
+  BuildContext context,
+  ValueChanged<int> onDestinationSelected,
+) {
+  return const OnosendaiAboutDialog();
 }
