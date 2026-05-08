@@ -134,18 +134,10 @@ class _LandingImage extends StatelessWidget {
           border: Border.all(color: theme.border, width: 1),
         ),
         clipBehavior: Clip.hardEdge,
-        child: DitheredImage(
+        child: ShadedImage(
           imageProvider: const AssetImage('assets/images/caveman_hamlet.jpg'),
           fit: BoxFit.contain,
-          settings: theme.isDark
-              ? DitherShaderSettings(
-                  foreground: theme.foreground,
-                  background: theme.background,
-                )
-              : DitherShaderSettings(
-                  foreground: theme.background,
-                  background: theme.foreground,
-                ),
+          effect: theme.imageShaderEffect,
           placeholderBuilder: (_) => const _LandingImagePlaceholder(),
           errorBuilder: (_) => const _LandingImageError(),
         ),

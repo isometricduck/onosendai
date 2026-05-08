@@ -5,6 +5,7 @@ import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/widgets.dart' show IconData;
 import 'package:flutter/material.dart' show Colors;
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:onosendai/core/images/shader_effects.dart';
 import 'package:onosendai/core/theme/theme.dart';
 
 class C64Theme extends Theme {
@@ -33,6 +34,9 @@ class C64Theme extends Theme {
     fontWeight: FontWeight.w400,
     letterSpacing: -1.5,
   );
+
+  @override
+  ImageShaderEffect get imageShaderEffect => const CrtEffect();
 }
 
 /*

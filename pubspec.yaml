@@ -37,6 +37,8 @@ flutter:
     - assets/images/onosendai_icon.png
   shaders:
     - assets/shaders/dither.glsl
+    - assets/shaders/scanlines.glsl
+    - assets/shaders/crt.glsl
   fonts:
     - family: EBGaramond
       fonts:

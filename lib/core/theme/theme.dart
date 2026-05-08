@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onosendai/core/images/shader_effects.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/core/theme/brutalist_theme.dart';
 import 'package:onosendai/core/theme/bubblegum_theme.dart';
@@ -141,4 +142,9 @@ abstract class Theme {
   TextStyle get font;
 
   TextStyle get mainFont => font.copyWith(color: foreground);
+
+  ImageShaderEffect get imageShaderEffect => DitherEffect(
+    foreground: isDark ? foreground : background,
+    background: isDark ? background : foreground,
+  );
 }

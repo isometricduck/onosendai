@@ -566,18 +566,10 @@ class _ContentImage extends StatelessWidget {
           border: Border.all(color: theme.border, width: 1),
         ),
         clipBehavior: Clip.hardEdge,
-        child: DitheredNetworkImage(
+        child: ShadedNetworkImage(
           url: url,
           fit: BoxFit.contain,
-          settings: theme.isDark
-              ? DitherShaderSettings(
-                  foreground: theme.foreground,
-                  background: theme.background,
-                )
-              : DitherShaderSettings(
-                  foreground: theme.background,
-                  background: theme.foreground,
-                ),
+          effect: theme.imageShaderEffect,
           placeholderBuilder: (_) => const _ContentImagePlaceholder(),
           errorBuilder: (_) => const _ContentImageError(),
         ),
