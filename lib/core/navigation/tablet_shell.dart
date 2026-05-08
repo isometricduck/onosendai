@@ -14,7 +14,7 @@ class _TabletShell extends StatelessWidget {
     final theme = context.theme;
 
     return Scaffold(
-      backgroundColor: theme.background,
+      backgroundColor: theme.pageBackground,
       body: SafeArea(
         child: _RailBody(
           selectedIndex: selectedIndex,

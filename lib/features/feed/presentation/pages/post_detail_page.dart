@@ -2,7 +2,7 @@ import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/features/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/feed/domain/entities/post_detail_state.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
 import 'package:onosendai/features/feed/presentation/widgets/post_card.dart';
@@ -72,9 +72,9 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
         SnackBar(
           content: Text(
             _errorMessage(error),
-            style: theme.mainFont.copyWith(color: theme.background),
+            style: theme.mainFont.copyWith(color: theme.snackbarText),
           ),
-          backgroundColor: theme.foreground,
+          backgroundColor: theme.snackbarBackground,
         ),
       );
     } finally {
@@ -100,9 +100,9 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
         SnackBar(
           content: Text(
             _errorMessage(error),
-            style: theme.mainFont.copyWith(color: theme.background),
+            style: theme.mainFont.copyWith(color: theme.snackbarText),
           ),
-          backgroundColor: theme.foreground,
+          backgroundColor: theme.snackbarBackground,
         ),
       );
     } finally {
@@ -127,7 +127,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     final body = ColoredBox(
-      color: theme.background,
+      color: theme.pageBackground,
       child: SafeArea(
         bottom: false,
         child: Center(
@@ -167,19 +167,19 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     );
 
     if (!isMobile) {
-      return Scaffold(backgroundColor: theme.background, body: body);
+      return Scaffold(backgroundColor: theme.pageBackground, body: body);
     }
 
     return Scaffold(
-      backgroundColor: theme.background,
+      backgroundColor: theme.pageBackground,
       appBar: AppBar(
-        backgroundColor: theme.background,
-        foregroundColor: theme.foreground,
-        surfaceTintColor: theme.background,
+        backgroundColor: theme.pageBackground,
+        foregroundColor: theme.headingText,
+        surfaceTintColor: theme.pageBackground,
         title: Text(
           'ENTRY',
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -302,28 +302,28 @@ Future<bool> _confirmDeleteReply(BuildContext context) async {
   return await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: theme.background,
-          surfaceTintColor: theme.background,
+          backgroundColor: theme.dialogBackground,
+          surfaceTintColor: theme.dialogBackground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
-            side: BorderSide(color: theme.border),
+            side: BorderSide(color: theme.dialogBorder),
           ),
           title: Text(
             'Delete reply?',
             style: theme.mainFont.copyWith(
-              color: theme.foreground,
+              color: theme.headingText,
               fontSize: 18,
             ),
           ),
           content: Text(
             'This reply will be removed from the post.',
-            style: theme.mainFont.copyWith(color: theme.dimmed),
+            style: theme.mainFont.copyWith(color: theme.metaText),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               style: TextButton.styleFrom(
-                foregroundColor: theme.dimmed,
+                foregroundColor: theme.secondaryButtonBorder,
                 textStyle: theme.mainFont,
               ),
               child: const Text('Cancel'),
@@ -331,8 +331,8 @@ Future<bool> _confirmDeleteReply(BuildContext context) async {
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: TextButton.styleFrom(
-                backgroundColor: theme.foreground,
-                foregroundColor: theme.background,
+                backgroundColor: theme.primaryButtonBackground,
+                foregroundColor: theme.primaryButtonForeground,
                 textStyle: theme.mainFont,
               ),
               child: const Text('Delete'),
@@ -356,14 +356,14 @@ class _InlineHeader extends StatelessWidget {
         IconButton(
           onPressed: onBack,
           icon: const Icon(LucideIcons.arrowLeft),
-          color: theme.foreground,
+          color: theme.headingText,
           tooltip: 'Back',
         ),
         const SizedBox(width: 4),
         Text(
           'Post',
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -386,7 +386,7 @@ class _RepliesHeader extends StatelessWidget {
       style: TextStyle(
         fontFamily: 'monospace',
         fontSize: 12,
-        color: theme.dimmed,
+        color: theme.metaText,
         letterSpacing: 0.5,
       ),
     );
@@ -419,16 +419,16 @@ class _ReplyComposer extends StatelessWidget {
           minLines: 4,
           maxLines: 8,
           onChanged: (_) => onChanged(),
-          style: theme.mainFont.copyWith(color: theme.foreground),
-          cursorColor: theme.foreground,
+          style: theme.mainFont,
+          cursorColor: theme.inputFocusBorder,
           decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(4),
-              borderSide: BorderSide(color: theme.border),
+              borderSide: BorderSide(color: theme.inputBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(4),
-              borderSide: BorderSide(color: theme.foreground),
+              borderSide: BorderSide(color: theme.inputFocusBorder),
             ),
           ),
         ),
@@ -458,7 +458,7 @@ class _ReplyTextButton extends StatelessWidget {
     return TextButton(
       onPressed: onTap,
       style: TextButton.styleFrom(
-        foregroundColor: enabled ? theme.foreground : theme.dimmed,
+        foregroundColor: enabled ? theme.primaryButtonBackground : theme.secondaryButtonBorder,
         textStyle: TextStyle(
           fontFamily: 'monospace',
           fontSize: 12,
@@ -475,7 +475,7 @@ class _ReplyTextButton extends StatelessWidget {
               height: 14,
               child: CircularProgressIndicator(
                 strokeWidth: 1.5,
-                color: theme.dimmed,
+                color: theme.actionIcon,
               ),
             )
           : Text(
@@ -496,7 +496,7 @@ class _CenteredSpinner extends StatelessWidget {
         height: 18,
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
-          color: context.theme.dimmed,
+          color: context.theme.actionIcon,
         ),
       ),
     );
@@ -516,7 +516,7 @@ class _InlineSpinner extends StatelessWidget {
           height: 14,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
-            color: context.theme.dimmed,
+            color: context.theme.actionIcon,
           ),
         ),
       ),
@@ -555,7 +555,7 @@ class _ErrorView extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 13,
-                color: theme.foreground,
+                color: theme.headingText,
               ),
             ),
             const SizedBox(height: 20),
@@ -591,7 +591,7 @@ class _RetryButtonState extends State<_RetryButton> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
             border: Border.all(
-              color: _hovered ? theme.foreground : theme.dimmed,
+              color: _hovered ? theme.primaryButtonForeground : theme.secondaryButtonBorder,
               width: 1,
             ),
           ),
@@ -600,7 +600,7 @@ class _RetryButtonState extends State<_RetryButton> {
             style: TextStyle(
               fontFamily: 'monospace',
               fontSize: 13,
-              color: theme.foreground,
+              color: theme.headingText,
               letterSpacing: 1.5,
             ),
           ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/features/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AboutContent extends StatelessWidget {
@@ -32,7 +32,7 @@ class AboutContent extends StatelessWidget {
           child: Image(
             image: const AssetImage('assets/images/onosendai_icon.png'),
             width: 200,
-            color: theme.foreground,
+            color: theme.headingText,
             colorBlendMode: BlendMode.srcIn,
           ),
         ),
@@ -41,7 +41,7 @@ class AboutContent extends StatelessWidget {
           'Ono-Sendai',
           textAlign: TextAlign.center,
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontSize: 24,
             fontWeight: FontWeight.w700,
           ),
@@ -51,7 +51,7 @@ class AboutContent extends StatelessWidget {
           'An Android client for the ᑕ¥βєяรקค¢є network',
           textAlign: TextAlign.center,
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -69,7 +69,7 @@ class AboutContent extends StatelessWidget {
               version,
               textAlign: TextAlign.center,
               style: theme.mainFont.copyWith(
-                color: theme.foreground,
+                color: theme.headingText,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -81,7 +81,7 @@ class AboutContent extends StatelessWidget {
           'Send bug reports and suggestions to @elmagochan',
           textAlign: TextAlign.center,
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontSize: 18,
             fontWeight: FontWeight.w400,
           ),
@@ -100,12 +100,12 @@ class _InlineHeader extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(LucideIcons.info, color: theme.foreground),
+        Icon(LucideIcons.info, color: theme.headingText),
         const SizedBox(width: 10),
         Text(
           'About',
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),

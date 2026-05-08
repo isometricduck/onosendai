@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/features/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/boot/presentation/riverpod/boot_animation_provider.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -14,7 +14,7 @@ class SettingsPage extends ConsumerWidget {
     final bootAnimationEnabled = ref.watch(bootAnimationEnabledProvider);
 
     final body = ColoredBox(
-      color: theme.background,
+      color: theme.pageBackground,
       child: SafeArea(
         bottom: false,
         child: Align(
@@ -42,19 +42,19 @@ class SettingsPage extends ConsumerWidget {
     );
 
     if (!isMobile) {
-      return Scaffold(backgroundColor: theme.background, body: body);
+      return Scaffold(backgroundColor: theme.pageBackground, body: body);
     }
 
     return Scaffold(
-      backgroundColor: theme.background,
+      backgroundColor: theme.pageBackground,
       appBar: AppBar(
-        backgroundColor: theme.background,
-        foregroundColor: theme.foreground,
-        surfaceTintColor: theme.background,
+        backgroundColor: theme.pageBackground,
+        foregroundColor: theme.headingText,
+        surfaceTintColor: theme.pageBackground,
         title: Text(
           'SETTINGS',
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -73,12 +73,12 @@ class _InlineHeader extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(LucideIcons.wrench, color: theme.foreground),
+        Icon(LucideIcons.wrench, color: theme.headingText),
         const SizedBox(width: 10),
         Text(
           'Settings',
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -107,14 +107,14 @@ class _SettingSwitchTile extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border.all(color: theme.border),
-        color: theme.background,
+        border: Border.all(color: theme.cardBorder),
+        color: theme.cardBackground,
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
-            Icon(icon, color: theme.foreground, size: 20),
+            Icon(icon, color: theme.headingText, size: 20),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -123,7 +123,7 @@ class _SettingSwitchTile extends StatelessWidget {
                   Text(
                     title,
                     style: theme.mainFont.copyWith(
-                      color: theme.foreground,
+                      color: theme.headingText,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -134,10 +134,10 @@ class _SettingSwitchTile extends StatelessWidget {
             const SizedBox(width: 12),
             Switch(
               value: value,
-              activeThumbColor: theme.foreground,
-              activeTrackColor: theme.foreground.withValues(alpha: 0.32),
-              inactiveThumbColor: theme.dimmed,
-              inactiveTrackColor: theme.dimmed.withValues(alpha: 0.18),
+              activeThumbColor: theme.switchActiveThumb,
+              activeTrackColor: theme.switchActiveTrack.withValues(alpha: 0.32),
+              inactiveThumbColor: theme.switchInactiveThumb,
+              inactiveTrackColor: theme.switchInactiveTrack.withValues(alpha: 0.18),
               onChanged: onChanged,
             ),
           ],

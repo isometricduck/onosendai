@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/images/shader_effects.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
-import 'package:onosendai/features/theme/themes/brutalist_theme.dart';
-import 'package:onosendai/features/theme/themes/bubblegum_theme.dart';
-import 'package:onosendai/features/theme/themes/c64_theme.dart';
-import 'package:onosendai/features/theme/themes/crypt_theme.dart';
-import 'package:onosendai/features/theme/themes/dark_theme.dart';
-import 'package:onosendai/features/theme/themes/eink_theme.dart';
-import 'package:onosendai/features/theme/themes/grid_theme.dart';
-import 'package:onosendai/features/theme/themes/lcd_theme.dart';
-import 'package:onosendai/features/theme/themes/light_theme.dart';
-import 'package:onosendai/features/theme/themes/matrix_theme.dart';
-import 'package:onosendai/features/theme/themes/poetry_theme.dart';
-import 'package:onosendai/features/theme/themes/vt320_theme.dart';
+import 'package:onosendai/features/theme/classic/brutalist_theme.dart';
+import 'package:onosendai/features/theme/classic/bubblegum_theme.dart';
+import 'package:onosendai/features/theme/classic/c64_theme.dart';
+import 'package:onosendai/features/theme/classic/crypt_theme.dart';
+import 'package:onosendai/features/theme/classic/dark_theme.dart';
+import 'package:onosendai/features/theme/classic/eink_theme.dart';
+import 'package:onosendai/features/theme/classic/grid_theme.dart';
+import 'package:onosendai/features/theme/classic/lcd_theme.dart';
+import 'package:onosendai/features/theme/classic/light_theme.dart';
+import 'package:onosendai/features/theme/classic/matrix_theme.dart';
+import 'package:onosendai/features/theme/classic/poetry_theme.dart';
+import 'package:onosendai/features/theme/classic/vt320_theme.dart';
 
 enum AppThemeId {
   dark,
@@ -94,7 +94,7 @@ extension AppThemeIdX on AppThemeId {
     };
   }
 
-  Theme get theme {
+  CyberTheme get theme {
     return switch (this) {
       AppThemeId.dark => DarkTheme(),
       AppThemeId.light => LightTheme(),
@@ -113,11 +113,11 @@ extension AppThemeIdX on AppThemeId {
 }
 
 class AppThemeScope extends InheritedWidget {
-  final Theme theme;
+  final CyberTheme theme;
 
   const AppThemeScope({super.key, required this.theme, required super.child});
 
-  static Theme of(BuildContext context) {
+  static CyberTheme of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<AppThemeScope>()?.theme ??
         DarkTheme();
   }
@@ -129,22 +129,56 @@ class AppThemeScope extends InheritedWidget {
 }
 
 extension AppColorsX on BuildContext {
-  Theme get theme => AppThemeScope.of(this);
+  CyberTheme get theme => AppThemeScope.of(this);
 }
 
-abstract class Theme {
-  bool get isDark; // True if background is darker than foreground
+abstract class CyberTheme {
+
   IconData get icon;
-  Color get foreground;
-  Color get background;
-  Color get dimmed;
-  Color get border;
-  TextStyle get font;
 
-  TextStyle get mainFont => font.copyWith(color: foreground);
+  TextStyle get mainFont;
 
-  ImageShaderEffect get imageShaderEffect => DitherEffect(
-    foreground: isDark ? foreground : background,
-    background: isDark ? background : foreground,
-  );
+  ImageShaderEffect get imageShaderEffect;
+
+  // Text
+  Color get headingText;
+  Color get metaText;
+  Color get hintText;
+
+  // Surfaces
+  Color get pageBackground;
+  Color get cardBackground;
+  Color get dialogBackground;
+  Color get inputBackground;
+  Color get navBackground;
+  Color get overlayBackground;
+
+  // Strokes
+  Color get cardBorder;
+  Color get divider;
+  Color get inputBorder;
+  Color get inputFocusBorder;
+  Color get dialogBorder;
+  Color get navBorder;
+
+  // Interactive
+  Color get actionIcon;
+  Color get navSelectedIcon;
+  Color get navUnselectedIcon;
+  Color get navIndicator;
+  Color get navSelectedLabel;
+  Color get navUnselectedLabel;
+  Color get primaryButtonBackground;
+  Color get primaryButtonForeground;
+  Color get secondaryButtonBorder;
+  Color get switchActiveThumb;
+  Color get switchActiveTrack;
+  Color get switchInactiveThumb;
+  Color get switchInactiveTrack;
+  Color get snackbarBackground;
+  Color get snackbarText;
+  Color get notificationUnreadBorder;
+  Color get notificationReadBorder;
+  Color get notificationUnreadIcon;
+  Color get notificationReadIcon;
 }

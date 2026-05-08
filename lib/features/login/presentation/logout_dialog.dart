@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
-import 'package:onosendai/features/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 
 class LogoutDialog extends ConsumerStatefulWidget {
   const LogoutDialog({super.key});
@@ -26,12 +26,12 @@ class _LogoutDialogState extends ConsumerState<LogoutDialog> {
     final theme = context.theme;
 
     return Dialog(
-      backgroundColor: theme.background,
+      backgroundColor: theme.dialogBackground,
       child: Container(
         width: 360,
         decoration: BoxDecoration(
-          color: theme.background,
-          border: Border.all(color: theme.border),
+          color: theme.dialogBackground,
+          border: Border.all(color: theme.dialogBorder),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -57,7 +57,7 @@ class _LogoutDialogState extends ConsumerState<LogoutDialog> {
                     child: Text(
                       '[ESC]',
                       style: theme.mainFont.copyWith(
-                        color: theme.dimmed,
+                        color: theme.metaText,
                         fontSize: 13,
                         letterSpacing: 1,
                       ),
@@ -66,7 +66,7 @@ class _LogoutDialogState extends ConsumerState<LogoutDialog> {
                 ],
               ),
             ),
-            Divider(height: 1, thickness: 1, color: theme.border),
+            Divider(height: 1, thickness: 1, color: theme.divider),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
               child: Column(
@@ -138,13 +138,13 @@ class _LogoutDialogButtonState extends State<_LogoutDialogButton> {
           duration: const Duration(milliseconds: 120),
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: theme.background,
+            color: theme.dialogBackground,
             border: Border.all(
               color: widget.onTap == null
-                  ? theme.dimmed
+                  ? theme.secondaryButtonBorder
                   : _hovered
-                  ? theme.foreground
-                  : theme.dimmed,
+                  ? theme.headingText
+                  : theme.secondaryButtonBorder,
             ),
           ),
           alignment: Alignment.center,
@@ -153,7 +153,7 @@ class _LogoutDialogButtonState extends State<_LogoutDialogButton> {
                   dimension: 14,
                   child: CircularProgressIndicator(
                     strokeWidth: 1.5,
-                    color: theme.dimmed,
+                    color: theme.actionIcon,
                   ),
                 )
               : Text(

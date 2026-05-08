@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/features/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 
 class NetiquettePage extends StatelessWidget {
   const NetiquettePage({super.key});
@@ -26,7 +26,7 @@ class NetiquettePage extends StatelessWidget {
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     final body = ColoredBox(
-      color: theme.background,
+      color: theme.pageBackground,
       child: SafeArea(
         bottom: false,
         child: Center(
@@ -40,7 +40,7 @@ class NetiquettePage extends StatelessWidget {
                 Text(
                   'CYBERSPACE NETIQUETTE v1.0',
                   style: theme.mainFont.copyWith(
-                    color: theme.foreground,
+                    color: theme.headingText,
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
@@ -54,7 +54,7 @@ class NetiquettePage extends StatelessWidget {
                 Text(
                   _footnote,
                   style: theme.mainFont.copyWith(
-                    color: theme.dimmed,
+                    color: theme.metaText,
                     height: 1.45,
                   ),
                 ),
@@ -66,19 +66,19 @@ class NetiquettePage extends StatelessWidget {
     );
 
     if (!isMobile) {
-      return Scaffold(backgroundColor: theme.background, body: body);
+      return Scaffold(backgroundColor: theme.pageBackground, body: body);
     }
 
     return Scaffold(
-      backgroundColor: theme.background,
+      backgroundColor: theme.pageBackground,
       appBar: AppBar(
-        backgroundColor: theme.background,
-        foregroundColor: theme.foreground,
-        surfaceTintColor: theme.background,
+        backgroundColor: theme.pageBackground,
+        foregroundColor: theme.headingText,
+        surfaceTintColor: theme.pageBackground,
         title: Text(
           'NETIQUETTE',
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -97,12 +97,12 @@ class _InlineHeader extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(LucideIcons.badgeCheck, color: theme.foreground),
+        Icon(LucideIcons.badgeCheck, color: theme.headingText),
         const SizedBox(width: 10),
         Text(
           'Netiquette',
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -131,7 +131,7 @@ class _RuleItem extends StatelessWidget {
             '$number.',
             textAlign: TextAlign.right,
             style: theme.mainFont.copyWith(
-              color: theme.foreground,
+              color: theme.headingText,
               fontWeight: FontWeight.w700,
               height: 1.45,
             ),
@@ -142,7 +142,7 @@ class _RuleItem extends StatelessWidget {
           child: Text(
             text,
             style: theme.mainFont.copyWith(
-              color: theme.foreground,
+              color: theme.headingText,
               height: 1.45,
             ),
           ),

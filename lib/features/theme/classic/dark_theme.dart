@@ -4,9 +4,9 @@ import 'dart:ui';
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/widgets.dart' show IconData;
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/features/theme/theme.dart';
+import 'package:onosendai/features/theme/classic_theme.dart';
 
-class DarkTheme extends Theme {
+class DarkTheme extends ClassicTheme {
   @override
   bool get isDark => true;
 

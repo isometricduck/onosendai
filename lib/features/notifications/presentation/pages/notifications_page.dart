@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
-import 'package:onosendai/features/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
 import 'package:onosendai/features/notifications/domain/entities/notifications_state.dart';
 import 'package:onosendai/features/notifications/presentation/riverpod/notifications_providers.dart';
@@ -50,7 +50,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     final body = ColoredBox(
-      color: theme.background,
+      color: theme.pageBackground,
       child: SafeArea(
         bottom: false,
         child: Center(
@@ -77,19 +77,19 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     );
 
     if (!isMobile) {
-      return Scaffold(backgroundColor: theme.background, body: body);
+      return Scaffold(backgroundColor: theme.pageBackground, body: body);
     }
 
     return Scaffold(
-      backgroundColor: theme.background,
+      backgroundColor: theme.pageBackground,
       appBar: AppBar(
-        backgroundColor: theme.background,
-        foregroundColor: theme.foreground,
-        surfaceTintColor: theme.background,
+        backgroundColor: theme.pageBackground,
+        foregroundColor: theme.headingText,
+        surfaceTintColor: theme.pageBackground,
         title: Text(
           'NOTIFICATIONS',
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -221,9 +221,9 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
         SnackBar(
           content: Text(
             _errorMessage(error),
-            style: theme.mainFont.copyWith(color: theme.background),
+            style: theme.mainFont.copyWith(color: theme.snackbarText),
           ),
-          backgroundColor: theme.foreground,
+          backgroundColor: theme.snackbarBackground,
         ),
       );
     } finally {
@@ -241,15 +241,15 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
     final canOpen = notification.targetId != null;
 
     return Material(
-      color: theme.background,
+      color: theme.cardBackground,
       child: InkWell(
         onTap: canOpen ? _openTarget : null,
         child: DecoratedBox(
           decoration: BoxDecoration(
             border: Border.all(
-              color: notification.read ? theme.border : theme.foreground,
+              color: notification.read ? theme.notificationReadBorder : theme.notificationUnreadBorder,
             ),
-            color: theme.background,
+            color: theme.cardBackground,
           ),
           child: Padding(
             padding: const EdgeInsets.all(14),
@@ -262,13 +262,13 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 1.5,
-                      color: theme.dimmed,
+                      color: theme.actionIcon,
                     ),
                   )
                 else
                   Icon(
                     notification.read ? LucideIcons.bell : LucideIcons.bellRing,
-                    color: notification.read ? theme.dimmed : theme.foreground,
+                    color: notification.read ? theme.notificationReadIcon : theme.notificationUnreadIcon,
                     size: 20,
                   ),
                 const SizedBox(width: 12),
@@ -279,7 +279,7 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
                       Text(
                         title,
                         style: theme.mainFont.copyWith(
-                          color: theme.foreground,
+                          color: theme.headingText,
                           fontWeight: notification.read
                               ? FontWeight.w400
                               : FontWeight.w700,
@@ -289,7 +289,7 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
                         const SizedBox(height: 8),
                         Text(
                           details,
-                          style: theme.mainFont.copyWith(color: theme.dimmed),
+                          style: theme.mainFont.copyWith(color: theme.metaText),
                         ),
                       ],
                       if (createdAt != null) ...[
@@ -297,7 +297,7 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
                         Text(
                           _formatTimestamp(createdAt),
                           style: theme.mainFont.copyWith(
-                            color: theme.dimmed,
+                            color: theme.metaText,
                             fontSize: 12,
                           ),
                         ),
@@ -365,13 +365,13 @@ class _InlineHeader extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(LucideIcons.bell, color: theme.foreground),
+        Icon(LucideIcons.bell, color: theme.headingText),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
             'Notifications',
             style: theme.mainFont.copyWith(
-              color: theme.foreground,
+              color: theme.headingText,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
@@ -379,7 +379,7 @@ class _InlineHeader extends StatelessWidget {
         ),
         Text(
           '$unreadCount unread',
-          style: theme.mainFont.copyWith(color: theme.dimmed, fontSize: 12),
+          style: theme.mainFont.copyWith(color: theme.metaText, fontSize: 12),
         ),
       ],
     );
@@ -397,7 +397,7 @@ class _CenteredSpinner extends StatelessWidget {
         height: 18,
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
-          color: context.theme.dimmed,
+          color: context.theme.actionIcon,
         ),
       ),
     );
@@ -417,7 +417,7 @@ class _InlineSpinner extends StatelessWidget {
           height: 14,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
-            color: context.theme.dimmed,
+            color: context.theme.actionIcon,
           ),
         ),
       ),
@@ -448,7 +448,7 @@ class _ErrorView extends StatelessWidget {
             TextButton(
               onPressed: onRetry,
               style: TextButton.styleFrom(
-                foregroundColor: theme.foreground,
+                foregroundColor: theme.primaryButtonForeground,
                 textStyle: theme.mainFont,
               ),
               child: const Text('Retry'),
@@ -469,7 +469,7 @@ class _DimmedText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: context.theme.mainFont.copyWith(color: context.theme.dimmed),
+      style: context.theme.mainFont.copyWith(color: context.theme.metaText),
     );
   }
 }

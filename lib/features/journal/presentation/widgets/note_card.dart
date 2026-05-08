@@ -1,7 +1,7 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart' hide RichText;
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/features/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/core/widgets/rich_text.dart';
 
 class NoteCard extends StatelessWidget {
@@ -16,8 +16,8 @@ class NoteCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.background,
-        border: Border.all(color: theme.border, width: 1),
+        color: theme.cardBackground,
+        border: Border.all(color: theme.cardBorder, width: 1),
       ),
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       child: Column(
@@ -29,7 +29,7 @@ class NoteCard extends StatelessWidget {
                 child: Text(
                   _formatDate(note.createdAt),
                   style: theme.mainFont.copyWith(
-                    color: theme.dimmed,
+                    color: theme.metaText,
                     fontSize: 12,
                   ),
                 ),
@@ -41,7 +41,7 @@ class NoteCard extends StatelessWidget {
             Text(
               '[note deleted]',
               style: theme.mainFont.copyWith(
-                color: theme.dimmed,
+                color: theme.hintText,
                 fontStyle: FontStyle.italic,
               ),
             )
@@ -57,7 +57,7 @@ class NoteCard extends StatelessWidget {
                   Text(
                     '#$topic',
                     style: theme.mainFont.copyWith(
-                      color: theme.dimmed,
+                      color: theme.metaText,
                       fontSize: 12,
                     ),
                   ),
@@ -72,10 +72,10 @@ class NoteCard extends StatelessWidget {
                 onPressed: onDelete,
                 tooltip: 'Delete note',
                 icon: const Icon(LucideIcons.trash2),
-                color: theme.dimmed,
-                hoverColor: theme.foreground.withValues(alpha: 0.08),
-                focusColor: theme.foreground.withValues(alpha: 0.08),
-                splashColor: theme.foreground.withValues(alpha: 0.12),
+                color: theme.actionIcon,
+                hoverColor: theme.headingText.withValues(alpha: 0.08),
+                focusColor: theme.headingText.withValues(alpha: 0.08),
+                splashColor: theme.headingText.withValues(alpha: 0.12),
               ),
             ),
           ],
