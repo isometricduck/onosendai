@@ -6,35 +6,30 @@ import 'package:flutter/widgets.dart' show IconData;
 import 'package:flutter/material.dart' show Colors;
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/images/shader_effects.dart';
-import 'package:onosendai/features/theme/cyber_theme.dart';
+import 'package:onosendai/features/theme/four_colors_theme.dart';
 
-class CGA0Theme {} /*extends CyberTheme {
-  @override
-  bool get isDark => true;
+class CGA0Theme extends FourColorsTheme {
 
   @override
-  IconData get icon => LucideIcons.tv;
-
+  Color color0 = Colors.black;
   @override
-  Color get foreground => Colors.white.withValues(alpha: 0.75);
-
+  Color color1 = Color.fromRGBO(55, 255, 55, 1);
   @override
-  Color get background => Color(int.parse('#2a2ab8'.replaceAll('#', '0xFF')));
-
+  Color color2 = Color.fromRGBO(255, 55, 55, 1);
   @override
-  Color get border => Colors.white.withValues(alpha: 0.3);
-
+  Color color3 = Color.fromRGBO(255, 255, 55, 1);
+  
   @override
-  Color get dimmed => Colors.white.withValues(alpha: 0.4);
-
-  @override
-  TextStyle get font => TextStyle(
-    fontFamily: 'DepartureMono',
-    fontSize: 18,
-    fontWeight: FontWeight.w400,
-    letterSpacing: -1.5,
-  );
-
+  IconData get icon => LucideIcons.appWindow;
+  
   @override
   ImageShaderEffect get imageShaderEffect => const CrtEffect();
-}*/
+  
+  @override
+  TextStyle get mainFont => TextStyle(
+    fontFamily: 'VT323',
+    fontSize: 20,
+    fontWeight: FontWeight.w500,
+    color: color3,
+  );
+}

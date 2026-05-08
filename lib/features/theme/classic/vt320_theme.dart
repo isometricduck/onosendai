@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/widgets.dart' show IconData;
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/core/images/shader_effects.dart';
 import 'package:onosendai/features/theme/classic_theme.dart';
 
 class Vt320Theme extends ClassicTheme {
@@ -35,14 +34,6 @@ class Vt320Theme extends ClassicTheme {
         fontSize: 20,
         fontWeight: FontWeight.w500,
       );
-
-  @override
-  ImageShaderEffect get imageShaderEffect => ScanlinesEffect(
-    foreground: foreground,
-    background: background,
-    lineSpacing: 3,
-    lineIntensity: 0.4,
-  );
 }
 
 /*

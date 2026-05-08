@@ -16,6 +16,7 @@ import 'package:onosendai/features/theme/classic/light_theme.dart';
 import 'package:onosendai/features/theme/classic/matrix_theme.dart';
 import 'package:onosendai/features/theme/classic/poetry_theme.dart';
 import 'package:onosendai/features/theme/classic/vt320_theme.dart';
+import 'package:onosendai/features/theme/expanded/cga0_theme.dart';
 
 enum AppThemeId {
   dark,
@@ -30,6 +31,7 @@ enum AppThemeId {
   bubblegum,
   vt320,
   eink,
+  cga0,
 }
 
 const appThemeIdPrefsKey = 'app_theme_id';
@@ -90,7 +92,8 @@ extension AppThemeIdX on AppThemeId {
       AppThemeId.grid => 'Grid',
       AppThemeId.crypt => 'Crypt',
       AppThemeId.bubblegum => 'Bubblegum',
-      AppThemeId.eink => "E-Ink",
+      AppThemeId.eink => 'E-Ink',
+      AppThemeId.cga0 => 'CGA 0'
     };
   }
 
@@ -108,6 +111,7 @@ extension AppThemeIdX on AppThemeId {
       AppThemeId.bubblegum => BubblegumTheme(),
       AppThemeId.vt320 => Vt320Theme(),
       AppThemeId.eink => EinkTheme(),
+      AppThemeId.cga0 => CGA0Theme(),
     };
   }
 }

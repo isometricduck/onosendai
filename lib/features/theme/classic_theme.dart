@@ -24,7 +24,7 @@ abstract class ClassicTheme extends CyberTheme {
     background: isDark ? background : foreground,
   );
   
-    // Text
+  // Text
   @override
   Color get headingText => foreground;
   @override
