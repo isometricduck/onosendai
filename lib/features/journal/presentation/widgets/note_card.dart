@@ -1,7 +1,7 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart' hide RichText;
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 import 'package:onosendai/core/widgets/rich_text.dart';
 
 class NoteCard extends StatelessWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 import 'package:onosendai/features/about/presentation/widgets/about_content.dart';
 
 class OnosendaiAboutDialog extends StatelessWidget {

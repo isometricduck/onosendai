@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart' show IconData;
 import 'package:flutter/material.dart' show Colors;
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/images/shader_effects.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 
 class C64Theme extends Theme {
   @override

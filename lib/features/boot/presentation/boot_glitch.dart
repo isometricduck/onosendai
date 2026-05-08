@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:onosendai/core/theme/theme.dart' as app_theme;
+import 'package:onosendai/features/theme/theme.dart' as app_theme;
 
 class GlitchBootAnimation extends ConsumerStatefulWidget {
   final Widget child;

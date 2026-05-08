@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 
 class LogoutDialog extends ConsumerStatefulWidget {
   const LogoutDialog({super.key});

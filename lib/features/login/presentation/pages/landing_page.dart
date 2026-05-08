@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/images/images.dart';
 import 'package:onosendai/core/navigation/app_shell.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 import 'package:onosendai/features/login/presentation/login_dialog.dart';
 
 class LandingPage extends ConsumerStatefulWidget {

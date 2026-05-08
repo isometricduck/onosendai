@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 import 'package:onosendai/features/about/presentation/pages/about_page.dart';
 import 'package:onosendai/features/about/presentation/widgets/about_dialog.dart';
 import 'package:onosendai/features/bookmarks/presentation/pages/bookmarks_page.dart';

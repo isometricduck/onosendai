@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 import 'package:onosendai/features/boot/presentation/riverpod/boot_animation_provider.dart';
 
 class SettingsPage extends ConsumerWidget {

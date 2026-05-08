@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 import 'package:onosendai/core/widgets/rich_text.dart';
 
 class PostCard extends ConsumerStatefulWidget {

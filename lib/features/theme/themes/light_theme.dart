@@ -5,23 +5,23 @@ import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/widgets.dart' show IconData;
 import 'package:flutter/material.dart' show Colors;
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 
-class LcdTheme extends Theme {
+class LightTheme extends Theme {
   @override
   bool get isDark => false;
 
   @override
-  IconData get icon => LucideIcons.calculator;
+  IconData get icon => LucideIcons.sun;
 
   @override
   Color get foreground => Colors.black;
 
   @override
-  Color get background => Color(int.parse('#eaeae4'.replaceAll('#', '0xFF')));
+  Color get background => Color(int.parse('#efe5c0'.replaceAll('#', '0xFF')));
 
   @override
-  Color get border => Color(int.parse('#9aa49d'.replaceAll('#', '0xFF')));
+  Color get border => Color(int.parse('#a89984'.replaceAll('#', '0xFF')));
 
   @override
   Color get dimmed => Color(int.parse('#3a3a3a'.replaceAll('#', '0xFF')));
@@ -36,7 +36,7 @@ class LcdTheme extends Theme {
 
 /*
 
-[data-theme=lcd] {
+[data-theme=light] {
     --font-size-base: 14px;
     --font-size-base-mobile: 16px;
     --font-size-h: .875rem;
@@ -44,17 +44,17 @@ class LcdTheme extends Theme {
     --font-size-p: .875rem;
     --font-size-p-mobile: 1rem;
     --line-height-base: 1.4;
-    --color-bg: #eaeae4;
+    --color-bg: #efe5c0;
     --color-fg: #000;
     --color-fg-dim: #3a3a3a;
-    --color-border: #9aa49d;
-    --color-quote: #9aa49d;
+    --color-border: #a89984;
+    --color-quote: #a89984;
     --color-blockquote-bg: rgba(0,0,0,.08);
-    --color-code-bg: #b4c2aa;
+    --color-code-bg: rgba(0,0,0,.08);
     --radius-lg: 7px;
     --radius-md: 5px;
     --radius-sm: 3px;
-    --color-code: #58625e;
+    --color-code: #941;
     --theme-font-mono: JetBrains Mono,Courier New,monospace;
     --code-font: JetBrains Mono,Courier New,monospace
 }

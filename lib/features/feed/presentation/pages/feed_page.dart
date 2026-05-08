@@ -1,7 +1,7 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 import 'package:onosendai/features/feed/domain/entities/feed_state.dart';
 import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';

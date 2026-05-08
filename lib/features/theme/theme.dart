@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/images/shader_effects.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
-import 'package:onosendai/core/theme/brutalist_theme.dart';
-import 'package:onosendai/core/theme/bubblegum_theme.dart';
-import 'package:onosendai/core/theme/c64_theme.dart';
-import 'package:onosendai/core/theme/crypt_theme.dart';
-import 'package:onosendai/core/theme/dark_theme.dart';
-import 'package:onosendai/core/theme/eink_theme.dart';
-import 'package:onosendai/core/theme/grid_theme.dart';
-import 'package:onosendai/core/theme/lcd_theme.dart';
-import 'package:onosendai/core/theme/light_theme.dart';
-import 'package:onosendai/core/theme/matrix_theme.dart';
-import 'package:onosendai/core/theme/poetry_theme.dart';
-import 'package:onosendai/core/theme/vt320_theme.dart';
+import 'package:onosendai/features/theme/themes/brutalist_theme.dart';
+import 'package:onosendai/features/theme/themes/bubblegum_theme.dart';
+import 'package:onosendai/features/theme/themes/c64_theme.dart';
+import 'package:onosendai/features/theme/themes/crypt_theme.dart';
+import 'package:onosendai/features/theme/themes/dark_theme.dart';
+import 'package:onosendai/features/theme/themes/eink_theme.dart';
+import 'package:onosendai/features/theme/themes/grid_theme.dart';
+import 'package:onosendai/features/theme/themes/lcd_theme.dart';
+import 'package:onosendai/features/theme/themes/light_theme.dart';
+import 'package:onosendai/features/theme/themes/matrix_theme.dart';
+import 'package:onosendai/features/theme/themes/poetry_theme.dart';
+import 'package:onosendai/features/theme/themes/vt320_theme.dart';
 
 enum AppThemeId {
   dark,

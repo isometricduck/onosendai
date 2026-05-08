@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
 import 'package:onosendai/features/notifications/domain/entities/notifications_state.dart';
 import 'package:onosendai/features/notifications/presentation/riverpod/notifications_providers.dart';

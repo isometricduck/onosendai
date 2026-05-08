@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 import 'package:onosendai/features/bookmarks/domain/entities/bookmarks_state.dart';
 import 'package:onosendai/features/bookmarks/presentation/riverpod/bookmarks_providers.dart';
 import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';

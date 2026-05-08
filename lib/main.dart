@@ -4,7 +4,7 @@ import 'package:onosendai/core/navigation/app_shell.dart';
 import 'package:onosendai/core/prefs/shared_preferences_app_prefs.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/theme.dart';
 import 'package:onosendai/features/boot/presentation/boot_glitch.dart';
 import 'package:onosendai/features/boot/presentation/riverpod/boot_animation_provider.dart';
 import 'package:onosendai/features/login/presentation/pages/landing_page.dart';
