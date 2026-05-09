@@ -2,7 +2,7 @@ import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
 import 'package:onosendai/features/journal/presentation/riverpod/journal_providers.dart';
 
@@ -73,9 +73,9 @@ class _WritePageState extends ConsumerState<WritePage> {
       SnackBar(
         content: Text(
           message,
-          style: theme.mainFont.copyWith(color: theme.background),
+          style: theme.mainFont.copyWith(color: theme.snackbarText),
         ),
-        backgroundColor: theme.foreground,
+        backgroundColor: theme.snackbarBackground,
       ),
     );
   }
@@ -85,28 +85,28 @@ class _WritePageState extends ConsumerState<WritePage> {
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: theme.background,
-            surfaceTintColor: theme.background,
+            backgroundColor: theme.dialogBackground,
+            surfaceTintColor: theme.dialogBackground,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
-              side: BorderSide(color: theme.border),
+              side: BorderSide(color: theme.dialogBorder),
             ),
             title: Text(
               'Publish to Feed?',
               style: theme.mainFont.copyWith(
-                color: theme.foreground,
+                color: theme.headingText,
                 fontSize: 18,
               ),
             ),
             content: Text(
               'This post will be visible in the public feed.',
-              style: theme.mainFont.copyWith(color: theme.dimmed),
+              style: theme.mainFont.copyWith(color: theme.metaText),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
                 style: TextButton.styleFrom(
-                  foregroundColor: theme.dimmed,
+                  foregroundColor: theme.secondaryButtonBorder,
                   textStyle: theme.mainFont,
                 ),
                 child: const Text('Cancel'),
@@ -114,8 +114,8 @@ class _WritePageState extends ConsumerState<WritePage> {
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 style: TextButton.styleFrom(
-                  backgroundColor: theme.foreground,
-                  foregroundColor: theme.background,
+                  backgroundColor: theme.primaryButtonBackground,
+                  foregroundColor: theme.primaryButtonForeground,
                   textStyle: theme.mainFont,
                 ),
                 child: const Text('Publish'),
@@ -149,7 +149,7 @@ class _WritePageState extends ConsumerState<WritePage> {
                     Text(
                       'Write',
                       style: theme.mainFont.copyWith(
-                        color: theme.foreground,
+                        color: theme.headingText,
                         fontSize: 18,
                       ),
                     ),
@@ -169,21 +169,21 @@ class _WritePageState extends ConsumerState<WritePage> {
                                   states,
                                 ) {
                                   if (states.contains(WidgetState.selected)) {
-                                    return theme.foreground;
+                                    return theme.primaryButtonBackground;
                                   }
-                                  return theme.background;
+                                  return theme.pageBackground;
                                 }),
                             foregroundColor:
                                 WidgetStateProperty.resolveWith<Color>((
                                   states,
                                 ) {
                                   if (states.contains(WidgetState.selected)) {
-                                    return theme.background;
+                                    return theme.primaryButtonForeground;
                                   }
-                                  return theme.foreground;
+                                  return theme.headingText;
                                 }),
                             side: WidgetStateProperty.all(
-                              BorderSide(color: theme.border),
+                              BorderSide(color: theme.inputBorder),
                             ),
                             shape: WidgetStateProperty.all(
                               const RoundedRectangleBorder(),
@@ -214,14 +214,14 @@ class _WritePageState extends ConsumerState<WritePage> {
                   minLines: 8,
                   maxLines: 12,
                   onChanged: (_) => setState(() {}),
-                  style: theme.mainFont.copyWith(color: theme.foreground),
-                  cursorColor: theme.foreground,
+                  style: theme.mainFont,
+                  cursorColor: theme.inputFocusBorder,
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: theme.border),
+                      borderSide: BorderSide(color: theme.inputBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: theme.foreground),
+                      borderSide: BorderSide(color: theme.inputFocusBorder),
                     ),
                   ),
                 ),
@@ -235,20 +235,20 @@ class _WritePageState extends ConsumerState<WritePage> {
                         states,
                       ) {
                         if (states.contains(WidgetState.disabled)) {
-                          return theme.dimmed;
+                          return theme.secondaryButtonBorder;
                         }
-                        return theme.foreground;
+                        return theme.primaryButtonBackground;
                       }),
                       foregroundColor: WidgetStateProperty.all(
-                        theme.background,
+                        theme.primaryButtonForeground,
                       ),
                       overlayColor: WidgetStateProperty.all(
-                        theme.background.withValues(alpha: 0.08),
+                        theme.primaryButtonForeground.withValues(alpha: 0.08),
                       ),
                       shape: WidgetStateProperty.all(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
-                          side: BorderSide(color: theme.foreground),
+                          side: BorderSide(color: theme.inputFocusBorder),
                         ),
                       ),
                       textStyle: WidgetStateProperty.all(theme.mainFont),
@@ -262,7 +262,7 @@ class _WritePageState extends ConsumerState<WritePage> {
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: theme.background,
+                              color: theme.primaryButtonForeground,
                             ),
                           )
                         : Text(publishLabel),

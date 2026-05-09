@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/images/images.dart';
 import 'package:onosendai/core/navigation/app_shell.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/login/presentation/login_dialog.dart';
 
 class LandingPage extends ConsumerStatefulWidget {
@@ -38,7 +38,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
     final theme = context.theme;
 
     return Scaffold(
-      backgroundColor: theme.background,
+      backgroundColor: theme.pageBackground,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -74,8 +74,8 @@ class _LandingCopy extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border.all(color: theme.border),
-        color: theme.background,
+        border: Border.all(color: theme.cardBorder),
+        color: theme.pageBackground,
       ),
       child: Scrollbar(
         child: SingleChildScrollView(
@@ -131,21 +131,13 @@ class _LandingImage extends StatelessWidget {
       child: Container(
         constraints: const BoxConstraints(maxHeight: 420),
         decoration: BoxDecoration(
-          border: Border.all(color: theme.border, width: 1),
+          border: Border.all(color: theme.cardBorder, width: 1),
         ),
         clipBehavior: Clip.hardEdge,
-        child: DitheredImage(
+        child: ShadedImage(
           imageProvider: const AssetImage('assets/images/caveman_hamlet.jpg'),
           fit: BoxFit.contain,
-          settings: theme.isDark
-              ? DitherShaderSettings(
-                  foreground: theme.foreground,
-                  background: theme.background,
-                )
-              : DitherShaderSettings(
-                  foreground: theme.background,
-                  background: theme.foreground,
-                ),
+          effect: theme.imageShaderEffect,
           placeholderBuilder: (_) => const _LandingImagePlaceholder(),
           errorBuilder: (_) => const _LandingImageError(),
         ),
@@ -169,7 +161,7 @@ class _LandingImagePlaceholder extends StatelessWidget {
           height: 14,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
-            color: theme.dimmed,
+            color: theme.actionIcon,
           ),
         ),
       ),
@@ -192,7 +184,7 @@ class _LandingImageError extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'monospace',
             fontSize: 12,
-            color: theme.dimmed,
+            color: theme.hintText,
             letterSpacing: 0.4,
           ),
         ),
@@ -215,9 +207,9 @@ class _HomeButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        foregroundColor: enabled ? theme.foreground : theme.dimmed,
-        disabledForegroundColor: theme.dimmed,
-        side: BorderSide(color: enabled ? theme.border : theme.dimmed),
+        foregroundColor: enabled ? theme.headingText : theme.hintText,
+        disabledForegroundColor: theme.hintText,
+        side: BorderSide(color: enabled ? theme.secondaryButtonBorder : theme.hintText),
         shape: const RoundedRectangleBorder(),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         textStyle: theme.mainFont.copyWith(

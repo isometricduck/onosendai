@@ -13,7 +13,7 @@ import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/core/prefs/app_prefs.dart';
 import 'package:onosendai/core/prefs/bookmarked_items_prefs.dart';
 import 'package:onosendai/core/prefs/current_user_prefs.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/feed/domain/repositories/feed_repository.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
 import 'package:onosendai/features/login/presentation/login_dialog.dart';

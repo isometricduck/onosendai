@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/classic_theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/about/presentation/pages/about_page.dart';
 import 'package:onosendai/features/about/presentation/widgets/about_dialog.dart';
 import 'package:onosendai/features/bookmarks/presentation/pages/bookmarks_page.dart';
@@ -114,7 +115,7 @@ class _MenuBottomSheet extends StatelessWidget {
     final theme = context.theme;
 
     return Material(
-      color: theme.background,
+      color: theme.navBackground,
       child: SafeArea(
         top: false,
         child: Padding(
@@ -159,17 +160,17 @@ class _MenuDestinationTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: DecoratedBox(
-        decoration: BoxDecoration(border: Border.all(color: theme.border)),
+        decoration: BoxDecoration(border: Border.all(color: theme.cardBorder)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(destination.icon, color: theme.foreground),
+            Icon(destination.icon, color: theme.headingText),
             const SizedBox(height: 8),
             Text(
               destination.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: theme.mainFont.copyWith(color: theme.foreground),
+              style: theme.mainFont.copyWith(color: theme.headingText),
             ),
           ],
         ),
@@ -187,7 +188,7 @@ class _ThemeBottomSheet extends ConsumerWidget {
     final selectedTheme = ref.watch(appThemeProvider);
 
     return Material(
-      color: theme.background,
+      color: theme.navBackground,
       child: SafeArea(
         top: false,
         child: SingleChildScrollView(
@@ -235,14 +236,14 @@ class _ThemeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    final contentColor = selected ? theme.background : theme.foreground;
+    final contentColor = selected ? theme.primaryButtonForeground : theme.headingText;
 
     return InkWell(
       onTap: onSelected,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: selected ? theme.foreground : Colors.transparent,
-          border: Border.all(color: theme.border),
+          color: selected ? theme.primaryButtonBackground : Colors.transparent,
+          border: Border.all(color: theme.cardBorder),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/about/presentation/widgets/about_content.dart';
 
 class OnosendaiAboutDialog extends StatelessWidget {
@@ -11,13 +11,13 @@ class OnosendaiAboutDialog extends StatelessWidget {
     final height = MediaQuery.sizeOf(context).height;
 
     return Dialog(
-      backgroundColor: theme.background,
+      backgroundColor: theme.dialogBackground,
       child: Container(
         width: 520,
         constraints: BoxConstraints(maxHeight: height * 0.86),
         decoration: BoxDecoration(
-          color: theme.background,
-          border: Border.all(color: theme.border),
+          color: theme.dialogBackground,
+          border: Border.all(color: theme.dialogBorder),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -41,7 +41,7 @@ class OnosendaiAboutDialog extends StatelessWidget {
                     child: Text(
                       '[ESC]',
                       style: theme.mainFont.copyWith(
-                        color: theme.dimmed,
+                        color: theme.metaText,
                         fontSize: 13,
                         letterSpacing: 1,
                       ),
@@ -50,7 +50,7 @@ class OnosendaiAboutDialog extends StatelessWidget {
                 ],
               ),
             ),
-            Divider(height: 1, thickness: 1, color: theme.border),
+            Divider(height: 1, thickness: 1, color: theme.divider),
             const Flexible(
               child: AboutContent(padding: EdgeInsets.fromLTRB(24, 24, 24, 32)),
             ),
@@ -87,9 +87,9 @@ class _AboutDialogButtonState extends State<_AboutDialogButton> {
           duration: const Duration(milliseconds: 120),
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: theme.background,
+            color: theme.dialogBackground,
             border: Border.all(
-              color: _hovered ? theme.foreground : theme.dimmed,
+              color: _hovered ? theme.headingText : theme.secondaryButtonBorder,
             ),
           ),
           alignment: Alignment.center,

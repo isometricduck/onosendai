@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/classic_theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/bookmarks/domain/entities/bookmarks_state.dart';
 import 'package:onosendai/features/bookmarks/presentation/riverpod/bookmarks_providers.dart';
 import 'package:onosendai/features/feed/domain/entities/feed_state.dart';
@@ -170,10 +171,10 @@ class _EinkFeedPageState extends ConsumerState<EinkFeedPage> {
       setState(() => _overlayVisible = false);
     }
 
-    final theme = context.theme;
+    final theme = context.theme as ClassicTheme;
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: theme.background,
+      backgroundColor: theme.navBackground,
       barrierColor: theme.foreground.withValues(alpha: 0.18),
       isScrollControlled: true,
       builder: (context) => _PostRepliesSheet(post: post),
@@ -195,7 +196,7 @@ class _EinkFeedPageState extends ConsumerState<EinkFeedPage> {
     };
 
     return ColoredBox(
-      color: theme.background,
+      color: theme.pageBackground,
       child: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) => GestureDetector(
@@ -365,8 +366,8 @@ class _PostRepliesSheetState extends ConsumerState<_PostRepliesSheet> {
         heightFactor: 0.72,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: theme.background,
-            border: Border(top: BorderSide(color: theme.border, width: 1)),
+            color: theme.navBackground,
+            border: Border(top: BorderSide(color: theme.navBorder, width: 1)),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
@@ -376,7 +377,7 @@ class _PostRepliesSheetState extends ConsumerState<_PostRepliesSheet> {
                 Text(
                   'Replies',
                   style: theme.mainFont.copyWith(
-                    color: theme.foreground,
+                    color: theme.headingText,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -469,7 +470,7 @@ class _EinkPageTitle extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: theme.mainFont.copyWith(
-          color: theme.foreground,
+          color: theme.headingText,
           fontSize: 18,
           fontWeight: FontWeight.w700,
         ),
@@ -523,8 +524,8 @@ class _ActionsOverlay extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: theme.background.withValues(alpha: 0.88),
-        border: Border.all(color: theme.border, width: 1),
+        color: theme.overlayBackground.withValues(alpha: 0.88),
+        border: Border.all(color: theme.cardBorder, width: 1),
       ),
       child: Center(
         child: Row(
@@ -575,10 +576,10 @@ class _OverlayAction extends StatelessWidget {
           height: 72,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: theme.background,
-              border: Border.all(color: theme.foreground, width: 1),
+              color: theme.cardBackground,
+              border: Border.all(color: theme.navSelectedIcon, width: 1),
             ),
-            child: Icon(icon, color: theme.foreground, size: 32),
+            child: Icon(icon, color: theme.navSelectedIcon, size: 32),
           ),
         ),
       ),

@@ -1,7 +1,7 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/journal/domain/entities/journal_state.dart';
 import 'package:onosendai/features/journal/presentation/riverpod/journal_providers.dart';
 import 'package:onosendai/features/journal/presentation/widgets/note_card.dart';
@@ -45,7 +45,7 @@ class _JournalPageState extends ConsumerState<JournalPage> {
     final journalAsync = ref.watch(journalNotifierProvider);
 
     return ColoredBox(
-      color: theme.background,
+      color: theme.pageBackground,
       child: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -145,28 +145,28 @@ Future<bool> _confirmDeleteNote(BuildContext context) async {
   return await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: theme.background,
-          surfaceTintColor: theme.background,
+          backgroundColor: theme.dialogBackground,
+          surfaceTintColor: theme.dialogBackground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
-            side: BorderSide(color: theme.border),
+            side: BorderSide(color: theme.dialogBorder),
           ),
           title: Text(
             'Delete note?',
             style: theme.mainFont.copyWith(
-              color: theme.foreground,
+              color: theme.headingText,
               fontSize: 18,
             ),
           ),
           content: Text(
             'This note will be removed from your journal.',
-            style: theme.mainFont.copyWith(color: theme.dimmed),
+            style: theme.mainFont.copyWith(color: theme.metaText),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               style: TextButton.styleFrom(
-                foregroundColor: theme.dimmed,
+                foregroundColor: theme.secondaryButtonBorder,
                 textStyle: theme.mainFont,
               ),
               child: const Text('Cancel'),
@@ -174,8 +174,8 @@ Future<bool> _confirmDeleteNote(BuildContext context) async {
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: TextButton.styleFrom(
-                backgroundColor: theme.foreground,
-                foregroundColor: theme.background,
+                backgroundColor: theme.primaryButtonBackground,
+                foregroundColor: theme.primaryButtonForeground,
                 textStyle: theme.mainFont,
               ),
               child: const Text('Delete'),
@@ -197,7 +197,7 @@ class _CenteredSpinner extends StatelessWidget {
         height: 18,
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
-          color: context.theme.dimmed,
+          color: context.theme.actionIcon,
         ),
       ),
     );
@@ -217,7 +217,7 @@ class _InlineSpinner extends StatelessWidget {
           height: 14,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
-            color: context.theme.dimmed,
+            color: context.theme.actionIcon,
           ),
         ),
       ),
@@ -278,7 +278,7 @@ class _RetryButtonState extends State<_RetryButton> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
             border: Border.all(
-              color: _hovered ? theme.foreground : theme.dimmed,
+              color: _hovered ? theme.primaryButtonForeground : theme.secondaryButtonBorder,
               width: 1,
             ),
           ),

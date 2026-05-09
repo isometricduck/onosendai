@@ -2,11 +2,18 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:onosendai/core/images/shader_effects.dart';
 
-const _ditherShaderAsset = 'assets/shaders/dither.glsl';
+final Map<String, Future<ui.FragmentProgram>> _programCache = {};
 
-Future<ui.FragmentProgram>? _ditherProgramFuture;
+Future<ui.FragmentProgram> loadFragmentProgram(String assetPath) {
+  return _programCache.putIfAbsent(
+    assetPath,
+    () => ui.FragmentProgram.fromAsset(assetPath),
+  );
+}
 
 Future<ui.Image> loadNetworkImageAsUiImage(String url) async {
   return loadImageProviderAsUiImage(CachedNetworkImageProvider(url));
@@ -33,109 +40,127 @@ Future<ui.Image> loadImageProviderAsUiImage(ImageProvider imageProvider) async {
   return completer.future;
 }
 
-Future<ui.FragmentProgram> loadDitherFragmentProgram() {
-  return _ditherProgramFuture ??= ui.FragmentProgram.fromAsset(
-    _ditherShaderAsset,
-  );
-}
-
-@immutable
-class DitherShaderSettings {
-  final double pixelSize;
-  final double ditherAmount;
-  final double bitDepth;
-  final double contrast;
-  final Color foreground;
-  final Color background;
-
-  const DitherShaderSettings({
-    this.pixelSize = 2,
-    this.ditherAmount = 0.85,
-    this.bitDepth = 1,
-    this.contrast = 1.2,
-    this.foreground = const Color(0xFFEBDBB2),
-    this.background = const Color(0xFF1D2021),
-  });
-}
-
-class DitheredNetworkImage extends StatefulWidget {
+class ShadedNetworkImage extends StatefulWidget {
   final String url;
   final BoxFit fit;
   final double? width;
   final double? height;
   final WidgetBuilder placeholderBuilder;
   final WidgetBuilder errorBuilder;
-  final DitherShaderSettings settings;
+  final ImageShaderEffect effect;
 
-  const DitheredNetworkImage({
+  const ShadedNetworkImage({
     super.key,
     required this.url,
     required this.placeholderBuilder,
     required this.errorBuilder,
+    required this.effect,
     this.fit = BoxFit.contain,
     this.width,
     this.height,
-    this.settings = const DitherShaderSettings(),
   });
 
   @override
-  State<DitheredNetworkImage> createState() => _DitheredNetworkImageState();
+  State<ShadedNetworkImage> createState() => _ShadedNetworkImageState();
 }
 
-class _DitheredNetworkImageState extends State<DitheredNetworkImage> {
+class _ShadedNetworkImageState extends State<ShadedNetworkImage> {
   @override
   Widget build(BuildContext context) {
-    return DitheredImage(
+    return ShadedImage(
       imageProvider: CachedNetworkImageProvider(widget.url),
       fit: widget.fit,
       width: widget.width,
       height: widget.height,
       placeholderBuilder: widget.placeholderBuilder,
       errorBuilder: widget.errorBuilder,
-      settings: widget.settings,
+      effect: widget.effect,
     );
   }
 }
 
-class DitheredImage extends StatefulWidget {
+class ShadedImage extends StatefulWidget {
   final ImageProvider imageProvider;
   final BoxFit fit;
   final double? width;
   final double? height;
   final WidgetBuilder placeholderBuilder;
   final WidgetBuilder errorBuilder;
-  final DitherShaderSettings settings;
+  final ImageShaderEffect effect;
 
-  const DitheredImage({
+  const ShadedImage({
     super.key,
     required this.imageProvider,
     required this.placeholderBuilder,
     required this.errorBuilder,
+    required this.effect,
     this.fit = BoxFit.contain,
     this.width,
     this.height,
-    this.settings = const DitherShaderSettings(),
   });
 
   @override
-  State<DitheredImage> createState() => _DitheredImageState();
+  State<ShadedImage> createState() => _ShadedImageState();
 }
 
-class _DitheredImageState extends State<DitheredImage> {
+class _ShadedImageState extends State<ShadedImage> {
+  static const _animationFrameInterval = Duration(milliseconds: 1000 ~/ 24);
+
   late Future<(ui.FragmentProgram, ui.Image)> _imageFuture;
+  ValueNotifier<double>? _timeNotifier;
+  Timer? _animationTimer;
+  Stopwatch? _animationClock;
 
   @override
   void initState() {
     super.initState();
-    _imageFuture = _loadShaderImage(widget.imageProvider);
+    _imageFuture = _loadShaderImage(
+      widget.imageProvider,
+      widget.effect.assetPath,
+    );
+    if (widget.effect.isAnimated) _startAnimation();
   }
 
   @override
-  void didUpdateWidget(DitheredImage oldWidget) {
+  void didUpdateWidget(ShadedImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.imageProvider != oldWidget.imageProvider) {
-      _imageFuture = _loadShaderImage(widget.imageProvider);
+    if (widget.imageProvider != oldWidget.imageProvider ||
+        widget.effect.assetPath != oldWidget.effect.assetPath) {
+      _imageFuture = _loadShaderImage(
+        widget.imageProvider,
+        widget.effect.assetPath,
+      );
     }
+    if (widget.effect.isAnimated != oldWidget.effect.isAnimated) {
+      if (widget.effect.isAnimated) {
+        _startAnimation();
+      } else {
+        _stopAnimation();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _stopAnimation();
+    super.dispose();
+  }
+
+  void _startAnimation() {
+    _timeNotifier = ValueNotifier(0);
+    _animationClock = Stopwatch()..start();
+    _animationTimer = Timer.periodic(_animationFrameInterval, (_) {
+      _timeNotifier!.value = _animationClock!.elapsedMilliseconds / 1000.0;
+    });
+  }
+
+  void _stopAnimation() {
+    _animationTimer?.cancel();
+    _animationTimer = null;
+    _animationClock?.stop();
+    _animationClock = null;
+    _timeNotifier?.dispose();
+    _timeNotifier = null;
   }
 
   @override
@@ -145,7 +170,12 @@ class _DitheredImageState extends State<DitheredImage> {
         return FutureBuilder<(ui.FragmentProgram, ui.Image)>(
           future: _imageFuture,
           builder: (context, snapshot) {
-            if (snapshot.hasError) return widget.errorBuilder(context);
+            if (snapshot.hasError) {
+              debugPrint(
+                '[ShadedImage] Failed to load shader/image: ${snapshot.error}\n${snapshot.stackTrace}',
+              );
+              return widget.errorBuilder(context);
+            }
             if (!snapshot.hasData) return widget.placeholderBuilder(context);
 
             final (program, image) = snapshot.requireData;
@@ -158,12 +188,15 @@ class _DitheredImageState extends State<DitheredImage> {
 
             return SizedBox.fromSize(
               size: paintSize,
-              child: CustomPaint(
-                painter: DitheredImagePainter(
-                  image: image,
-                  program: program,
-                  fit: widget.fit,
-                  settings: widget.settings,
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: ShadedImagePainter(
+                    image: image,
+                    program: program,
+                    fit: widget.fit,
+                    effect: widget.effect,
+                    timeListenable: _timeNotifier,
+                  ),
                 ),
               ),
             );
@@ -206,27 +239,30 @@ Size _imagePaintSize({
 
 Future<(ui.FragmentProgram, ui.Image)> _loadShaderImage(
   ImageProvider imageProvider,
+  String shaderAssetPath,
 ) async {
   final results = await Future.wait<Object>([
-    loadDitherFragmentProgram(),
+    loadFragmentProgram(shaderAssetPath),
     loadImageProviderAsUiImage(imageProvider),
   ]);
 
   return (results[0] as ui.FragmentProgram, results[1] as ui.Image);
 }
 
-class DitheredImagePainter extends CustomPainter {
+class ShadedImagePainter extends CustomPainter {
   final ui.Image image;
   final ui.FragmentProgram program;
   final BoxFit fit;
-  final DitherShaderSettings settings;
+  final ImageShaderEffect effect;
+  final ValueListenable<double>? timeListenable;
 
-  const DitheredImagePainter({
+  ShadedImagePainter({
     required this.image,
     required this.program,
+    required this.effect,
+    this.timeListenable,
     this.fit = BoxFit.contain,
-    this.settings = const DitherShaderSettings(),
-  });
+  }) : super(repaint: timeListenable);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -238,7 +274,13 @@ class DitheredImagePainter extends CustomPainter {
       fitted.destination,
       Offset.zero & size,
     );
-    final shader = _createDitherShader(destination.size);
+    final shader = program.fragmentShader();
+    effect.applyUniforms(
+      shader,
+      image,
+      destination.size,
+      timeListenable?.value ?? 0,
+    );
 
     canvas
       ..save()
@@ -248,33 +290,12 @@ class DitheredImagePainter extends CustomPainter {
       ..restore();
   }
 
-  ui.FragmentShader _createDitherShader(Size size) {
-    final shader = program.fragmentShader()
-      ..setImageSampler(0, image)
-      ..setFloat(0, size.width)
-      ..setFloat(1, size.height)
-      ..setFloat(2, settings.pixelSize)
-      ..setFloat(3, settings.ditherAmount)
-      ..setFloat(4, settings.bitDepth)
-      ..setFloat(5, settings.contrast);
-
-    _setColor(shader, 6, settings.foreground);
-    _setColor(shader, 9, settings.background);
-    return shader;
-  }
-
-  void _setColor(ui.FragmentShader shader, int index, Color color) {
-    shader
-      ..setFloat(index, color.r)
-      ..setFloat(index + 1, color.g)
-      ..setFloat(index + 2, color.b);
-  }
-
   @override
-  bool shouldRepaint(DitheredImagePainter oldDelegate) {
+  bool shouldRepaint(ShadedImagePainter oldDelegate) {
     return image != oldDelegate.image ||
         program != oldDelegate.program ||
         fit != oldDelegate.fit ||
-        settings != oldDelegate.settings;
+        effect != oldDelegate.effect ||
+        timeListenable != oldDelegate.timeListenable;
   }
 }

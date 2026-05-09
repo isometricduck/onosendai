@@ -1,7 +1,7 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/feed/domain/entities/feed_state.dart';
 import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
@@ -46,7 +46,7 @@ class _FeedPageState extends ConsumerState<FeedPage> {
     final feedAsync = ref.watch(feedNotifierProvider);
 
     return ColoredBox(
-      color: theme.background,
+      color: theme.pageBackground,
       child: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -160,7 +160,7 @@ class _CenteredSpinner extends StatelessWidget {
         height: 18,
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
-          color: context.theme.dimmed,
+          color: context.theme.actionIcon,
         ),
       ),
     );
@@ -180,7 +180,7 @@ class _InlineSpinner extends StatelessWidget {
           height: 14,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
-            color: context.theme.dimmed,
+            color: context.theme.actionIcon,
           ),
         ),
       ),
@@ -240,7 +240,7 @@ class _RetryButtonState extends State<_RetryButton> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
             border: Border.all(
-              color: _hovered ? theme.foreground : theme.dimmed,
+              color: _hovered ? theme.cardBackground : theme.secondaryButtonBorder,
               width: 1,
             ),
           ),

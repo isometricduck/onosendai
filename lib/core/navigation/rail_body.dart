@@ -22,15 +22,15 @@ class _RailBody extends StatelessWidget {
           selectedIndex: navigationSelectedIndex,
           onDestinationSelected: onDestinationSelected,
           extended: extended,
-          backgroundColor: theme.background,
-          indicatorColor: theme.dimmed,
-          selectedIconTheme: IconThemeData(color: theme.foreground),
-          unselectedIconTheme: IconThemeData(color: theme.dimmed),
+          backgroundColor: theme.navBackground,
+          indicatorColor: theme.navIndicator,
+          selectedIconTheme: IconThemeData(color: theme.navSelectedIcon),
+          unselectedIconTheme: IconThemeData(color: theme.navUnselectedIcon),
           selectedLabelTextStyle: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.navSelectedLabel,
           ),
           unselectedLabelTextStyle: theme.mainFont.copyWith(
-            color: theme.dimmed,
+            color: theme.navUnselectedLabel,
           ),
           destinations: [
             for (final destination in _destinations.take(
@@ -43,7 +43,7 @@ class _RailBody extends StatelessWidget {
               ),
           ],
         ),
-        VerticalDivider(width: 1, color: theme.border),
+        VerticalDivider(width: 1, color: theme.navBorder),
         Expanded(child: _destinations[selectedIndex].page!),
       ],
     );

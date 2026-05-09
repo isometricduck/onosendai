@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/about/presentation/widgets/about_content.dart';
 
 class AboutPage extends StatelessWidget {
@@ -11,7 +11,7 @@ class AboutPage extends StatelessWidget {
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     final body = ColoredBox(
-      color: theme.background,
+      color: theme.pageBackground,
       child: SafeArea(
         bottom: false,
         child: Align(
@@ -25,19 +25,19 @@ class AboutPage extends StatelessWidget {
     );
 
     if (!isMobile) {
-      return Scaffold(backgroundColor: theme.background, body: body);
+      return Scaffold(backgroundColor: theme.pageBackground, body: body);
     }
 
     return Scaffold(
-      backgroundColor: theme.background,
+      backgroundColor: theme.pageBackground,
       appBar: AppBar(
-        backgroundColor: theme.background,
-        foregroundColor: theme.foreground,
-        surfaceTintColor: theme.background,
+        backgroundColor: theme.pageBackground,
+        foregroundColor: theme.headingText,
+        surfaceTintColor: theme.pageBackground,
         title: Text(
           'ABOUT',
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontWeight: FontWeight.w700,
           ),
         ),

@@ -1,6 +1,6 @@
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart' hide RichText;
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/core/widgets/rich_text.dart';
 
 class EinkPostCard extends StatefulWidget {
@@ -25,8 +25,8 @@ class _EinkPostCardState extends State<EinkPostCard> {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.background,
-        border: Border.all(color: theme.border, width: 1),
+        color: theme.cardBackground,
+        border: Border.all(color: theme.cardBorder, width: 1),
       ),
       padding: _cardPadding,
       child: Column(
@@ -42,7 +42,7 @@ class _EinkPostCardState extends State<EinkPostCard> {
               style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 13,
-                color: theme.dimmed,
+                color: theme.hintText,
                 fontStyle: FontStyle.italic,
               ),
             )
@@ -111,7 +111,7 @@ class _PostSectionDivider extends StatelessWidget {
 
     return SizedBox(
       height: 1,
-      child: DecoratedBox(decoration: BoxDecoration(color: theme.border)),
+      child: DecoratedBox(decoration: BoxDecoration(color: theme.divider)),
     );
   }
 }
@@ -131,7 +131,7 @@ class _Header extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'monospace',
             fontSize: 13,
-            color: theme.foreground,
+            color: theme.headingText,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.4,
           ),
@@ -143,7 +143,7 @@ class _Header extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'monospace',
             fontSize: 12,
-            color: theme.dimmed,
+            color: theme.metaText,
           ),
         ),
       ],
@@ -161,14 +161,14 @@ class _TopicChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.dimmed, width: 1),
+        border: Border.all(color: theme.metaText, width: 1),
       ),
       child: Text(
         '#$topic',
         style: TextStyle(
           fontFamily: 'monospace',
           fontSize: 11,
-          color: theme.dimmed,
+          color: theme.metaText,
           letterSpacing: 0.3,
         ),
       ),

@@ -2,19 +2,24 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onosendai/core/images/shader_effects.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
-import 'package:onosendai/core/theme/brutalist_theme.dart';
-import 'package:onosendai/core/theme/bubblegum_theme.dart';
-import 'package:onosendai/core/theme/c64_theme.dart';
-import 'package:onosendai/core/theme/crypt_theme.dart';
-import 'package:onosendai/core/theme/dark_theme.dart';
-import 'package:onosendai/core/theme/eink_theme.dart';
-import 'package:onosendai/core/theme/grid_theme.dart';
-import 'package:onosendai/core/theme/lcd_theme.dart';
-import 'package:onosendai/core/theme/light_theme.dart';
-import 'package:onosendai/core/theme/matrix_theme.dart';
-import 'package:onosendai/core/theme/poetry_theme.dart';
-import 'package:onosendai/core/theme/vt320_theme.dart';
+import 'package:onosendai/features/theme/classic/brutalist_theme.dart';
+import 'package:onosendai/features/theme/classic/bubblegum_theme.dart';
+import 'package:onosendai/features/theme/classic/c64_theme.dart';
+import 'package:onosendai/features/theme/classic/crypt_theme.dart';
+import 'package:onosendai/features/theme/classic/dark_theme.dart';
+import 'package:onosendai/features/theme/classic/eink_theme.dart';
+import 'package:onosendai/features/theme/classic/grid_theme.dart';
+import 'package:onosendai/features/theme/classic/lcd_theme.dart';
+import 'package:onosendai/features/theme/classic/light_theme.dart';
+import 'package:onosendai/features/theme/classic/matrix_theme.dart';
+import 'package:onosendai/features/theme/classic/poetry_theme.dart';
+import 'package:onosendai/features/theme/classic/vt320_theme.dart';
+import 'package:onosendai/features/theme/expanded/bw_theme.dart';
+import 'package:onosendai/features/theme/expanded/cga0_theme.dart';
+import 'package:onosendai/features/theme/expanded/neon_theme.dart';
+import 'package:onosendai/features/theme/expanded/vapor_theme.dart';
 
 enum AppThemeId {
   dark,
@@ -29,6 +34,10 @@ enum AppThemeId {
   bubblegum,
   vt320,
   eink,
+  cga0,
+  bw,
+  vapor,
+  neon,
 }
 
 const appThemeIdPrefsKey = 'app_theme_id';
@@ -89,11 +98,15 @@ extension AppThemeIdX on AppThemeId {
       AppThemeId.grid => 'Grid',
       AppThemeId.crypt => 'Crypt',
       AppThemeId.bubblegum => 'Bubblegum',
-      AppThemeId.eink => "E-Ink",
+      AppThemeId.eink => 'E-Ink',
+      AppThemeId.cga0 => 'CGA 0',
+      AppThemeId.bw => 'B & W',
+      AppThemeId.vapor => 'Vaporwave',
+      AppThemeId.neon => 'Neon',
     };
   }
 
-  Theme get theme {
+  CyberTheme get theme {
     return switch (this) {
       AppThemeId.dark => DarkTheme(),
       AppThemeId.light => LightTheme(),
@@ -107,16 +120,20 @@ extension AppThemeIdX on AppThemeId {
       AppThemeId.bubblegum => BubblegumTheme(),
       AppThemeId.vt320 => Vt320Theme(),
       AppThemeId.eink => EinkTheme(),
+      AppThemeId.cga0 => Cga0Theme(),
+      AppThemeId.bw => BwTheme(),
+      AppThemeId.vapor => VaporTheme(),
+      AppThemeId.neon => NeonTheme(),
     };
   }
 }
 
 class AppThemeScope extends InheritedWidget {
-  final Theme theme;
+  final CyberTheme theme;
 
   const AppThemeScope({super.key, required this.theme, required super.child});
 
-  static Theme of(BuildContext context) {
+  static CyberTheme of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<AppThemeScope>()?.theme ??
         DarkTheme();
   }
@@ -128,17 +145,55 @@ class AppThemeScope extends InheritedWidget {
 }
 
 extension AppColorsX on BuildContext {
-  Theme get theme => AppThemeScope.of(this);
+  CyberTheme get theme => AppThemeScope.of(this);
 }
 
-abstract class Theme {
-  bool get isDark; // True if background is darker than foreground
+abstract class CyberTheme {
   IconData get icon;
-  Color get foreground;
-  Color get background;
-  Color get dimmed;
-  Color get border;
-  TextStyle get font;
 
-  TextStyle get mainFont => font.copyWith(color: foreground);
+  TextStyle get mainFont;
+
+  ImageShaderEffect get imageShaderEffect;
+
+  // Text
+  Color get headingText;
+  Color get metaText;
+  Color get hintText;
+
+  // Surfaces
+  Color get pageBackground;
+  Color get cardBackground;
+  Color get dialogBackground;
+  Color get inputBackground;
+  Color get navBackground;
+  Color get overlayBackground;
+
+  // Strokes
+  Color get cardBorder;
+  Color get divider;
+  Color get inputBorder;
+  Color get inputFocusBorder;
+  Color get dialogBorder;
+  Color get navBorder;
+
+  // Interactive
+  Color get actionIcon;
+  Color get navSelectedIcon;
+  Color get navUnselectedIcon;
+  Color get navIndicator;
+  Color get navSelectedLabel;
+  Color get navUnselectedLabel;
+  Color get primaryButtonBackground;
+  Color get primaryButtonForeground;
+  Color get secondaryButtonBorder;
+  Color get switchActiveThumb;
+  Color get switchActiveTrack;
+  Color get switchInactiveThumb;
+  Color get switchInactiveTrack;
+  Color get snackbarBackground;
+  Color get snackbarText;
+  Color get notificationUnreadBorder;
+  Color get notificationReadBorder;
+  Color get notificationUnreadIcon;
+  Color get notificationReadIcon;
 }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/bookmarks/domain/entities/bookmarks_state.dart';
 import 'package:onosendai/features/bookmarks/presentation/riverpod/bookmarks_providers.dart';
 import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
@@ -20,7 +20,7 @@ class BookmarksPage extends ConsumerWidget {
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     final body = ColoredBox(
-      color: theme.background,
+      color: theme.pageBackground,
       child: SafeArea(
         bottom: false,
         child: Center(
@@ -54,19 +54,19 @@ class BookmarksPage extends ConsumerWidget {
     );
 
     if (!isMobile) {
-      return Scaffold(backgroundColor: theme.background, body: body);
+      return Scaffold(backgroundColor: theme.pageBackground, body: body);
     }
 
     return Scaffold(
-      backgroundColor: theme.background,
+      backgroundColor: theme.pageBackground,
       appBar: AppBar(
-        backgroundColor: theme.background,
-        foregroundColor: theme.foreground,
-        surfaceTintColor: theme.background,
+        backgroundColor: theme.pageBackground,
+        foregroundColor: theme.headingText,
+        surfaceTintColor: theme.pageBackground,
         title: Text(
           'BOOKMARKS',
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -182,12 +182,12 @@ class _InlineHeader extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(LucideIcons.bookmark, color: theme.foreground),
+        Icon(LucideIcons.bookmark, color: theme.headingText),
         const SizedBox(width: 10),
         Text(
           'Bookmarks',
           style: theme.mainFont.copyWith(
-            color: theme.foreground,
+            color: theme.headingText,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -211,7 +211,7 @@ class _SectionHeader extends StatelessWidget {
       style: TextStyle(
         fontFamily: 'monospace',
         fontSize: 12,
-        color: theme.dimmed,
+        color: theme.metaText,
         letterSpacing: 0.5,
       ),
     );
@@ -229,7 +229,7 @@ class _CenteredSpinner extends StatelessWidget {
         height: 18,
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
-          color: context.theme.dimmed,
+          color: context.theme.actionIcon,
         ),
       ),
     );
@@ -290,7 +290,7 @@ class _RetryButtonState extends State<_RetryButton> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
             border: Border.all(
-              color: _hovered ? theme.foreground : theme.dimmed,
+              color: _hovered ? theme.primaryButtonForeground : theme.secondaryButtonBorder,
               width: 1,
             ),
           ),

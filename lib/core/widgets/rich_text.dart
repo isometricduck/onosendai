@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/images/images.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class RichText extends StatefulWidget {
@@ -212,9 +212,9 @@ class _InlineRichTextState extends State<_InlineRichText> {
   Widget build(BuildContext context) {
     final theme = context.theme;
     final linkStyle = widget.style.copyWith(
-      color: theme.foreground,
+      color: theme.headingText,
       decoration: TextDecoration.underline,
-      decorationColor: theme.foreground,
+      decorationColor: theme.headingText,
     );
 
     final spans = [
@@ -496,17 +496,17 @@ class _AudioAttachmentBox extends StatelessWidget {
       label: 'Open audio ${attachment.title} by ${attachment.artist}',
       child: InkWell(
         onTap: () => launchUrl(attachment.src),
-        hoverColor: theme.foreground.withValues(alpha: 0.08),
-        focusColor: theme.foreground.withValues(alpha: 0.08),
-        splashColor: theme.foreground.withValues(alpha: 0.12),
+        hoverColor: theme.headingText.withValues(alpha: 0.08),
+        focusColor: theme.headingText.withValues(alpha: 0.08),
+        splashColor: theme.headingText.withValues(alpha: 0.12),
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: theme.border, width: 1),
+            border: Border.all(color: theme.cardBorder, width: 1),
           ),
           padding: const EdgeInsets.all(10),
           child: Row(
             children: [
-              Icon(LucideIcons.music, size: 18, color: theme.foreground),
+              Icon(LucideIcons.music, size: 18, color: theme.headingText),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -517,7 +517,7 @@ class _AudioAttachmentBox extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 13,
-                        color: theme.foreground,
+                        color: theme.headingText,
                         fontWeight: FontWeight.w700,
                       ),
                       maxLines: 2,
@@ -529,7 +529,7 @@ class _AudioAttachmentBox extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 12,
-                        color: theme.dimmed,
+                        color: theme.metaText,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -538,7 +538,7 @@ class _AudioAttachmentBox extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Icon(LucideIcons.externalLink, size: 16, color: theme.dimmed),
+              Icon(LucideIcons.externalLink, size: 16, color: theme.actionIcon),
             ],
           ),
         ),
@@ -560,26 +560,16 @@ class _ContentImage extends StatelessWidget {
     return Semantics(
       label: altText.isEmpty ? 'Post image' : altText,
       image: true,
-      child: Container(
+      child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 420),
-        decoration: BoxDecoration(
-          border: Border.all(color: theme.border, width: 1),
-        ),
-        clipBehavior: Clip.hardEdge,
-        child: DitheredNetworkImage(
-          url: url,
-          fit: BoxFit.contain,
-          settings: theme.isDark
-              ? DitherShaderSettings(
-                  foreground: theme.foreground,
-                  background: theme.background,
-                )
-              : DitherShaderSettings(
-                  foreground: theme.background,
-                  background: theme.foreground,
-                ),
-          placeholderBuilder: (_) => const _ContentImagePlaceholder(),
-          errorBuilder: (_) => const _ContentImageError(),
+        child: ClipRect(
+          child: ShadedNetworkImage(
+            url: url,
+            fit: BoxFit.contain,
+            effect: theme.imageShaderEffect,
+            placeholderBuilder: (_) => const _ContentImagePlaceholder(),
+            errorBuilder: (_) => const _ContentImageError(),
+          ),
         ),
       ),
     );
@@ -596,7 +586,7 @@ class _ContentDivider extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: 1,
-      child: DecoratedBox(decoration: BoxDecoration(color: theme.border)),
+      child: DecoratedBox(decoration: BoxDecoration(color: theme.divider)),
     );
   }
 }
@@ -616,7 +606,7 @@ class _ContentImagePlaceholder extends StatelessWidget {
           height: 14,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
-            color: theme.dimmed,
+            color: theme.actionIcon,
           ),
         ),
       ),
@@ -639,7 +629,7 @@ class _ContentImageError extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'monospace',
             fontSize: 12,
-            color: theme.dimmed,
+            color: theme.hintText,
             letterSpacing: 0.4,
           ),
         ),

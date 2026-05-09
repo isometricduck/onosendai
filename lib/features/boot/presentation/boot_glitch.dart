@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:onosendai/core/theme/theme.dart' as app_theme;
+import 'package:onosendai/features/theme/cyber_theme.dart' as app_theme;
 
 class GlitchBootAnimation extends ConsumerStatefulWidget {
   final Widget child;
@@ -58,7 +58,7 @@ class _GlitchBootAnimationState extends ConsumerState<GlitchBootAnimation>
 
 class _GlitchSplash extends StatelessWidget {
   final double progress; // 0.0 → 1.0
-  final app_theme.Theme theme;
+  final app_theme.CyberTheme theme;
 
   const _GlitchSplash({required this.progress, required this.theme});
 
@@ -67,7 +67,7 @@ class _GlitchSplash extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
-        backgroundColor: theme.background,
+        backgroundColor: theme.pageBackground,
         body: CustomPaint(
           painter: _GlitchPainter(progress: progress, theme: theme),
           child: Center(
@@ -83,7 +83,7 @@ class _GlitchSplash extends StatelessWidget {
 
 class _GlitchText extends StatelessWidget {
   final double progress;
-  final app_theme.Theme theme;
+  final app_theme.CyberTheme theme;
 
   const _GlitchText({required this.progress, required this.theme});
 
@@ -133,8 +133,8 @@ class _GlitchText extends StatelessWidget {
         // Main white/clean layer
         _logoText(
           splitAmount > 0
-              ? theme.foreground.withValues(alpha: 0.9)
-              : theme.foreground,
+              ? theme.headingText.withValues(alpha: 0.9)
+              : theme.headingText,
         ),
         // Subtitle fades in during clean phase
         if (cleanProgress > 0)
@@ -153,7 +153,7 @@ class _GlitchText extends StatelessWidget {
                   fontFamily: 'monospace',
                   fontSize: 11,
                   letterSpacing: 4,
-                  color: theme.dimmed,
+                  color: theme.hintText,
                 ),
               ),
             ),
@@ -178,7 +178,7 @@ class _GlitchText extends StatelessWidget {
 
 class _GlitchPainter extends CustomPainter {
   final double progress;
-  final app_theme.Theme theme;
+  final app_theme.CyberTheme theme;
 
   _GlitchPainter({required this.progress, required this.theme});
 
@@ -193,7 +193,7 @@ class _GlitchPainter extends CustomPainter {
   void _drawScanlines(Canvas canvas, Size size) {
     final opacity = progress < 0.85 ? 0.15 : 0.06;
     final paint = Paint()
-      ..color = theme.foreground.withValues(alpha: opacity)
+      ..color = theme.headingText.withValues(alpha: opacity)
       ..strokeWidth = 1.0;
 
     for (double y = 0; y < size.height; y += 3) {
@@ -219,7 +219,7 @@ class _GlitchPainter extends CustomPainter {
         ..color = [
           const Color(0x33FF003C),
           const Color(0x2200FFFF),
-          theme.dimmed.withValues(alpha: 0.14),
+          theme.hintText.withValues(alpha: 0.14),
         ][i % 3];
 
       canvas.drawRect(Rect.fromLTWH(x, y, w, h), paint);

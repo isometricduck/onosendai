@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
-import 'package:onosendai/core/theme/theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/core/widgets/rich_text.dart';
 
 class PostCard extends ConsumerStatefulWidget {
@@ -59,8 +59,8 @@ class _PostCardState extends ConsumerState<PostCard> {
 
     final card = Container(
       decoration: BoxDecoration(
-        color: theme.background,
-        border: Border.all(color: theme.border, width: 1),
+        color: theme.cardBackground,
+        border: Border.all(color: theme.cardBorder, width: 1),
       ),
       padding: _cardPadding,
       child: Column(
@@ -76,7 +76,7 @@ class _PostCardState extends ConsumerState<PostCard> {
               style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 13,
-                color: theme.dimmed,
+                color: theme.hintText,
                 fontStyle: FontStyle.italic,
               ),
             )
@@ -269,7 +269,7 @@ class _PostSectionDivider extends StatelessWidget {
 
     return SizedBox(
       height: 1,
-      child: DecoratedBox(decoration: BoxDecoration(color: theme.border)),
+      child: DecoratedBox(decoration: BoxDecoration(color: theme.divider)),
     );
   }
 }
@@ -349,28 +349,28 @@ Future<bool> _confirmDeletePost(BuildContext context) async {
   return await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: theme.background,
-          surfaceTintColor: theme.background,
+          backgroundColor: theme.dialogBackground,
+          surfaceTintColor: theme.dialogBackground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
-            side: BorderSide(color: theme.border),
+            side: BorderSide(color: theme.dialogBorder),
           ),
           title: Text(
             'Delete post?',
             style: theme.mainFont.copyWith(
-              color: theme.foreground,
+              color: theme.headingText,
               fontSize: 18,
             ),
           ),
           content: Text(
             'This post and its replies will be removed.',
-            style: theme.mainFont.copyWith(color: theme.dimmed),
+            style: theme.mainFont.copyWith(color: theme.metaText),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               style: TextButton.styleFrom(
-                foregroundColor: theme.dimmed,
+                foregroundColor: theme.secondaryButtonBorder,
                 textStyle: theme.mainFont,
               ),
               child: const Text('Cancel'),
@@ -378,8 +378,8 @@ Future<bool> _confirmDeletePost(BuildContext context) async {
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: TextButton.styleFrom(
-                backgroundColor: theme.foreground,
-                foregroundColor: theme.background,
+                backgroundColor: theme.primaryButtonBackground,
+                foregroundColor: theme.primaryButtonForeground,
                 textStyle: theme.mainFont,
               ),
               child: const Text('Delete'),
@@ -420,10 +420,10 @@ class _PostActionIcon extends StatelessWidget {
                     dimension: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: theme.dimmed,
+                      color: theme.actionIcon,
                     ),
                   )
-                : Icon(icon, size: 24, color: theme.dimmed),
+                : Icon(icon, size: 24, color: theme.actionIcon),
           ),
         ),
       ),
@@ -449,8 +449,8 @@ class ReplyCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.background,
-        border: Border.all(color: theme.border, width: 1),
+        color: theme.cardBackground,
+        border: Border.all(color: theme.cardBorder, width: 1),
       ),
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       child: Column(
@@ -468,7 +468,7 @@ class ReplyCard extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 13,
-                color: theme.dimmed,
+                color: theme.hintText,
                 fontStyle: FontStyle.italic,
               ),
             )
@@ -478,7 +478,7 @@ class ReplyCard extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 14,
-                color: theme.foreground,
+                color: theme.headingText,
                 height: 1.4,
               ),
             ),
@@ -503,7 +503,7 @@ class _Header extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'monospace',
             fontSize: 13,
-            color: theme.foreground,
+            color: theme.headingText,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.4,
           ),
@@ -515,7 +515,7 @@ class _Header extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'monospace',
             fontSize: 12,
-            color: theme.dimmed,
+            color: theme.metaText,
           ),
         ),
       ],
@@ -545,7 +545,7 @@ class _ReplyHeader extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'monospace',
               fontSize: 13,
-              color: theme.foreground,
+              color: theme.headingText,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.4,
             ),
@@ -559,7 +559,7 @@ class _ReplyHeader extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'monospace',
             fontSize: 12,
-            color: theme.dimmed,
+            color: theme.metaText,
           ),
         ),
         if (onDelete != null || isDeleting) ...[
@@ -573,14 +573,14 @@ class _ReplyHeader extends StatelessWidget {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 1.5,
-                      color: theme.dimmed,
+                      color: theme.actionIcon,
                     ),
                   )
                 : const Icon(LucideIcons.trash2),
-            color: theme.dimmed,
-            hoverColor: theme.foreground.withValues(alpha: 0.08),
-            focusColor: theme.foreground.withValues(alpha: 0.08),
-            splashColor: theme.foreground.withValues(alpha: 0.12),
+            color: theme.actionIcon,
+            hoverColor: theme.headingText.withValues(alpha: 0.08),
+            focusColor: theme.headingText.withValues(alpha: 0.08),
+            splashColor: theme.headingText.withValues(alpha: 0.12),
             visualDensity: VisualDensity.compact,
           ),
         ],
@@ -599,14 +599,14 @@ class _TopicChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.dimmed, width: 1),
+        border: Border.all(color: theme.metaText, width: 1),
       ),
       child: Text(
         '#$topic',
         style: TextStyle(
           fontFamily: 'monospace',
           fontSize: 11,
-          color: theme.dimmed,
+          color: theme.metaText,
           letterSpacing: 0.3,
         ),
       ),
