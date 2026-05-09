@@ -22,11 +22,17 @@ class RichText extends StatefulWidget {
   });
 
   static String decodeContent(String content) {
-    return content
-        .replaceAll('&amp;', '&')
-        .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>')
-        .replaceAll('&nbsp;', '');
+    return normalizeLineBreaks(
+      content
+          .replaceAll('&amp;', '&')
+          .replaceAll('&lt;', '<')
+          .replaceAll('&gt;', '>')
+          .replaceAll('&nbsp;', ''),
+    );
+  }
+
+  static String normalizeLineBreaks(String content) {
+    return content.replaceAll(RegExp(r'(\r?\n){3,}'), '\n\n');
   }
 
   @override
@@ -95,9 +101,10 @@ class _RichTextState extends State<RichText> {
 
   void _syncSegments() {
     _disposeRecognizers();
-    final content = widget.decodeHtml
+    final decodedContent = widget.decodeHtml
         ? RichText.decodeContent(widget.content)
         : widget.content;
+    final content = RichText.normalizeLineBreaks(decodedContent);
     _contentSegments = _ContentSegment.parse(content);
 
     for (final segment in _contentSegments) {
@@ -567,6 +574,7 @@ class _ContentImage extends StatelessWidget {
             url: url,
             fit: BoxFit.contain,
             effect: theme.imageShaderEffect,
+            fallbackColor: theme.headingText,
             placeholderBuilder: (_) => const _ContentImagePlaceholder(),
             errorBuilder: (_) => const _ContentImageError(),
           ),
