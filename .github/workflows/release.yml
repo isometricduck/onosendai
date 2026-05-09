@@ -39,7 +39,8 @@ jobs:
           EOF
 
       - run: flutter pub get
-      - run: flutter build apk --release
+      - run: flutter build apk --flavor=standard --release
+      - run: flutter build apk --flavor=eink --dart-define EINK=true --release
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
