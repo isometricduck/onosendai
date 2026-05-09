@@ -4,11 +4,13 @@ class _RailBody extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final bool extended;
+  final bool hasUnreadNotifications;
 
   const _RailBody({
     required this.selectedIndex,
     required this.onDestinationSelected,
     required this.extended,
+    required this.hasUnreadNotifications,
   });
 
   @override
@@ -37,8 +39,14 @@ class _RailBody extends StatelessWidget {
               _primaryNavigationDestinationCount,
             ))
               NavigationRailDestination(
-                icon: Icon(destination.icon),
-                selectedIcon: Icon(destination.icon),
+                icon: _DestinationIcon(
+                  destination: destination,
+                  hasUnreadNotifications: hasUnreadNotifications,
+                ),
+                selectedIcon: _DestinationIcon(
+                  destination: destination,
+                  hasUnreadNotifications: hasUnreadNotifications,
+                ),
                 label: Text(destination.label),
               ),
           ],

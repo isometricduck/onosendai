@@ -11,6 +11,7 @@ import 'package:onosendai/features/feed/presentation/pages/feed_page.dart';
 import 'package:onosendai/features/journal/presentation/pages/journal_page.dart';
 import 'package:onosendai/features/login/presentation/logout_dialog.dart';
 import 'package:onosendai/features/netiquette/presentation/pages/netiquette_page.dart';
+import 'package:onosendai/features/notifications/presentation/riverpod/notifications_providers.dart';
 import 'package:onosendai/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:onosendai/features/settings/presentation/pages/settings_page.dart';
 import 'package:onosendai/features/write/presentation/pages/write_page.dart';
@@ -61,12 +62,17 @@ class _AppShellState extends ConsumerState<AppShell> {
       return const _EinkShell();
     }
 
+    final hasUnreadNotifications =
+        (ref.watch(notificationsNotifierProvider).valueOrNull?.unreadCount ??
+            0) >
+        0;
     final width = MediaQuery.sizeOf(context).width;
 
     if (width < 600) {
       return _MobileShell(
         selectedIndex: _selectedIndex,
         onDestinationSelected: _selectDestination,
+        hasUnreadNotifications: hasUnreadNotifications,
       );
     }
 
@@ -74,12 +80,14 @@ class _AppShellState extends ConsumerState<AppShell> {
       return _TabletShell(
         selectedIndex: _selectedIndex,
         onDestinationSelected: _selectDestination,
+        hasUnreadNotifications: hasUnreadNotifications,
       );
     }
 
     return _DesktopShell(
       selectedIndex: _selectedIndex,
       onDestinationSelected: _selectDestination,
+      hasUnreadNotifications: hasUnreadNotifications,
     );
   }
 }
@@ -236,7 +244,9 @@ class _ThemeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    final contentColor = selected ? theme.primaryButtonForeground : theme.headingText;
+    final contentColor = selected
+        ? theme.primaryButtonForeground
+        : theme.headingText;
 
     return InkWell(
       onTap: onSelected,

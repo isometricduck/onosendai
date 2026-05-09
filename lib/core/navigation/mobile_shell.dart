@@ -3,10 +3,12 @@ part of 'app_shell.dart';
 class _MobileShell extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
+  final bool hasUnreadNotifications;
 
   const _MobileShell({
     required this.selectedIndex,
     required this.onDestinationSelected,
+    required this.hasUnreadNotifications,
   });
 
   @override
@@ -26,7 +28,10 @@ class _MobileShell extends StatelessWidget {
             );
           }),
           labelTextStyle: WidgetStateProperty.all(
-            theme.mainFont.copyWith(color: theme.navSelectedLabel, fontSize: 12),
+            theme.mainFont.copyWith(
+              color: theme.navSelectedLabel,
+              fontSize: 12,
+            ),
           ),
         ),
         child: NavigationBar(
@@ -39,8 +44,14 @@ class _MobileShell extends StatelessWidget {
               _primaryNavigationDestinationCount,
             ))
               NavigationDestination(
-                icon: Icon(destination.icon),
-                selectedIcon: Icon(destination.icon),
+                icon: _DestinationIcon(
+                  destination: destination,
+                  hasUnreadNotifications: hasUnreadNotifications,
+                ),
+                selectedIcon: _DestinationIcon(
+                  destination: destination,
+                  hasUnreadNotifications: hasUnreadNotifications,
+                ),
                 label: '',
               ),
           ],

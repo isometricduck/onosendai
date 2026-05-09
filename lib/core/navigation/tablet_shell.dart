@@ -3,10 +3,12 @@ part of 'app_shell.dart';
 class _TabletShell extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
+  final bool hasUnreadNotifications;
 
   const _TabletShell({
     required this.selectedIndex,
     required this.onDestinationSelected,
+    required this.hasUnreadNotifications,
   });
 
   @override
@@ -20,6 +22,7 @@ class _TabletShell extends StatelessWidget {
           selectedIndex: selectedIndex,
           onDestinationSelected: onDestinationSelected,
           extended: false,
+          hasUnreadNotifications: hasUnreadNotifications,
         ),
       ),
     );

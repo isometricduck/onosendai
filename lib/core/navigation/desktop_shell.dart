@@ -3,10 +3,12 @@ part of 'app_shell.dart';
 class _DesktopShell extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
+  final bool hasUnreadNotifications;
 
   const _DesktopShell({
     required this.selectedIndex,
     required this.onDestinationSelected,
+    required this.hasUnreadNotifications,
   });
 
   @override
@@ -20,6 +22,7 @@ class _DesktopShell extends StatelessWidget {
           selectedIndex: selectedIndex,
           onDestinationSelected: onDestinationSelected,
           extended: true,
+          hasUnreadNotifications: hasUnreadNotifications,
         ),
       ),
     );

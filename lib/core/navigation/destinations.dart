@@ -97,10 +97,39 @@ const _destinations = <_AppDestination>[
 ];
 
 const _primaryNavigationDestinationCount = 5;
+const _notificationsDestinationIndex = 3;
 
 int _navigationSelectedIndex(int selectedIndex) {
   if (selectedIndex < _primaryNavigationDestinationCount) return selectedIndex;
   return _primaryNavigationDestinationCount - 1;
+}
+
+class _DestinationIcon extends StatelessWidget {
+  final _AppDestination destination;
+  final bool hasUnreadNotifications;
+
+  const _DestinationIcon({
+    required this.destination,
+    required this.hasUnreadNotifications,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = Icon(destination.icon);
+    final showBadge =
+        hasUnreadNotifications &&
+        _destinations.indexOf(destination) == _notificationsDestinationIndex;
+
+    if (!showBadge) return icon;
+
+    final theme = context.theme;
+
+    return Badge(
+      smallSize: 8,
+      backgroundColor: theme.notificationUnreadIcon,
+      child: icon,
+    );
+  }
 }
 
 const _einkDestinations = <_AppDestination>[
