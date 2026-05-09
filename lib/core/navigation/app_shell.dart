@@ -76,7 +76,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       );
     }
 
-    if (width <= 840) {
+    if (width < 1280) {
       return _TabletShell(
         selectedIndex: _selectedIndex,
         onDestinationSelected: _selectDestination,

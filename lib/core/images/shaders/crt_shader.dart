@@ -7,8 +7,8 @@ class CrtEffect extends ImageShaderEffect {
   final double vignette;
 
   const CrtEffect({
-    this.saturation = 0.15,
-    this.scanline = 0.18,
+    this.saturation = 0.03,
+    this.scanline = 2.5,
     this.curvature = 0.12,
     this.vignette = 0.40,
   });
@@ -17,7 +17,7 @@ class CrtEffect extends ImageShaderEffect {
   String get assetPath => 'assets/shaders/crt.glsl';
 
   @override
-  bool get isAnimated => true;
+  bool get isAnimated => false;
 
   @override
   void applyUniforms(

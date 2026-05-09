@@ -50,7 +50,8 @@ void main() {
     col *= 1.0 - uVignette * dot(d, d) * 3.5;
 
     // Flicker
-    col *= 0.97 + 0.09 * sin(uTime * 3.0);
+    // Hay que buscarle la vuelta
+    //col *= 0.97 + 0.18 * sin(uTime * 3.0);
 
     // Film grain
     float noise = fract(sin(dot(warped + fract(uTime), vec2(127.1, 311.7))) * 43758.5453);

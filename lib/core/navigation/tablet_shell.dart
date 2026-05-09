@@ -19,6 +19,7 @@ class _TabletShell extends StatelessWidget {
       backgroundColor: theme.pageBackground,
       body: SafeArea(
         child: _RailBody(
+          width: 100,
           selectedIndex: selectedIndex,
           onDestinationSelected: onDestinationSelected,
           extended: false,

@@ -59,7 +59,7 @@ const _destinations = <_AppDestination>[
   ),
   _AppDestination(
     icon: LucideIcons.bell,
-    label: 'Notifications',
+    label: 'Notifs',
     page: NotificationsPage(),
   ),
   _AppDestination.sheet(

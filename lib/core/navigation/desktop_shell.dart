@@ -19,6 +19,7 @@ class _DesktopShell extends StatelessWidget {
       backgroundColor: theme.pageBackground,
       body: SafeArea(
         child: _RailBody(
+          width: 220,
           selectedIndex: selectedIndex,
           onDestinationSelected: onDestinationSelected,
           extended: true,
