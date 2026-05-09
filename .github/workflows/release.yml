@@ -1,4 +1,4 @@
-name: Release APK
+name: Generate APKs for release
 
 on:
   push:
