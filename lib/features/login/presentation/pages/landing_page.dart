@@ -138,6 +138,7 @@ class _LandingImage extends StatelessWidget {
           imageProvider: const AssetImage('assets/images/caveman_hamlet.jpg'),
           fit: BoxFit.contain,
           effect: theme.imageShaderEffect,
+          fallbackColor: theme.headingText,
           placeholderBuilder: (_) => const _LandingImagePlaceholder(),
           errorBuilder: (_) => const _LandingImageError(),
         ),
@@ -209,7 +210,9 @@ class _HomeButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         foregroundColor: enabled ? theme.headingText : theme.hintText,
         disabledForegroundColor: theme.hintText,
-        side: BorderSide(color: enabled ? theme.secondaryButtonBorder : theme.hintText),
+        side: BorderSide(
+          color: enabled ? theme.secondaryButtonBorder : theme.hintText,
+        ),
         shape: const RoundedRectangleBorder(),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         textStyle: theme.mainFont.copyWith(

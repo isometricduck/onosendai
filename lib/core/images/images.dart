@@ -48,6 +48,7 @@ class ShadedNetworkImage extends StatefulWidget {
   final WidgetBuilder placeholderBuilder;
   final WidgetBuilder errorBuilder;
   final ImageShaderEffect effect;
+  final Color fallbackColor;
 
   const ShadedNetworkImage({
     super.key,
@@ -55,6 +56,7 @@ class ShadedNetworkImage extends StatefulWidget {
     required this.placeholderBuilder,
     required this.errorBuilder,
     required this.effect,
+    required this.fallbackColor,
     this.fit = BoxFit.contain,
     this.width,
     this.height,
@@ -75,6 +77,7 @@ class _ShadedNetworkImageState extends State<ShadedNetworkImage> {
       placeholderBuilder: widget.placeholderBuilder,
       errorBuilder: widget.errorBuilder,
       effect: widget.effect,
+      fallbackColor: widget.fallbackColor,
     );
   }
 }
@@ -87,6 +90,7 @@ class ShadedImage extends StatefulWidget {
   final WidgetBuilder placeholderBuilder;
   final WidgetBuilder errorBuilder;
   final ImageShaderEffect effect;
+  final Color fallbackColor;
 
   const ShadedImage({
     super.key,
@@ -94,6 +98,7 @@ class ShadedImage extends StatefulWidget {
     required this.placeholderBuilder,
     required this.errorBuilder,
     required this.effect,
+    required this.fallbackColor,
     this.fit = BoxFit.contain,
     this.width,
     this.height,
@@ -106,7 +111,7 @@ class ShadedImage extends StatefulWidget {
 class _ShadedImageState extends State<ShadedImage> {
   static const _animationFrameInterval = Duration(milliseconds: 1000 ~/ 24);
 
-  late Future<(ui.FragmentProgram, ui.Image)> _imageFuture;
+  late Future<_ShadedImageData> _imageFuture;
   ValueNotifier<double>? _timeNotifier;
   Timer? _animationTimer;
   Stopwatch? _animationClock;
@@ -117,6 +122,7 @@ class _ShadedImageState extends State<ShadedImage> {
     _imageFuture = _loadShaderImage(
       widget.imageProvider,
       widget.effect.assetPath,
+      widget.fallbackColor,
     );
     if (widget.effect.isAnimated) _startAnimation();
   }
@@ -125,10 +131,12 @@ class _ShadedImageState extends State<ShadedImage> {
   void didUpdateWidget(ShadedImage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.imageProvider != oldWidget.imageProvider ||
-        widget.effect.assetPath != oldWidget.effect.assetPath) {
+        widget.effect.assetPath != oldWidget.effect.assetPath ||
+        widget.fallbackColor != oldWidget.fallbackColor) {
       _imageFuture = _loadShaderImage(
         widget.imageProvider,
         widget.effect.assetPath,
+        widget.fallbackColor,
       );
     }
     if (widget.effect.isAnimated != oldWidget.effect.isAnimated) {
@@ -167,7 +175,7 @@ class _ShadedImageState extends State<ShadedImage> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return FutureBuilder<(ui.FragmentProgram, ui.Image)>(
+        return FutureBuilder<_ShadedImageData>(
           future: _imageFuture,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
@@ -178,9 +186,9 @@ class _ShadedImageState extends State<ShadedImage> {
             }
             if (!snapshot.hasData) return widget.placeholderBuilder(context);
 
-            final (program, image) = snapshot.requireData;
+            final data = snapshot.requireData;
             final paintSize = _imagePaintSize(
-              image: image,
+              image: data.image,
               constraints: constraints,
               width: widget.width,
               height: widget.height,
@@ -191,8 +199,9 @@ class _ShadedImageState extends State<ShadedImage> {
               child: RepaintBoundary(
                 child: CustomPaint(
                   painter: ShadedImagePainter(
-                    image: image,
-                    program: program,
+                    image: data.image,
+                    program: data.program,
+                    fallbackImage: data.fallbackImage,
                     fit: widget.fit,
                     effect: widget.effect,
                     timeListenable: _timeNotifier,
@@ -237,21 +246,133 @@ Size _imagePaintSize({
   return Size(paintWidth, paintHeight);
 }
 
-Future<(ui.FragmentProgram, ui.Image)> _loadShaderImage(
+Future<_ShadedImageData> _loadShaderImage(
   ImageProvider imageProvider,
   String shaderAssetPath,
+  Color fallbackColor,
 ) async {
-  final results = await Future.wait<Object>([
-    loadFragmentProgram(shaderAssetPath),
-    loadImageProviderAsUiImage(imageProvider),
+  final image = await loadImageProviderAsUiImage(imageProvider);
+  final results = await Future.wait<Object?>([
+    loadFragmentProgram(shaderAssetPath).then<Object?>(
+      (program) => program,
+      onError: (Object error, StackTrace stackTrace) {
+        debugPrint('[ShadedImage] Failed to load shader: $error\n$stackTrace');
+        return null;
+      },
+    ),
+    _loadMonochromeImage(image, fallbackColor).then<Object?>(
+      (fallbackImage) => fallbackImage,
+      onError: (Object error, StackTrace stackTrace) {
+        debugPrint(
+          '[ShadedImage] Failed to build monochrome fallback: $error\n$stackTrace',
+        );
+        return null;
+      },
+    ),
   ]);
 
-  return (results[0] as ui.FragmentProgram, results[1] as ui.Image);
+  return _ShadedImageData(
+    image: image,
+    program: results[0] as ui.FragmentProgram?,
+    fallbackImage: results[1] as ui.Image?,
+  );
+}
+
+Future<ui.Image> _loadMonochromeImage(ui.Image image, Color color) async {
+  final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  if (byteData == null) {
+    throw StateError('Unable to read image pixels.');
+  }
+
+  final rgba = Uint8List.fromList(
+    byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+  );
+  final monochromeRgba = await compute(
+    _monochromeRgba,
+    _MonochromeTransformRequest(
+      rgba: rgba,
+      tintRed: (color.r * 255).round(),
+      tintGreen: (color.g * 255).round(),
+      tintBlue: (color.b * 255).round(),
+      tintAlpha: color.a,
+    ),
+  );
+
+  final completer = Completer<ui.Image>();
+  ui.decodeImageFromPixels(
+    monochromeRgba,
+    image.width,
+    image.height,
+    ui.PixelFormat.rgba8888,
+    completer.complete,
+  );
+
+  return completer.future;
+}
+
+Uint8List _monochromeRgba(_MonochromeTransformRequest request) {
+  final pixels = request.rgba;
+
+  for (var offset = 0; offset < pixels.length; offset += 4) {
+    final luminance =
+        (0.299 * pixels[offset] +
+            0.587 * pixels[offset + 1] +
+            0.114 * pixels[offset + 2]) /
+        255;
+
+    pixels[offset] = (request.tintRed * luminance)
+        .round()
+        .clamp(0, 255)
+        .toInt();
+    pixels[offset + 1] = (request.tintGreen * luminance)
+        .round()
+        .clamp(0, 255)
+        .toInt();
+    pixels[offset + 2] = (request.tintBlue * luminance)
+        .round()
+        .clamp(0, 255)
+        .toInt();
+    pixels[offset + 3] = (pixels[offset + 3] * request.tintAlpha)
+        .round()
+        .clamp(0, 255)
+        .toInt();
+  }
+
+  return pixels;
+}
+
+class _MonochromeTransformRequest {
+  final Uint8List rgba;
+  final int tintRed;
+  final int tintGreen;
+  final int tintBlue;
+  final double tintAlpha;
+
+  const _MonochromeTransformRequest({
+    required this.rgba,
+    required this.tintRed,
+    required this.tintGreen,
+    required this.tintBlue,
+    required this.tintAlpha,
+  });
+}
+
+class _ShadedImageData {
+  final ui.Image image;
+  final ui.FragmentProgram? program;
+  final ui.Image? fallbackImage;
+
+  const _ShadedImageData({
+    required this.image,
+    required this.program,
+    required this.fallbackImage,
+  });
 }
 
 class ShadedImagePainter extends CustomPainter {
   final ui.Image image;
-  final ui.FragmentProgram program;
+  final ui.FragmentProgram? program;
+  final ui.Image? fallbackImage;
   final BoxFit fit;
   final ImageShaderEffect effect;
   final ValueListenable<double>? timeListenable;
@@ -259,6 +380,7 @@ class ShadedImagePainter extends CustomPainter {
   ShadedImagePainter({
     required this.image,
     required this.program,
+    required this.fallbackImage,
     required this.effect,
     this.timeListenable,
     this.fit = BoxFit.contain,
@@ -274,26 +396,62 @@ class ShadedImagePainter extends CustomPainter {
       fitted.destination,
       Offset.zero & size,
     );
-    final shader = program.fragmentShader();
-    effect.applyUniforms(
-      shader,
-      image,
-      destination.size,
-      timeListenable?.value ?? 0,
-    );
+    final program = this.program;
 
     canvas
       ..save()
       ..clipRect(destination)
-      ..translate(destination.left, destination.top)
-      ..drawRect(Offset.zero & destination.size, Paint()..shader = shader)
-      ..restore();
+      ..translate(destination.left, destination.top);
+
+    if (program == null) {
+      _paintFallback(canvas, destination.size);
+      canvas.restore();
+      return;
+    }
+
+    try {
+      final shader = program.fragmentShader();
+      effect.applyUniforms(
+        shader,
+        image,
+        destination.size,
+        timeListenable?.value ?? 0,
+      );
+      canvas.drawRect(Offset.zero & destination.size, Paint()..shader = shader);
+    } catch (error, stackTrace) {
+      debugPrint('[ShadedImage] Failed to apply shader: $error\n$stackTrace');
+      _paintFallback(canvas, destination.size);
+    } finally {
+      canvas.restore();
+    }
+  }
+
+  void _paintFallback(Canvas canvas, Size size) {
+    final fallbackImage = this.fallbackImage;
+    if (fallbackImage == null) {
+      paintImage(
+        canvas: canvas,
+        rect: Offset.zero & size,
+        image: image,
+        fit: BoxFit.fill,
+      );
+      return;
+    }
+
+    paintImage(
+      canvas: canvas,
+      rect: Offset.zero & size,
+      image: fallbackImage,
+      fit: BoxFit.fill,
+      filterQuality: FilterQuality.medium,
+    );
   }
 
   @override
   bool shouldRepaint(ShadedImagePainter oldDelegate) {
     return image != oldDelegate.image ||
         program != oldDelegate.program ||
+        fallbackImage != oldDelegate.fallbackImage ||
         fit != oldDelegate.fit ||
         effect != oldDelegate.effect ||
         timeListenable != oldDelegate.timeListenable;
