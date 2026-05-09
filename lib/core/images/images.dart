@@ -170,7 +170,12 @@ class _ShadedImageState extends State<ShadedImage> {
         return FutureBuilder<(ui.FragmentProgram, ui.Image)>(
           future: _imageFuture,
           builder: (context, snapshot) {
-            if (snapshot.hasError) return widget.errorBuilder(context);
+            if (snapshot.hasError) {
+              debugPrint(
+                '[ShadedImage] Failed to load shader/image: ${snapshot.error}\n${snapshot.stackTrace}',
+              );
+              return widget.errorBuilder(context);
+            }
             if (!snapshot.hasData) return widget.placeholderBuilder(context);
 
             final (program, image) = snapshot.requireData;

@@ -3,36 +3,34 @@ import 'dart:ui';
 // ignore: implementation_imports
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/widgets.dart' show IconData;
-import 'package:flutter/material.dart' show Colors;
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/images/shader_effects.dart';
 import 'package:onosendai/features/theme/four_colors_theme.dart';
 
-class Cga0Theme extends FourColorsTheme {
+class VaporTheme extends FourColorsTheme {
 
   @override
-  Color color0 = Colors.black;
+  Color color0 = Color.fromRGBO(0x2A, 0x18, 0x40, 1);
   @override
-  Color color1 = Color.fromRGBO(55, 255, 55, 1);
+  Color color1 = Color.fromRGBO(0xC9, 0xB0, 0xFF, 1);
   @override
-  Color color2 = Color.fromRGBO(255, 55, 55, 1);
+  Color color2 = Color.fromRGBO(0xFF, 0xB3, 0xD9, 1);
   @override
-  Color color3 = Color.fromRGBO(255, 255, 55, 1);
+  Color color3 = Color.fromRGBO(0xA3, 0xF0, 0xD0, 1);
   
   @override
-  IconData get icon => LucideIcons.appWindow;
+  IconData get icon => LucideIcons.videotape;
   
   @override
-  ImageShaderEffect get imageShaderEffect => const Cga0Effect();
+  ImageShaderEffect get imageShaderEffect => const VhsEffect();
   
   @override
   TextStyle get mainFont => TextStyle(
-    fontFamily: 'DotGothic16',
+    fontFamily: 'VCROSDMono',
     fontSize: 16,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.5,
+    fontWeight: FontWeight.w400,
     color: color3,
   );
 
-  // secondary: VT323
+  // secondary: Space Mono
 }

@@ -16,7 +16,10 @@ import 'package:onosendai/features/theme/classic/light_theme.dart';
 import 'package:onosendai/features/theme/classic/matrix_theme.dart';
 import 'package:onosendai/features/theme/classic/poetry_theme.dart';
 import 'package:onosendai/features/theme/classic/vt320_theme.dart';
+import 'package:onosendai/features/theme/expanded/bw_theme.dart';
 import 'package:onosendai/features/theme/expanded/cga0_theme.dart';
+import 'package:onosendai/features/theme/expanded/neon_theme.dart';
+import 'package:onosendai/features/theme/expanded/vapor_theme.dart';
 
 enum AppThemeId {
   dark,
@@ -32,6 +35,9 @@ enum AppThemeId {
   vt320,
   eink,
   cga0,
+  bw,
+  vapor,
+  neon,
 }
 
 const appThemeIdPrefsKey = 'app_theme_id';
@@ -93,7 +99,10 @@ extension AppThemeIdX on AppThemeId {
       AppThemeId.crypt => 'Crypt',
       AppThemeId.bubblegum => 'Bubblegum',
       AppThemeId.eink => 'E-Ink',
-      AppThemeId.cga0 => 'CGA 0'
+      AppThemeId.cga0 => 'CGA 0',
+      AppThemeId.bw => 'B & W',
+      AppThemeId.vapor => 'Vaporwave',
+      AppThemeId.neon => 'Neon',
     };
   }
 
@@ -111,7 +120,10 @@ extension AppThemeIdX on AppThemeId {
       AppThemeId.bubblegum => BubblegumTheme(),
       AppThemeId.vt320 => Vt320Theme(),
       AppThemeId.eink => EinkTheme(),
-      AppThemeId.cga0 => CGA0Theme(),
+      AppThemeId.cga0 => Cga0Theme(),
+      AppThemeId.bw => BwTheme(),
+      AppThemeId.vapor => VaporTheme(),
+      AppThemeId.neon => NeonTheme(),
     };
   }
 }
@@ -137,7 +149,6 @@ extension AppColorsX on BuildContext {
 }
 
 abstract class CyberTheme {
-
   IconData get icon;
 
   TextStyle get mainFont;

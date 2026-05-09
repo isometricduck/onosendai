@@ -560,18 +560,16 @@ class _ContentImage extends StatelessWidget {
     return Semantics(
       label: altText.isEmpty ? 'Post image' : altText,
       image: true,
-      child: Container(
+      child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 420),
-        decoration: BoxDecoration(
-          border: Border.all(color: theme.cardBorder, width: 1),
-        ),
-        clipBehavior: Clip.hardEdge,
-        child: ShadedNetworkImage(
-          url: url,
-          fit: BoxFit.contain,
-          effect: theme.imageShaderEffect,
-          placeholderBuilder: (_) => const _ContentImagePlaceholder(),
-          errorBuilder: (_) => const _ContentImageError(),
+        child: ClipRect(
+          child: ShadedNetworkImage(
+            url: url,
+            fit: BoxFit.contain,
+            effect: theme.imageShaderEffect,
+            placeholderBuilder: (_) => const _ContentImagePlaceholder(),
+            errorBuilder: (_) => const _ContentImageError(),
+          ),
         ),
       ),
     );

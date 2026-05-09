@@ -39,6 +39,9 @@ flutter:
     - assets/shaders/dither.glsl
     - assets/shaders/scanlines.glsl
     - assets/shaders/crt.glsl
+    - assets/shaders/cga0.glsl
+    - assets/shaders/vhs.glsl
+    - assets/shaders/neon.glsl
   fonts:
     - family: EBGaramond
       fonts:
@@ -158,4 +161,26 @@ flutter:
     - family: VT323
       fonts:
         - asset: assets/fonts/VT323/VT323-Regular.ttf
+          weight: 400
+    - family: DotGothic16
+      fonts:
+        - asset: assets/fonts/DotGothic16/DotGothic16-Regular.ttf
+          weight: 400
+    - family: Orbitron
+      fonts:
+        - asset: assets/fonts/Orbitron/static/Orbitron-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Orbitron/static/Orbitron-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Orbitron/static/Orbitron-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Orbitron/static/Orbitron-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Orbitron/static/Orbitron-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Orbitron/static/Orbitron-Black.ttf
+          weight: 900
+    - family: VCROSDMono
+      fonts:
+        - asset: assets/fonts/VCROSDMono/VCR_OSD_MONO_1.001.ttf
           weight: 400
