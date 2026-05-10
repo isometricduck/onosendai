@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/boot/presentation/riverpod/boot_animation_provider.dart';
+import 'package:onosendai/features/settings/presentation/riverpod/font_scale_provider.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -12,6 +13,7 @@ class SettingsPage extends ConsumerWidget {
     final theme = context.theme;
     final isMobile = MediaQuery.sizeOf(context).width < 600;
     final bootAnimationEnabled = ref.watch(bootAnimationEnabledProvider);
+    final fontScale = ref.watch(fontScaleProvider);
 
     final body = ColoredBox(
       color: theme.pageBackground,
@@ -33,6 +35,14 @@ class SettingsPage extends ConsumerWidget {
                   onChanged: (value) => ref
                       .read(bootAnimationEnabledProvider.notifier)
                       .setEnabled(value),
+                ),
+                const SizedBox(height: 8),
+                _SettingSliderTile(
+                  icon: LucideIcons.type,
+                  title: 'Text size',
+                  value: fontScale,
+                  onChanged: (value) =>
+                      ref.read(fontScaleProvider.notifier).setScale(value),
                 ),
               ],
             ),
@@ -84,6 +94,79 @@ class _InlineHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SettingSliderTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final double value;
+  final ValueChanged<double> onChanged;
+
+  const _SettingSliderTile({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
+
+  String get _label => '${(value * 100).round()}%';
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.cardBorder),
+        color: theme.cardBackground,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: theme.headingText, size: 20),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.mainFont.copyWith(
+                      color: theme.headingText,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Text(
+                  _label,
+                  style: theme.mainFont.copyWith(
+                    color: theme.metaText,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: theme.actionIcon,
+                inactiveTrackColor: theme.cardBorder,
+                thumbColor: theme.actionIcon,
+                overlayColor: theme.actionIcon.withValues(alpha: 0.12),
+              ),
+              child: Slider(
+                value: value,
+                min: 0.8,
+                max: 1.6,
+                divisions: 4,
+                onChanged: onChanged,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

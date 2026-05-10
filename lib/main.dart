@@ -8,6 +8,7 @@ import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/boot/presentation/boot_glitch.dart';
 import 'package:onosendai/features/boot/presentation/riverpod/boot_animation_provider.dart';
 import 'package:onosendai/features/login/presentation/pages/landing_page.dart';
+import 'package:onosendai/features/settings/presentation/riverpod/font_scale_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,7 @@ Future<void> main() async {
   final initialBootAnimationEnabled = isEink ? false : await _loadInitialBootAnimationEnabled(
     appPrefs,
   );
+  final initialFontScale = await _loadInitialFontScale(appPrefs);
 
   const app = MainApp();
 
@@ -35,6 +37,7 @@ Future<void> main() async {
         initialBootAnimationEnabledProvider.overrideWithValue(
           initialBootAnimationEnabled,
         ),
+        initialFontScaleProvider.overrideWithValue(initialFontScale),
       ],
       child: initialBootAnimationEnabled
           ? const GlitchBootAnimation(
@@ -57,6 +60,16 @@ Future<AppThemeId> _loadInitialAppTheme(SharedPreferencesAppPrefs prefs) async {
   }
 }
 
+Future<double> _loadInitialFontScale(SharedPreferencesAppPrefs prefs) async {
+  try {
+    return await prefs.getDouble(fontScalePrefsKey) ?? 1.0;
+  } catch (error, stackTrace) {
+    debugPrint('Failed to load initial font scale: $error');
+    debugPrintStack(stackTrace: stackTrace);
+    return 1.0;
+  }
+}
+
 Future<bool> _loadInitialBootAnimationEnabled(
   SharedPreferencesAppPrefs prefs,
 ) async {
@@ -75,10 +88,19 @@ class MainApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appTheme = ref.watch(appThemeProvider);
+    final fontScale = ref.watch(fontScaleProvider);
 
     return AppThemeScope(
       theme: appTheme.theme,
-      child: const MaterialApp(home: _AuthGate()),
+      child: MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(fontScale),
+          ),
+          child: child!,
+        ),
+        home: const _AuthGate(),
+      ),
     );
   }
 }

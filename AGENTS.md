@@ -7,7 +7,7 @@ All communication with the cyberspace API is handled in the package cyberspace_c
 The code is organized in vertical features with a clean architecture approach:
 
 lib/
-├── core/           # theme, router, DI, network, error handling
+├── core/           # router, DI, network, error handling
 ├── features/
 │   ├── feed/
 │   │   ├── data/
@@ -48,9 +48,10 @@ All navigation state lives in a single top-level `AppShell` widget.
 
 ## Theming
 
-The theme class defines the elements that go into a theme. For the time being, the dark theme is hardcoded.
-All icons are taken from the `lucide_icons` package.
+The app uses a semantic theme approach. ClassicTheme map these to four colors, where "foreground", "border" and "dimmed" are in the same family and with a strong contrast to "background". FourColorsTheme maps four distinct colors.
+
+All themes use a shader to display images. The classes in @lib/core/images/shaders set the default parameters and the actual shaders live in assets/shaders/
 
 ## Tools
 
-Use 'fvm flutter' to run any flutter commands.
+Use 'puro flutter' to run any flutter commands.
