@@ -1,29 +1,21 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:onosendai/core/navigation/rail_destinations.dart';
+import 'package:onosendai/core/navigation/destinations.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 
 class RailBody extends StatelessWidget {
   final double width;
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
-  final bool extended;
-  final bool hasUnreadNotifications;
+  final List<AppDestination> destinations;
 
   const RailBody({super.key, 
     required this.width,
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-    required this.extended,
-    required this.hasUnreadNotifications,
+    required this.destinations
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = context.cyberTheme;
-    final railSelectedIndex =
-        railDestinations.indexWhere((e) => e == selectedIndex);
+    final railSelectedIndex = 0;
+        //railDestinations.indexWhere((e) => e == selectedIndex);
 
     return Row(
       children: [
@@ -31,10 +23,10 @@ class RailBody extends StatelessWidget {
           width: width,
           child: NavigationRail(
             selectedIndex: railSelectedIndex,
-            onDestinationSelected: (railIndex) {
+            /*onDestinationSelected: (railIndex) {
               onDestinationSelected(railDestinations[railIndex].$1);
-            },
-            extended: extended,
+            },*/
+            //extended: extended,
             backgroundColor: theme.navBackground,
             indicatorColor: theme.navIndicator,
             selectedIconTheme: IconThemeData(color: theme.navSelectedIcon),
@@ -46,23 +38,23 @@ class RailBody extends StatelessWidget {
               color: theme.navUnselectedLabel,
             ),
             destinations: [
-              for (final (_, destination) in _railDestinations)
+              for (final destination in destinations)
                 NavigationRailDestination(
-                  icon: _DestinationIcon(
+                  icon: DestinationIcon(
                     destination: destination,
-                    hasUnreadNotifications: hasUnreadNotifications,
+                    hasUnreadNotifications: false,
                   ),
-                  selectedIcon: _DestinationIcon(
+                  selectedIcon: DestinationIcon(
                     destination: destination,
-                    hasUnreadNotifications: hasUnreadNotifications,
+                    hasUnreadNotifications: false,
                   ),
-                  label: Text(destination.label),
+                  label: Text(destination.value.label),
                 ),
             ],
           ),
         ),
         VerticalDivider(width: 1, color: theme.navBorder),
-        Expanded(child: _destinations[selectedIndex].page!),
+        //Expanded(child: _destinations[selectedIndex].page!),
       ],
     );
   }

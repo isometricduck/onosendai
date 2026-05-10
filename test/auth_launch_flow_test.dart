@@ -202,7 +202,7 @@ void main() {
       expect(find.text('Login'), findsOneWidget);
       expect(find.text('feed'), findsOneWidget);
       expect(storage.reads, 0);
-      expect(find.byType(AppShell), findsNothing);
+      expect(find.byType(AppUI), findsNothing);
       expect(find.byType(LoginDialog), findsNothing);
 
       await tester.tap(find.text('Login'));
@@ -221,7 +221,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(storage.reads, 1);
-      expect(find.byType(AppShell), findsOneWidget);
+      expect(find.byType(AppUI), findsOneWidget);
       expect(find.byType(NavigationBar), findsOneWidget);
       expect(find.byType(LoginDialog), findsNothing);
     },

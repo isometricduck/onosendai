@@ -115,7 +115,7 @@ class _AuthGate extends ConsumerWidget {
     return tokens.when(
       loading: () => const _LoadingPage(),
       error: (_, _) => const LandingPage(),
-      data: (tokens) => tokens == null ? const LandingPage() : const AppShell(),
+      data: (tokens) => tokens == null ? const LandingPage() : const AppUI(),
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/images/images.dart';
-import 'package:onosendai/core/navigation/app_shell.dart';
+import 'package:onosendai/core/navigation/app_ui.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/login/presentation/login_dialog.dart';
 
@@ -33,7 +33,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_showFeed) return const AppShell();
+    if (_showFeed) return const AppUI();
 
     final theme = context.cyberTheme;
 

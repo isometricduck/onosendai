@@ -1,4 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:onosendai/core/navigation/destinations.dart';
+import 'package:onosendai/features/feed/presentation/pages/eink_feed_page.dart';
+import 'package:onosendai/features/theme/classic_theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
+
+const einkDestinations = <AppDestination>[
+  AppDestination.feed,
+  AppDestination.bookmarks,
+  AppDestination.about,
+  AppDestination.logout,
+];
 
 class EinkShell extends StatefulWidget {
   const EinkShell({super.key});
@@ -7,11 +19,11 @@ class EinkShell extends StatefulWidget {
   State<EinkShell> createState() => _EinkShellState();
 }
 
-class _EinkShellState extends State<_EinkShell> {
+class _EinkShellState extends State<EinkShell> {
   var _selectedIndex = 0;
 
   void _selectDestination(int index) {
-    final destination = _einkDestinations[index];
+    /*final destination = _einkDestinations[index];
 
     if (destination.dialog != null) {
       showDialog<void>(
@@ -21,20 +33,20 @@ class _EinkShellState extends State<_EinkShell> {
       return;
     }
 
-    if (destination.page == null) return;
+    if (destination.page == null) return;*/
     setState(() => _selectedIndex = index);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.cyberTheme as ClassicTheme;
-    final destination = _einkDestinations[_selectedIndex];
+    //final destination = einkDestinations[_selectedIndex];
 
-    final page = destination.page;
+    //final page = destination.page;
 
     return Scaffold(
       backgroundColor: theme.background,
-      body: switch (page) {
+      body: /*switch (page) {
         EinkFeedPage() => EinkFeedPage(
           source: page.source,
           destinationSheetBuilder: (context, hideOverlay) =>
@@ -47,9 +59,8 @@ class _EinkShellState extends State<_EinkShell> {
                   });
                 },
               ),
-        ),
-        _ => const SizedBox.shrink(),
-      },
+        ),*/
+        const SizedBox.shrink(),
     );
   }
 }
@@ -66,7 +77,7 @@ class _EinkDestinationSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.cyberTheme as ClassicTheme;
-    final einkDestinations = _einkDestinations.indexed;
+    final einkIdxDestinations = einkDestinations.indexed;
 
     return Material(
       color: theme.background,
@@ -76,7 +87,7 @@ class _EinkDestinationSheet extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
           child: Row(
             children: [
-              for (final (index, destination) in einkDestinations) ...[
+              for (final (index, destination) in einkIdxDestinations) ...[
                 Expanded(
                   child: _EinkDestinationButton(
                     destination: destination,
@@ -84,7 +95,7 @@ class _EinkDestinationSheet extends StatelessWidget {
                     onTap: () => onDestinationSelected(index),
                   ),
                 ),
-                if (index != einkDestinations.last.$1) const SizedBox(width: 8),
+                //if (index != einkDestinations.last) const SizedBox(width: 8),
               ],
             ],
           ),
@@ -95,7 +106,7 @@ class _EinkDestinationSheet extends StatelessWidget {
 }
 
 class _EinkDestinationButton extends StatelessWidget {
-  final _AppDestination destination;
+  final AppDestination destination;
   final bool selected;
   final VoidCallback onTap;
 
@@ -122,10 +133,10 @@ class _EinkDestinationButton extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(destination.icon, color: contentColor, size: 28),
+              Icon(destination.value.icon, color: contentColor, size: 28),
               const SizedBox(height: 6),
               Text(
-                destination.label,
+                destination.value.label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.mainFont.copyWith(
@@ -141,9 +152,9 @@ class _EinkDestinationButton extends StatelessWidget {
   }
 }
 
-Widget _aboutDialog(
+/* Widget _aboutDialog(
   BuildContext context,
   ValueChanged<int> onDestinationSelected,
 ) {
   return const OnosendaiAboutDialog();
-}
+} */

@@ -1,48 +1,73 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onosendai/core/navigation/destinations.dart';
+import 'package:onosendai/core/providers/nav_provider.dart';
+import 'package:onosendai/features/about/presentation/pages/about_page.dart';
+import 'package:onosendai/features/bookmarks/presentation/pages/bookmarks_page.dart';
+import 'package:onosendai/features/feed/presentation/pages/feed_page.dart';
+import 'package:onosendai/features/journal/presentation/pages/journal_page.dart';
+import 'package:onosendai/features/netiquette/presentation/pages/netiquette_page.dart';
+import 'package:onosendai/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:onosendai/features/settings/presentation/pages/settings_page.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
+import 'package:onosendai/features/write/presentation/pages/write_page.dart';
 
-class MobileShell extends StatelessWidget {
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
-  final bool hasUnreadNotifications;
+const visibleDestinations = <AppDestination>[
+  AppDestination.feed,
+  AppDestination.write,
+  AppDestination.themes,
+  AppDestination.notifications,
+];
 
-  const MobileShell({super.key, 
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-    required this.hasUnreadNotifications,
-  });
+const hiddenDestinations = <AppDestination>[
+  AppDestination.menu,
+  AppDestination.journal,
+  AppDestination.bookmarks,
+  AppDestination.settings,
+  AppDestination.netiquette,
+  AppDestination.about,
+  AppDestination.logout,
+];
 
-  void _selectDestination(int index) {
-    final destination = _destinations[index];
+class MobileShell extends ConsumerWidget {
 
-    if (destination.sheet != null) {
-      showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        builder: (context) => destination.sheet!(context, _selectDestination),
-      );
-      return;
+  const MobileShell({super.key});
+
+  Widget getPage(AppDestination destination) {
+    switch(destination) {
+      case AppDestination.feed:
+        return FeedPage();
+      case AppDestination.write:
+        return WritePage();
+      case AppDestination.themes:
+        return FeedPage();
+      case AppDestination.notifications:
+        return NotificationsPage();
+      case AppDestination.menu:
+        return FeedPage();
+      case AppDestination.journal:
+        return JournalPage();
+      case AppDestination.bookmarks:
+        return BookmarksPage();
+      case AppDestination.settings:
+        return SettingsPage();
+      case AppDestination.netiquette:
+        return NetiquettePage();
+      case AppDestination.about:
+        return AboutPage();
+      case AppDestination.logout:
+        return AboutPage();
     }
-
-    if (destination.dialog != null) {
-      showDialog<void>(
-        context: context,
-        builder: (context) => destination.dialog!(context, _selectDestination),
-      );
-      return;
-    }
-
-    setState(() => _selectedIndex = index);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = context.cyberTheme;
-    final navigationSelectedIndex = _navigationSelectedIndex(selectedIndex);
+    final navState = ref.read(navNotifierProvider);
 
     return Scaffold(
       backgroundColor: theme.pageBackground,
-      body: _destinations[selectedIndex].page!,
+      body: getPage(navState.destination),
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           iconTheme: WidgetStateProperty.resolveWith((states) {
@@ -59,22 +84,19 @@ class MobileShell extends StatelessWidget {
           ),
         ),
         child: NavigationBar(
-          selectedIndex: navigationSelectedIndex,
-          onDestinationSelected: onDestinationSelected,
+          selectedIndex: 0,
           backgroundColor: theme.navBackground,
           indicatorColor: theme.navIndicator,
           destinations: [
-            for (final destination in _destinations.take(
-              _primaryNavigationDestinationCount,
-            ))
+            for (final destination in visibleDestinations)
               NavigationDestination(
-                icon: _DestinationIcon(
+                icon: DestinationIcon(
                   destination: destination,
-                  hasUnreadNotifications: hasUnreadNotifications,
+                  hasUnreadNotifications: false,
                 ),
-                selectedIcon: _DestinationIcon(
+                selectedIcon: DestinationIcon(
                   destination: destination,
-                  hasUnreadNotifications: hasUnreadNotifications,
+                  hasUnreadNotifications: false,
                 ),
                 label: '',
               ),

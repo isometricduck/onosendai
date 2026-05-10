@@ -1,5 +1,6 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 
 /* typedef AppDestinationSheetBuilder =
     Widget Function(
@@ -11,6 +12,34 @@ typedef AppDestinationDialogBuilder =
       BuildContext context,
       ValueChanged<int> onDestinationSelected,
     ); */
+
+class DestinationIcon extends StatelessWidget {
+  final AppDestination destination;
+  final bool hasUnreadNotifications;
+
+  const DestinationIcon({super.key, 
+    required this.destination,
+    required this.hasUnreadNotifications,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = Icon(destination.value.icon);
+    final showBadge =
+        hasUnreadNotifications &&
+        destination == AppDestination.notifications;
+
+    if (!showBadge) return icon;
+
+    final theme = context.cyberTheme;
+
+    return Badge(
+      smallSize: 8,
+      backgroundColor: theme.notificationUnreadIcon,
+      child: icon,
+    );
+  }
+}
 
 class Destination {
   final IconData icon;

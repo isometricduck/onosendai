@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:onosendai/core/navigation/app_shell.dart';
+import 'package:onosendai/core/navigation/app_ui.dart';
 import 'package:onosendai/core/navigation/destinations.dart';
 import 'package:onosendai/core/navigation/mobile_destinations.dart';
+import 'package:onosendai/core/navigation/mobile_shell.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 
 class MenuBottomSheet extends StatelessWidget {
@@ -28,9 +29,9 @@ class MenuBottomSheet extends StatelessWidget {
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
             children: [
-              for (var index = 0; index < mobileDestinations.length; index++)
+              for (var index = 0; index < visibleDestinations.length; index++)
                   _MenuDestinationTile(
-                    destination: mobileDestinations[index],
+                    destination: visibleDestinations[index],
                     onTap: () {
                       Navigator.pop(context);
                       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -63,10 +64,10 @@ class _MenuDestinationTile extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(destination.icon, color: theme.headingText),
+            Icon(destination.value.icon, color: theme.headingText),
             const SizedBox(height: 8),
             Text(
-              destination.label,
+              destination.value.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.mainFont.copyWith(color: theme.headingText),
