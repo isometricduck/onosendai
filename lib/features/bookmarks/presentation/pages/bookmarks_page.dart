@@ -15,7 +15,7 @@ class BookmarksPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final bookmarksAsync = ref.watch(bookmarksNotifierProvider);
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
@@ -178,7 +178,7 @@ class _InlineHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Row(
       children: [
@@ -204,7 +204,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Text(
       label,
@@ -229,7 +229,7 @@ class _CenteredSpinner extends StatelessWidget {
         height: 18,
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
-          color: context.theme.actionIcon,
+          color: context.cyberTheme.actionIcon,
         ),
       ),
     );
@@ -244,7 +244,7 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Center(
       child: Padding(
@@ -278,7 +278,7 @@ class _RetryButtonState extends State<_RetryButton> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -308,7 +308,7 @@ class _DimmedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: context.theme.mainFont);
+    return Text(text, style: context.cyberTheme.mainFont);
   }
 }
 

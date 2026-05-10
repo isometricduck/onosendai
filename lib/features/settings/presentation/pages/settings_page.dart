@@ -10,7 +10,7 @@ class SettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final isMobile = MediaQuery.sizeOf(context).width < 600;
     final bootAnimationEnabled = ref.watch(bootAnimationEnabledProvider);
     final fontScale = ref.watch(fontScaleProvider);
@@ -79,7 +79,7 @@ class _InlineHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Row(
       children: [
@@ -115,7 +115,7 @@ class _SettingSliderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -186,7 +186,7 @@ class _SettingSwitchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return DecoratedBox(
       decoration: BoxDecoration(

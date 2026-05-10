@@ -41,7 +41,7 @@ class _JournalPageState extends ConsumerState<JournalPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final journalAsync = ref.watch(journalNotifierProvider);
 
     return ColoredBox(
@@ -141,7 +141,7 @@ class _JournalList extends ConsumerWidget {
 }
 
 Future<bool> _confirmDeleteNote(BuildContext context) async {
-  final theme = context.theme;
+  final theme = context.cyberTheme;
   return await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
@@ -197,7 +197,7 @@ class _CenteredSpinner extends StatelessWidget {
         height: 18,
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
-          color: context.theme.actionIcon,
+          color: context.cyberTheme.actionIcon,
         ),
       ),
     );
@@ -217,7 +217,7 @@ class _InlineSpinner extends StatelessWidget {
           height: 14,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
-            color: context.theme.actionIcon,
+            color: context.cyberTheme.actionIcon,
           ),
         ),
       ),
@@ -233,7 +233,7 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -267,7 +267,7 @@ class _RetryButtonState extends State<_RetryButton> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -296,6 +296,6 @@ class _DimmedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: context.theme.mainFont);
+    return Text(text, style: context.cyberTheme.mainFont);
   }
 }

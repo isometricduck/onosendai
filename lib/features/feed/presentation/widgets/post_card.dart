@@ -49,7 +49,7 @@ class _PostCardState extends ConsumerState<PostCard> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final post = widget.post;
     final showDelete =
         widget.onDelete != null &&
@@ -139,7 +139,7 @@ class _PostCardState extends ConsumerState<PostCard> {
   }
 
   Widget _buildContent(BuildContext context, Post post) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final contentStyle = theme.mainFont;
 
     final content = RichText.decodeContent(post.content);
@@ -265,7 +265,7 @@ class _PostSectionDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return SizedBox(
       height: 1,
@@ -345,7 +345,7 @@ class _PostActionBar extends StatelessWidget {
 }
 
 Future<bool> _confirmDeletePost(BuildContext context) async {
-  final theme = context.theme;
+  final theme = context.cyberTheme;
   return await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
@@ -405,7 +405,7 @@ class _PostActionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Tooltip(
       message: tooltip,
@@ -445,7 +445,7 @@ class ReplyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Container(
       decoration: BoxDecoration(
@@ -494,7 +494,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -536,7 +536,7 @@ class _ReplyHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return Row(
       children: [
         Expanded(
@@ -595,7 +595,7 @@ class _TopicChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(

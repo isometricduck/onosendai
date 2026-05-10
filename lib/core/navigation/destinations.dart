@@ -1,156 +1,65 @@
-part of 'app_shell.dart';
+import 'package:flutter/widgets.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
-typedef _AppDestinationSheetBuilder =
+/* typedef AppDestinationSheetBuilder =
     Widget Function(
       BuildContext context,
       ValueChanged<int> onDestinationSelected,
     );
-typedef _AppDestinationDialogBuilder =
+typedef AppDestinationDialogBuilder =
     Widget Function(
       BuildContext context,
       ValueChanged<int> onDestinationSelected,
-    );
+    ); */
 
-// This class is asking for a refactor
-class _AppDestination {
+class Destination {
   final IconData icon;
   final String label;
-  final Widget? page;
-  final _AppDestinationSheetBuilder? sheet;
-  final _AppDestinationDialogBuilder? dialog;
-  final bool includeInMenu;
 
-  const _AppDestination({
-    required this.icon,
-    required this.label,
-    required this.page,
-  }) : sheet = null,
-       dialog = null,
-       includeInMenu = true;
-
-  const _AppDestination.sheet({
-    required this.icon,
-    required this.label,
-    required this.sheet,
-    this.includeInMenu = true,
-  }) : page = null,
-       dialog = null;
-
-  const _AppDestination.dialog({
-    required this.icon,
-    required this.label,
-    required this.dialog,
-  }) : page = null,
-       sheet = null,
-       includeInMenu = true;
+  const Destination({required this.icon, required this.label});
 }
 
-const _destinations = <_AppDestination>[
-  _AppDestination(
+enum AppDestination {
+  feed(Destination(
     icon: LucideIcons.menuSquare,
-    label: 'Feed',
-    page: FeedPage(),
-  ),
-  _AppDestination(icon: LucideIcons.pencil, label: 'Write', page: WritePage()),
-  _AppDestination.sheet(
+    label: 'Feed'
+  )),
+  write(Destination(icon: LucideIcons.pencil, label: 'Write')),
+  themes(Destination(
     icon: LucideIcons.eye,
-    label: 'Themes',
-    sheet: _themeBottomSheet,
-  ),
-  _AppDestination(
+    label: 'Themes'
+  )),
+  notifications(Destination(
     icon: LucideIcons.bell,
-    label: 'Notifs',
-    page: NotificationsPage(),
-  ),
-  _AppDestination.sheet(
+    label: 'Notifs'
+  )),
+  menu(Destination(
     icon: LucideIcons.menu,
     label: 'Menu',
-    sheet: _menuBottomSheet,
-    includeInMenu: false,
-  ),
-  _AppDestination(
+  )),
+  journal(Destination(
     icon: LucideIcons.book,
-    label: 'Journal',
-    page: JournalPage(),
-  ),
-  _AppDestination(
+    label: 'Journal'
+  )),
+  bookmarks(Destination(
     icon: LucideIcons.bookmark,
-    label: 'Bookmarks',
-    page: BookmarksPage(),
-  ),
-  _AppDestination(
+    label: 'Bookmarks'
+  )),
+  settings(Destination(
     icon: LucideIcons.wrench,
-    label: 'Settings',
-    page: SettingsPage(),
-  ),
-  _AppDestination(
+    label: 'Settings'
+  )),
+  netiquette(Destination(
     icon: LucideIcons.scale,
-    label: 'Netiquette',
-    page: NetiquettePage(),
-  ),
-  _AppDestination(icon: LucideIcons.info, label: 'About', page: AboutPage()),
-  _AppDestination.dialog(
+    label: 'Netiquette'
+  )),
+  about(Destination(icon: LucideIcons.info, label: 'About')),
+  logout(Destination(
     icon: LucideIcons.logOut,
-    label: 'Log out',
-    dialog: _logoutDialog,
-  ),
-];
+    label: 'Log out'
+  ));
 
-const _primaryNavigationDestinationCount = 5;
-const _notificationsDestinationIndex = 3;
-
-int _navigationSelectedIndex(int selectedIndex) {
-  if (selectedIndex < _primaryNavigationDestinationCount) return selectedIndex;
-  return _primaryNavigationDestinationCount - 1;
+  final Destination value;
+  const AppDestination(this.value);
 }
 
-class _DestinationIcon extends StatelessWidget {
-  final _AppDestination destination;
-  final bool hasUnreadNotifications;
-
-  const _DestinationIcon({
-    required this.destination,
-    required this.hasUnreadNotifications,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final icon = Icon(destination.icon);
-    final showBadge =
-        hasUnreadNotifications &&
-        _destinations.indexOf(destination) == _notificationsDestinationIndex;
-
-    if (!showBadge) return icon;
-
-    final theme = context.theme;
-
-    return Badge(
-      smallSize: 8,
-      backgroundColor: theme.notificationUnreadIcon,
-      child: icon,
-    );
-  }
-}
-
-const _einkDestinations = <_AppDestination>[
-  _AppDestination(
-    icon: LucideIcons.menuSquare,
-    label: 'Feed',
-    page: EinkFeedPage(),
-  ),
-  _AppDestination(
-    icon: LucideIcons.bookmark,
-    label: 'Bookmarks',
-    page: EinkFeedPage(source: EinkFeedSource.bookmarks),
-  ),
-  _AppDestination.dialog(
-    icon: LucideIcons.info,
-    label: 'About',
-    dialog: _aboutDialog,
-  ),
-  _AppDestination.dialog(
-    icon: LucideIcons.logOut,
-    label: 'Log out',
-    dialog: _logoutDialog,
-  ),
-];

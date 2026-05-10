@@ -19,7 +19,7 @@ class AboutContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return ListView(
       padding: padding,
@@ -96,7 +96,7 @@ class _InlineHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Row(
       children: [

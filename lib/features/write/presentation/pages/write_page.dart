@@ -68,7 +68,7 @@ class _WritePageState extends ConsumerState<WritePage> {
   }
 
   void _showMessage(String message) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -81,7 +81,7 @@ class _WritePageState extends ConsumerState<WritePage> {
   }
 
   Future<bool> _confirmFeedPublish() async {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
@@ -128,7 +128,7 @@ class _WritePageState extends ConsumerState<WritePage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final canSubmit = _contentController.text.trim().isNotEmpty;
     final publishLabel = switch (_destination) {
       _WriteDestination.journal => 'Save Note',

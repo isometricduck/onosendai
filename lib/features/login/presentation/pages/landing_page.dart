@@ -35,7 +35,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
   Widget build(BuildContext context) {
     if (_showFeed) return const AppShell();
 
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Scaffold(
       backgroundColor: theme.pageBackground,
@@ -70,7 +70,7 @@ class _LandingCopy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -123,7 +123,7 @@ class _LandingImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Semantics(
       label: 'Caveman Hamlet',
@@ -152,7 +152,7 @@ class _LandingImagePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return SizedBox(
       height: 180,
@@ -175,7 +175,7 @@ class _LandingImageError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return SizedBox(
       height: 120,
@@ -202,7 +202,7 @@ class _HomeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final enabled = onPressed != null;
 
     return OutlinedButton(

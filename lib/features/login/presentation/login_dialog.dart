@@ -94,12 +94,12 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
     }
 
     return Dialog(
-      backgroundColor: context.theme.dialogBackground,
+      backgroundColor: context.cyberTheme.dialogBackground,
       child: Container(
         width: 380,
         decoration: BoxDecoration(
-          color: context.theme.dialogBackground,
-          border: Border.all(color: context.theme.dialogBorder, width: 1),
+          color: context.cyberTheme.dialogBackground,
+          border: Border.all(color: context.cyberTheme.dialogBorder, width: 1),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -117,7 +117,7 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
                       fontFamily: 'monospace',
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: context.theme.headingText,
+                      color: context.cyberTheme.headingText,
                       letterSpacing: 2.0,
                     ),
                   ),
@@ -130,7 +130,7 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
                       style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 13,
-                        color: context.theme.metaText,
+                        color: context.cyberTheme.metaText,
                         letterSpacing: 1.0,
                       ),
                     ),
@@ -140,7 +140,7 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
             ),
 
             // Divider
-            Divider(height: 1, thickness: 1, color: context.theme.divider),
+            Divider(height: 1, thickness: 1, color: context.cyberTheme.divider),
 
             // Form
             Padding(
@@ -193,7 +193,7 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
                         size: 18,
-                        color: context.theme.metaText,
+                        color: context.cyberTheme.metaText,
                       ),
                     ),
                   ),
@@ -215,7 +215,7 @@ class _LoginDialogState extends ConsumerState<LoginDialog> {
                       style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 12,
-                        color: context.theme.headingText,
+                        color: context.cyberTheme.headingText,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -241,7 +241,7 @@ class _FieldLabel extends StatelessWidget {
       style: TextStyle(
         fontFamily: 'monospace',
         fontSize: 13,
-        color: context.theme.headingText,
+        color: context.cyberTheme.headingText,
         letterSpacing: 0.5,
       ),
     );
@@ -276,8 +276,8 @@ class _LoginTextField extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: context.theme.inputBackground,
-            border: Border.all(color: context.theme.inputBorder, width: 1),
+            color: context.cyberTheme.inputBackground,
+            border: Border.all(color: context.cyberTheme.inputBorder, width: 1),
           ),
           child: TextField(
             controller: controller,
@@ -290,7 +290,7 @@ class _LoginTextField extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'monospace',
               fontSize: 13,
-              color: context.theme.headingText,
+              color: context.cyberTheme.headingText,
               letterSpacing: 0.3,
             ),
             decoration: InputDecoration(
@@ -310,7 +310,7 @@ class _LoginTextField extends StatelessWidget {
                 minHeight: 0,
               ),
             ),
-            cursorColor: context.theme.inputFocusBorder,
+            cursorColor: context.cyberTheme.inputFocusBorder,
           ),
         ),
       ],
@@ -347,13 +347,13 @@ class _LoginButtonState extends State<_LoginButton> {
           duration: const Duration(milliseconds: 120),
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: context.theme.dialogBackground,
+            color: context.cyberTheme.dialogBackground,
             border: Border.all(
               color: widget.isLoading
-                  ? context.theme.secondaryButtonBorder
+                  ? context.cyberTheme.secondaryButtonBorder
                   : _hovered
-                  ? context.theme.headingText
-                  : context.theme.secondaryButtonBorder,
+                  ? context.cyberTheme.headingText
+                  : context.cyberTheme.secondaryButtonBorder,
               width: 1,
             ),
           ),
@@ -364,7 +364,7 @@ class _LoginButtonState extends State<_LoginButton> {
                   height: 14,
                   child: CircularProgressIndicator(
                     strokeWidth: 1.5,
-                    color: context.theme.actionIcon,
+                    color: context.cyberTheme.actionIcon,
                   ),
                 )
               : Text(
@@ -372,7 +372,7 @@ class _LoginButtonState extends State<_LoginButton> {
                   style: TextStyle(
                     fontFamily: 'monospace',
                     fontSize: 13,
-                    color: context.theme.headingText,
+                    color: context.cyberTheme.headingText,
                     letterSpacing: 1.5,
                   ),
                 ),

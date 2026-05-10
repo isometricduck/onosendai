@@ -1,11 +1,13 @@
-part of 'app_shell.dart';
+import 'package:flutter/material.dart';
+import 'package:onosendai/core/navigation/rail_body.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 
-class _DesktopShell extends StatelessWidget {
+class DesktopShell extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final bool hasUnreadNotifications;
 
-  const _DesktopShell({
+  const DesktopShell({super.key, 
     required this.selectedIndex,
     required this.onDestinationSelected,
     required this.hasUnreadNotifications,
@@ -13,12 +15,12 @@ class _DesktopShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Scaffold(
       backgroundColor: theme.pageBackground,
       body: SafeArea(
-        child: _RailBody(
+        child: RailBody(
           width: 220,
           selectedIndex: selectedIndex,
           onDestinationSelected: onDestinationSelected,

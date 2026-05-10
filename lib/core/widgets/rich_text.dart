@@ -66,7 +66,7 @@ class _RichTextState extends State<RichText> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final textStyle = widget.style ?? theme.mainFont;
     final audioAttachment = _AudioAttachment.fromAttachments(
       widget.attachments,
@@ -217,7 +217,7 @@ class _InlineRichTextState extends State<_InlineRichText> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final linkStyle = widget.style.copyWith(
       color: theme.headingText,
       decoration: TextDecoration.underline,
@@ -496,7 +496,7 @@ class _AudioAttachmentBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Semantics(
       button: true,
@@ -562,7 +562,7 @@ class _ContentImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Semantics(
       label: altText.isEmpty ? 'Post image' : altText,
@@ -589,7 +589,7 @@ class _ContentDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return SizedBox(
       width: double.infinity,
@@ -604,7 +604,7 @@ class _ContentImagePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return SizedBox(
       height: 180,
@@ -627,7 +627,7 @@ class _ContentImageError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return SizedBox(
       height: 120,

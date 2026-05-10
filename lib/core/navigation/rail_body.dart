@@ -1,13 +1,17 @@
-part of 'app_shell.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:onosendai/core/navigation/rail_destinations.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 
-class _RailBody extends StatelessWidget {
+class RailBody extends StatelessWidget {
   final double width;
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final bool extended;
   final bool hasUnreadNotifications;
 
-  const _RailBody({
+  const RailBody({super.key, 
     required this.width,
     required this.selectedIndex,
     required this.onDestinationSelected,
@@ -17,16 +21,19 @@ class _RailBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
-    final navigationSelectedIndex = _navigationSelectedIndex(selectedIndex);
+    final theme = context.cyberTheme;
+    final railSelectedIndex =
+        railDestinations.indexWhere((e) => e == selectedIndex);
 
     return Row(
       children: [
         SizedBox(
           width: width,
           child: NavigationRail(
-            selectedIndex: navigationSelectedIndex,
-            onDestinationSelected: onDestinationSelected,
+            selectedIndex: railSelectedIndex,
+            onDestinationSelected: (railIndex) {
+              onDestinationSelected(railDestinations[railIndex].$1);
+            },
             extended: extended,
             backgroundColor: theme.navBackground,
             indicatorColor: theme.navIndicator,
@@ -39,9 +46,7 @@ class _RailBody extends StatelessWidget {
               color: theme.navUnselectedLabel,
             ),
             destinations: [
-              for (final destination in _destinations.take(
-                _primaryNavigationDestinationCount,
-              ))
+              for (final (_, destination) in _railDestinations)
                 NavigationRailDestination(
                   icon: _DestinationIcon(
                     destination: destination,

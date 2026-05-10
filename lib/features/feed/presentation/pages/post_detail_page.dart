@@ -67,7 +67,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
       setState(() => _isReplying = false);
     } catch (error) {
       if (!mounted) return;
-      final theme = context.theme;
+      final theme = context.cyberTheme;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -95,7 +95,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
           .deleteReply(reply.replyId);
     } catch (error) {
       if (!mounted) return;
-      final theme = context.theme;
+      final theme = context.cyberTheme;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -120,7 +120,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final detailAsync = ref.watch(postDetailNotifierProvider(widget.post));
     final currentUser = ref.watch(currentUserProfileProvider).valueOrNull;
     debugPrint("Current user: $currentUser");
@@ -298,7 +298,7 @@ class _PostDetailList extends StatelessWidget {
 }
 
 Future<bool> _confirmDeleteReply(BuildContext context) async {
-  final theme = context.theme;
+  final theme = context.cyberTheme;
   return await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
@@ -350,7 +350,7 @@ class _InlineHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return Row(
       children: [
         IconButton(
@@ -380,7 +380,7 @@ class _RepliesHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return Text(
       count == 1 ? '1 REPLY' : '$count REPLIES',
       style: TextStyle(
@@ -410,7 +410,7 @@ class _ReplyComposer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -453,7 +453,7 @@ class _ReplyTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final enabled = onTap != null;
     return TextButton(
       onPressed: onTap,
@@ -480,7 +480,7 @@ class _ReplyTextButton extends StatelessWidget {
             )
           : Text(
             '[R]EPLY',
-            style: context.theme.mainFont,),
+            style: context.cyberTheme.mainFont,),
     );
   }
 }
@@ -496,7 +496,7 @@ class _CenteredSpinner extends StatelessWidget {
         height: 18,
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
-          color: context.theme.actionIcon,
+          color: context.cyberTheme.actionIcon,
         ),
       ),
     );
@@ -516,7 +516,7 @@ class _InlineSpinner extends StatelessWidget {
           height: 14,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
-            color: context.theme.actionIcon,
+            color: context.cyberTheme.actionIcon,
           ),
         ),
       ),
@@ -532,7 +532,7 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -580,7 +580,7 @@ class _RetryButtonState extends State<_RetryButton> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),

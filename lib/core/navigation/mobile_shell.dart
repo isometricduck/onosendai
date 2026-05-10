@@ -1,19 +1,43 @@
-part of 'app_shell.dart';
+import 'package:flutter/widgets.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 
-class _MobileShell extends StatelessWidget {
+class MobileShell extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final bool hasUnreadNotifications;
 
-  const _MobileShell({
+  const MobileShell({super.key, 
     required this.selectedIndex,
     required this.onDestinationSelected,
     required this.hasUnreadNotifications,
   });
 
+  void _selectDestination(int index) {
+    final destination = _destinations[index];
+
+    if (destination.sheet != null) {
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => destination.sheet!(context, _selectDestination),
+      );
+      return;
+    }
+
+    if (destination.dialog != null) {
+      showDialog<void>(
+        context: context,
+        builder: (context) => destination.dialog!(context, _selectDestination),
+      );
+      return;
+    }
+
+    setState(() => _selectedIndex = index);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final navigationSelectedIndex = _navigationSelectedIndex(selectedIndex);
 
     return Scaffold(

@@ -145,7 +145,7 @@ class AppThemeScope extends InheritedWidget {
 }
 
 extension AppColorsX on BuildContext {
-  CyberTheme get theme => AppThemeScope.of(this);
+  CyberTheme get cyberTheme => AppThemeScope.of(this);
 }
 
 abstract class CyberTheme {

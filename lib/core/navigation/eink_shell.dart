@@ -1,10 +1,10 @@
-part of 'app_shell.dart';
+import 'package:flutter/widgets.dart';
 
-class _EinkShell extends StatefulWidget {
-  const _EinkShell();
+class EinkShell extends StatefulWidget {
+  const EinkShell({super.key});
 
   @override
-  State<_EinkShell> createState() => _EinkShellState();
+  State<EinkShell> createState() => _EinkShellState();
 }
 
 class _EinkShellState extends State<_EinkShell> {
@@ -27,7 +27,7 @@ class _EinkShellState extends State<_EinkShell> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme as ClassicTheme;
+    final theme = context.cyberTheme as ClassicTheme;
     final destination = _einkDestinations[_selectedIndex];
 
     final page = destination.page;
@@ -65,7 +65,7 @@ class _EinkDestinationSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme as ClassicTheme;
+    final theme = context.cyberTheme as ClassicTheme;
     final einkDestinations = _einkDestinations.indexed;
 
     return Material(
@@ -107,7 +107,7 @@ class _EinkDestinationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme as ClassicTheme;
+    final theme = context.cyberTheme as ClassicTheme;
     final contentColor = selected ? theme.background : theme.foreground;
 
     return InkWell(
