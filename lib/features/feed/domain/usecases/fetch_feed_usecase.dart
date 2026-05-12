@@ -6,6 +6,9 @@ class FetchFeedUseCase {
 
   FetchFeedUseCase(this._repo);
 
+  Future<List<Post>> cached({int limit = 20}) =>
+      _repo.fetchCached(limit: limit);
+
   Future<PagedResult<Post>> call({String? cursor, int limit = 20}) =>
       _repo.fetch(cursor: cursor, limit: limit);
 }

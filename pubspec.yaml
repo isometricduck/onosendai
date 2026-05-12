@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cyberspace_client:
-    git: 
+    git:
       url: https://github.com/isometricduck/cyberspace_client
       ref: main
   flutter_riverpod: ^2.6.1
@@ -21,6 +21,8 @@ dependencies:
   cached_network_image: ^3.4.1
   url_launcher: ^6.3.2
   package_info_plus: ^8.3.0
+  drift: ^2.23.0
+  drift_flutter: ^0.2.4
 
 dev_dependencies:
   flutter_test:
@@ -29,6 +31,7 @@ dev_dependencies:
   http: ^1.6.0
   riverpod_generator: ^2.6.1
   build_runner: ^2.4.15
+  drift_dev: ^2.23.0
 
 flutter:
   uses-material-design: true

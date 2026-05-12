@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
+import 'package:onosendai/core/providers/database_provider.dart';
 import 'package:onosendai/features/journal/data/repositories/journal_repository_impl.dart';
 import 'package:onosendai/features/journal/domain/entities/journal_state.dart';
 import 'package:onosendai/features/journal/domain/repositories/journal_repository.dart';
@@ -8,7 +8,10 @@ import 'package:onosendai/features/journal/domain/usecases/delete_journal_note_u
 import 'package:onosendai/features/journal/domain/usecases/fetch_journal_usecase.dart';
 
 final journalRepositoryProvider = Provider<JournalRepository>((ref) {
-  return JournalRepositoryImpl(ref.read(cyberspaceClientProvider));
+  return JournalRepositoryImpl(
+    ref.read(cyberspaceClientProvider),
+    ref.read(appDatabaseProvider),
+  );
 });
 
 final fetchJournalUseCaseProvider = Provider<FetchJournalUseCase>((ref) {
@@ -27,15 +30,15 @@ final journalNotifierProvider =
 class JournalNotifier extends AsyncNotifier<JournalState> {
   @override
   Future<JournalState> build() async {
-    try {
-      debugPrint('Building JournalNotifier');
-      final page = await ref.read(fetchJournalUseCaseProvider)();
-      debugPrint('Page: $page');
-      return JournalState(notes: page.data, nextCursor: page.cursor);
-    } catch (e, st) {
-      debugPrint('Error in JournalNotifier: $e\n$st');
-      rethrow;
+    final useCase = ref.read(fetchJournalUseCaseProvider);
+
+    final cached = await useCase.cached();
+    if (cached.isNotEmpty) {
+      state = AsyncData(JournalState(notes: cached));
     }
+
+    final page = await useCase();
+    return JournalState(notes: page.data, nextCursor: page.cursor);
   }
 
   Future<void> refresh() async {
@@ -71,6 +74,7 @@ class JournalNotifier extends AsyncNotifier<JournalState> {
   Future<void> deleteNote(String noteId) async {
     final current = state.valueOrNull;
     await ref.read(deleteJournalNoteUseCaseProvider)(noteId);
+    await ref.read(journalRepositoryProvider).deleteFromCache(noteId);
     if (current == null) {
       ref.invalidateSelf();
       return;

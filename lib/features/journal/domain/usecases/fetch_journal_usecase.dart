@@ -6,6 +6,9 @@ class FetchJournalUseCase {
 
   FetchJournalUseCase(this._repo);
 
+  Future<List<Note>> cached({int limit = 20}) =>
+      _repo.fetchCached(limit: limit);
+
   Future<PagedResult<Note>> call({String? cursor, int limit = 20}) =>
       _repo.fetch(cursor: cursor, limit: limit);
 }
