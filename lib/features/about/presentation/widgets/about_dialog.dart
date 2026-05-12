@@ -7,7 +7,7 @@ class OnosendaiAboutDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final height = MediaQuery.sizeOf(context).height;
 
     return Dialog(
@@ -76,7 +76,7 @@ class _AboutDialogButtonState extends State<_AboutDialogButton> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),

@@ -22,7 +22,7 @@ class NetiquettePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     final body = ColoredBox(
@@ -93,7 +93,7 @@ class _InlineHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Row(
       children: [
@@ -120,7 +120,7 @@ class _RuleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

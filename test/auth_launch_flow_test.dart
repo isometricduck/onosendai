@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:onosendai/core/auth/token_storage.dart';
-import 'package:onosendai/core/navigation/app_shell.dart';
+import 'package:onosendai/core/navigation/app_ui.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/core/prefs/app_prefs.dart';
@@ -202,7 +202,7 @@ void main() {
       expect(find.text('Login'), findsOneWidget);
       expect(find.text('feed'), findsOneWidget);
       expect(storage.reads, 0);
-      expect(find.byType(AppShell), findsNothing);
+      expect(find.byType(AppUI), findsNothing);
       expect(find.byType(LoginDialog), findsNothing);
 
       await tester.tap(find.text('Login'));
@@ -221,7 +221,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(storage.reads, 1);
-      expect(find.byType(AppShell), findsOneWidget);
+      expect(find.byType(AppUI), findsOneWidget);
       expect(find.byType(NavigationBar), findsOneWidget);
       expect(find.byType(LoginDialog), findsNothing);
     },

@@ -1,72 +1,99 @@
-part of 'app_shell.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onosendai/core/navigation/destinations.dart';
+import 'package:onosendai/core/navigation/shell_effect.dart';
+import 'package:onosendai/core/providers/nav_provider.dart';
+import 'package:onosendai/features/about/presentation/widgets/about_dialog.dart';
+import 'package:onosendai/features/feed/presentation/pages/eink_feed_page.dart';
+import 'package:onosendai/features/login/presentation/logout_dialog.dart';
+import 'package:onosendai/features/theme/classic_theme.dart';
+import 'package:onosendai/features/theme/cyber_theme.dart';
 
-class _EinkShell extends StatefulWidget {
-  const _EinkShell();
+const einkDestinations = <AppDestination>[
+  AppDestination.feed,
+  AppDestination.bookmarks,
+  AppDestination.about,
+  AppDestination.logout,
+];
 
-  @override
-  State<_EinkShell> createState() => _EinkShellState();
-}
+class EinkShell extends ConsumerWidget {
+  const EinkShell({super.key});
 
-class _EinkShellState extends State<_EinkShell> {
-  var _selectedIndex = 0;
+  void _selectDestination(WidgetRef ref, AppDestination destination) {
+    final nav = ref.read(navNotifierProvider.notifier);
 
-  void _selectDestination(int index) {
-    final destination = _einkDestinations[index];
-
-    if (destination.dialog != null) {
-      showDialog<void>(
-        context: context,
-        builder: (context) => destination.dialog!(context, _selectDestination),
-      );
-      return;
+    switch (destination) {
+      case AppDestination.about:
+        nav.showEffect(ShellEffect.about);
+      case AppDestination.logout:
+        nav.showEffect(ShellEffect.logout);
+        return;
+      default:
+        nav.goTo(destination);
     }
-
-    if (destination.page == null) return;
-    setState(() => _selectedIndex = index);
   }
 
   @override
-  Widget build(BuildContext context) {
-    final theme = context.theme as ClassicTheme;
-    final destination = _einkDestinations[_selectedIndex];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = context.cyberTheme as ClassicTheme;
+    final navState = ref.watch(navNotifierProvider);
 
-    final page = destination.page;
+    ref.listen(navNotifierProvider, (previous, next) {
+      final effect = next.pendingEffect;
+      if (effect == null) return;
+
+      switch (effect) {
+        case ShellEffect.themes:
+        case ShellEffect.menu:
+          break;
+        case ShellEffect.about:
+          showDialog<void>(
+            context: context,
+            builder: (context) => OnosendaiAboutDialog(),
+          );
+          break;
+        case ShellEffect.logout:
+          showDialog<void>(
+            context: context,
+            builder: (context) => LogoutDialog(),
+          );
+          break;
+      }
+    });
 
     return Scaffold(
       backgroundColor: theme.background,
-      body: switch (page) {
-        EinkFeedPage() => EinkFeedPage(
-          source: page.source,
+      body: 
+        EinkFeedPage(
+          // This is horrible
+          source: navState.destination == AppDestination.feed ? EinkFeedSource.feed : EinkFeedSource.bookmarks,
           destinationSheetBuilder: (context, hideOverlay) =>
               _EinkDestinationSheet(
-                selectedIndex: _selectedIndex,
-                onDestinationSelected: (index) {
+                selectedDestination: navState.destination,
+                onDestinationSelected: (destination) {
                   hideOverlay();
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) _selectDestination(index);
+                    _selectDestination(ref, destination);
                   });
                 },
               ),
         ),
-        _ => const SizedBox.shrink(),
-      },
     );
   }
 }
 
 class _EinkDestinationSheet extends StatelessWidget {
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
+  final AppDestination selectedDestination;
+  final ValueChanged<AppDestination> onDestinationSelected;
 
   const _EinkDestinationSheet({
-    required this.selectedIndex,
+    required this.selectedDestination,
     required this.onDestinationSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme as ClassicTheme;
-    final einkDestinations = _einkDestinations.indexed;
+    final theme = context.cyberTheme as ClassicTheme;
 
     return Material(
       color: theme.background,
@@ -76,15 +103,15 @@ class _EinkDestinationSheet extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
           child: Row(
             children: [
-              for (final (index, destination) in einkDestinations) ...[
+              for (final destination in einkDestinations) ...[
                 Expanded(
                   child: _EinkDestinationButton(
                     destination: destination,
-                    selected: index == selectedIndex,
-                    onTap: () => onDestinationSelected(index),
+                    selected: destination == selectedDestination,
+                    onTap: () => onDestinationSelected(destination),
                   ),
                 ),
-                if (index != einkDestinations.last.$1) const SizedBox(width: 8),
+                //if (index != einkDestinations.last) const SizedBox(width: 8),
               ],
             ],
           ),
@@ -95,7 +122,7 @@ class _EinkDestinationSheet extends StatelessWidget {
 }
 
 class _EinkDestinationButton extends StatelessWidget {
-  final _AppDestination destination;
+  final AppDestination destination;
   final bool selected;
   final VoidCallback onTap;
 
@@ -107,7 +134,7 @@ class _EinkDestinationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme as ClassicTheme;
+    final theme = context.cyberTheme as ClassicTheme;
     final contentColor = selected ? theme.background : theme.foreground;
 
     return InkWell(
@@ -122,10 +149,10 @@ class _EinkDestinationButton extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(destination.icon, color: contentColor, size: 28),
+              Icon(destination.value.icon, color: contentColor, size: 28),
               const SizedBox(height: 6),
               Text(
-                destination.label,
+                destination.value.label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.mainFont.copyWith(
@@ -139,11 +166,4 @@ class _EinkDestinationButton extends StatelessWidget {
       ),
     );
   }
-}
-
-Widget _aboutDialog(
-  BuildContext context,
-  ValueChanged<int> onDestinationSelected,
-) {
-  return const OnosendaiAboutDialog();
 }

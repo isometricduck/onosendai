@@ -7,7 +7,7 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     final body = ColoredBox(

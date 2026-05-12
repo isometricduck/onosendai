@@ -45,7 +45,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final notificationsAsync = ref.watch(notificationsNotifierProvider);
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
@@ -216,7 +216,7 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
       ).push(MaterialPageRoute(builder: (_) => PostDetailPage(post: post)));
     } catch (error) {
       if (!mounted) return;
-      final theme = context.theme;
+      final theme = context.cyberTheme;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -233,7 +233,7 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final notification = widget.notification;
     final title = _titleFor(notification);
     final details = _detailsFor(notification);
@@ -361,7 +361,7 @@ class _InlineHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Row(
       children: [
@@ -397,7 +397,7 @@ class _CenteredSpinner extends StatelessWidget {
         height: 18,
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
-          color: context.theme.actionIcon,
+          color: context.cyberTheme.actionIcon,
         ),
       ),
     );
@@ -417,7 +417,7 @@ class _InlineSpinner extends StatelessWidget {
           height: 14,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
-            color: context.theme.actionIcon,
+            color: context.cyberTheme.actionIcon,
           ),
         ),
       ),
@@ -433,7 +433,7 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Center(
       child: Padding(
@@ -469,7 +469,7 @@ class _DimmedText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: context.theme.mainFont.copyWith(color: context.theme.metaText),
+      style: context.cyberTheme.mainFont.copyWith(color: context.cyberTheme.metaText),
     );
   }
 }

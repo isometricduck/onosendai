@@ -20,7 +20,7 @@ class _EinkPostCardState extends State<EinkPostCard> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final post = widget.post;
 
     return Container(
@@ -78,7 +78,7 @@ class _EinkPostCardState extends State<EinkPostCard> {
   }
 
   Widget _buildContent(BuildContext context, Post post) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final contentStyle = theme.mainFont;
 
     final content = RichText.decodeContent(post.content);
@@ -107,7 +107,7 @@ class _PostSectionDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return SizedBox(
       height: 1,
@@ -122,7 +122,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -157,7 +157,7 @@ class _TopicChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(

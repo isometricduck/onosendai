@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:onosendai/core/navigation/app_shell.dart';
+import 'package:onosendai/core/navigation/app_ui.dart';
 import 'package:onosendai/core/prefs/shared_preferences_app_prefs.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
@@ -115,7 +115,7 @@ class _AuthGate extends ConsumerWidget {
     return tokens.when(
       loading: () => const _LoadingPage(),
       error: (_, _) => const LandingPage(),
-      data: (tokens) => tokens == null ? const LandingPage() : const AppShell(),
+      data: (tokens) => tokens == null ? const LandingPage() : const AppUI(),
     );
   }
 }
@@ -125,7 +125,7 @@ class _LoadingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Scaffold(
       backgroundColor: theme.pageBackground,

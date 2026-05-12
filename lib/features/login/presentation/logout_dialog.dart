@@ -23,7 +23,7 @@ class _LogoutDialogState extends ConsumerState<LogoutDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Dialog(
       backgroundColor: theme.dialogBackground,
@@ -127,7 +127,7 @@ class _LogoutDialogButtonState extends State<_LogoutDialogButton> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),

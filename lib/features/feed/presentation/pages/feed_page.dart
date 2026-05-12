@@ -42,7 +42,7 @@ class _FeedPageState extends ConsumerState<FeedPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final feedAsync = ref.watch(feedNotifierProvider);
 
     return ColoredBox(
@@ -160,7 +160,7 @@ class _CenteredSpinner extends StatelessWidget {
         height: 18,
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
-          color: context.theme.actionIcon,
+          color: context.cyberTheme.actionIcon,
         ),
       ),
     );
@@ -180,7 +180,7 @@ class _InlineSpinner extends StatelessWidget {
           height: 14,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
-            color: context.theme.actionIcon,
+            color: context.cyberTheme.actionIcon,
           ),
         ),
       ),
@@ -196,7 +196,7 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -229,7 +229,7 @@ class _RetryButtonState extends State<_RetryButton> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -257,6 +257,6 @@ class _DimmedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: context.theme.mainFont);
+    return Text(text, style: context.cyberTheme.mainFont);
   }
 }

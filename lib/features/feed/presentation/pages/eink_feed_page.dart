@@ -171,7 +171,7 @@ class _EinkFeedPageState extends ConsumerState<EinkFeedPage> {
       setState(() => _overlayVisible = false);
     }
 
-    final theme = context.theme as ClassicTheme;
+    final theme = context.cyberTheme as ClassicTheme;
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: theme.navBackground,
@@ -183,7 +183,7 @@ class _EinkFeedPageState extends ConsumerState<EinkFeedPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final postsAsync = switch (widget.source) {
       EinkFeedSource.feed =>
         ref
@@ -357,7 +357,7 @@ class _PostRepliesSheetState extends ConsumerState<_PostRepliesSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
     final detailAsync = ref.watch(postDetailNotifierProvider(widget.post));
 
     return SafeArea(
@@ -439,7 +439,7 @@ class _RepliesErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Center(
       child: Column(
@@ -461,7 +461,7 @@ class _EinkPageTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -520,7 +520,7 @@ class _ActionsOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -564,7 +564,7 @@ class _OverlayAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Tooltip(
       message: label,
@@ -600,7 +600,7 @@ class _CenteredStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text(message, style: context.theme.mainFont));
+    return Center(child: Text(message, style: context.cyberTheme.mainFont));
   }
 }
 
@@ -612,7 +612,7 @@ class _EinkFeedErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.cyberTheme;
 
     return Center(
       child: Padding(
