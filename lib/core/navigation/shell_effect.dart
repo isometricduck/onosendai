@@ -1,3 +1,6 @@
 enum ShellEffect {
-  logout
+  logout,
+  about,
+  themes,
+  menu
 }
