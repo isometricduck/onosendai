@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/navigation/destinations.dart';
-import 'package:onosendai/core/navigation/menu_bottom_sheet.dart';
+import 'package:onosendai/core/navigation/menu_sheet.dart';
 import 'package:onosendai/core/navigation/shell_effect.dart';
-import 'package:onosendai/core/navigation/themes_bottom_sheet.dart';
+import 'package:onosendai/core/navigation/themes_sheet.dart';
 import 'package:onosendai/core/providers/nav_provider.dart';
 import 'package:onosendai/features/about/presentation/widgets/about_dialog.dart';
 import 'package:onosendai/features/bookmarks/presentation/pages/bookmarks_page.dart';
@@ -86,8 +86,6 @@ class MobileShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = context.cyberTheme;
     final navState = ref.watch(navNotifierProvider);
-
-    debugPrint("Building Mobile shell");
 
     ref.listen(navNotifierProvider, (previous, next) {
       final effect = next.pendingEffect;

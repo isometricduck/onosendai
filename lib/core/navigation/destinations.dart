@@ -2,17 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 
-/* typedef AppDestinationSheetBuilder =
-    Widget Function(
-      BuildContext context,
-      ValueChanged<int> onDestinationSelected,
-    );
-typedef AppDestinationDialogBuilder =
-    Widget Function(
-      BuildContext context,
-      ValueChanged<int> onDestinationSelected,
-    ); */
-
 class DestinationIcon extends StatelessWidget {
   final AppDestination destination;
   final bool hasUnreadNotifications;

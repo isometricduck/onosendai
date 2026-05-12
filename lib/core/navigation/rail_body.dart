@@ -4,18 +4,24 @@ import 'package:onosendai/features/theme/cyber_theme.dart';
 
 class RailBody extends StatelessWidget {
   final double width;
+  final bool extended;
   final List<AppDestination> destinations;
+  final AppDestination selectedDestination;
+  final ValueChanged<AppDestination> onSelectDestination;
 
-  const RailBody({super.key, 
+  const RailBody({
+    super.key,
     required this.width,
-    required this.destinations
+    required this.extended,
+    required this.destinations,
+    required this.selectedDestination,
+    required this.onSelectDestination,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = context.cyberTheme;
-    final railSelectedIndex = 0;
-        //railDestinations.indexWhere((e) => e == selectedIndex);
+    final railSelectedIndex = destinations.indexOf(selectedDestination);
 
     return Row(
       children: [
@@ -23,10 +29,10 @@ class RailBody extends StatelessWidget {
           width: width,
           child: NavigationRail(
             selectedIndex: railSelectedIndex,
-            /*onDestinationSelected: (railIndex) {
-              onDestinationSelected(railDestinations[railIndex].$1);
-            },*/
-            //extended: extended,
+            onDestinationSelected: (railIndex) {
+              onSelectDestination(destinations[railIndex]);
+            },
+            extended: extended,
             backgroundColor: theme.navBackground,
             indicatorColor: theme.navIndicator,
             selectedIconTheme: IconThemeData(color: theme.navSelectedIcon),
