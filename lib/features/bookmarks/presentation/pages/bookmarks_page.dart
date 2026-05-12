@@ -8,6 +8,7 @@ import 'package:onosendai/features/bookmarks/domain/entities/bookmarks_state.dar
 import 'package:onosendai/features/bookmarks/presentation/riverpod/bookmarks_providers.dart';
 import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
+import 'package:onosendai/features/feed/presentation/riverpod/selected_post_provider.dart';
 import 'package:onosendai/features/feed/presentation/widgets/post_card.dart';
 
 class BookmarksPage extends ConsumerWidget {
@@ -76,7 +77,7 @@ class BookmarksPage extends ConsumerWidget {
   }
 }
 
-class _BookmarksList extends StatelessWidget {
+class _BookmarksList extends ConsumerWidget {
   final BookmarksState state;
   final bool showInlineHeader;
   final Future<void> Function() onRefresh;
@@ -90,7 +91,25 @@ class _BookmarksList extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
+    void openPost(Post post, {bool initiallyReplying = false}) {
+      if (isMobile) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PostDetailPage(
+              post: post,
+              initiallyReplying: initiallyReplying,
+            ),
+          ),
+        );
+      } else {
+        ref.read(selectedPostProvider.notifier).state =
+            (post, initiallyReplying);
+      }
+    }
+
     if (state.isEmpty) {
       return RefreshIndicator(
         onRefresh: onRefresh,
@@ -137,15 +156,8 @@ class _BookmarksList extends StatelessWidget {
             return PostCard(
               post: post,
               onDelete: onDeletePost,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => PostDetailPage(post: post)),
-              ),
-              onReply: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) =>
-                      PostDetailPage(post: post, initiallyReplying: true),
-                ),
-              ),
+              onTap: () => openPost(post),
+              onReply: () => openPost(post, initiallyReplying: true),
             );
           }
           cursor += state.posts.length;

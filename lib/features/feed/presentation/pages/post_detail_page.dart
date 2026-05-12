@@ -10,11 +10,13 @@ import 'package:onosendai/features/feed/presentation/widgets/post_card.dart';
 class PostDetailPage extends ConsumerStatefulWidget {
   final Post post;
   final bool initiallyReplying;
+  final VoidCallback? onClose;
 
   const PostDetailPage({
     super.key,
     required this.post,
     this.initiallyReplying = false,
+    this.onClose,
   });
 
   @override
@@ -28,6 +30,14 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
   var _isReplying = false;
   var _isSubmittingReply = false;
   String? _deletingReplyId;
+
+  void _close() {
+    if (widget.onClose != null) {
+      widget.onClose!();
+    } else {
+      Navigator.of(context).maybePop();
+    }
+  }
 
   @override
   void initState() {
@@ -115,7 +125,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
         .read(postDetailNotifierProvider(widget.post).notifier)
         .deletePost();
     if (!mounted) return;
-    Navigator.of(context).maybePop();
+    _close();
   }
 
   @override
@@ -155,7 +165,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                 onSubmitReply: _submitReply,
                 onDeletePost: _deletePost,
                 onDeleteReply: _deleteReply,
-                onBack: () => Navigator.of(context).maybePop(),
+                onBack: _close,
                 onRefresh: () => ref
                     .read(postDetailNotifierProvider(widget.post).notifier)
                     .refresh(),

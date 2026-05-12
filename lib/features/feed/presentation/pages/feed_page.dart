@@ -5,6 +5,7 @@ import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/feed/domain/entities/feed_state.dart';
 import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
+import 'package:onosendai/features/feed/presentation/riverpod/selected_post_provider.dart';
 import 'package:onosendai/features/feed/presentation/widgets/post_card.dart';
 
 class FeedPage extends ConsumerStatefulWidget {
@@ -81,7 +82,7 @@ String _errorMessage(Object error) {
   return 'Something went wrong.';
 }
 
-class _FeedList extends StatelessWidget {
+class _FeedList extends ConsumerWidget {
   final FeedState state;
   final ScrollController scrollController;
   final Future<void> Function() onRefresh;
@@ -95,7 +96,25 @@ class _FeedList extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
+    void openPost(Post post, {bool initiallyReplying = false}) {
+      if (isMobile) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PostDetailPage(
+              post: post,
+              initiallyReplying: initiallyReplying,
+            ),
+          ),
+        );
+      } else {
+        ref.read(selectedPostProvider.notifier).state =
+            (post, initiallyReplying);
+      }
+    }
+
     if (state.posts.isEmpty) {
       return RefreshIndicator(
         onRefresh: onRefresh,
@@ -126,15 +145,8 @@ class _FeedList extends StatelessWidget {
             return PostCard(
               post: post,
               onDelete: onDeletePost,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => PostDetailPage(post: post)),
-              ),
-              onReply: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) =>
-                      PostDetailPage(post: post, initiallyReplying: true),
-                ),
-              ),
+              onTap: () => openPost(post),
+              onReply: () => openPost(post, initiallyReplying: true),
             );
           }
           if (state.isLoadingMore) return const _InlineSpinner();

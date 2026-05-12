@@ -7,6 +7,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
+import 'package:onosendai/features/feed/presentation/riverpod/selected_post_provider.dart';
 import 'package:onosendai/features/notifications/domain/entities/notifications_state.dart';
 import 'package:onosendai/features/notifications/presentation/riverpod/notifications_providers.dart';
 
@@ -211,9 +212,14 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
       final post = await client.posts.get(postId);
       if (!mounted) return;
 
-      await Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => PostDetailPage(post: post)));
+      final isMobile = MediaQuery.sizeOf(context).width < 600;
+      if (isMobile) {
+        await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => PostDetailPage(post: post)),
+        );
+      } else {
+        ref.read(selectedPostProvider.notifier).state = (post, false);
+      }
     } catch (error) {
       if (!mounted) return;
       final theme = context.cyberTheme;
