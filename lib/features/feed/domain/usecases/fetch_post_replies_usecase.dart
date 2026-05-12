@@ -6,6 +6,9 @@ class FetchPostRepliesUseCase {
 
   FetchPostRepliesUseCase(this._repo);
 
+  Future<List<Reply>> cached(String postId, {int limit = 20}) =>
+      _repo.fetchCachedReplies(postId, limit: limit);
+
   Future<PagedResult<Reply>> call(
     String postId, {
     String? cursor,

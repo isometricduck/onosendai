@@ -54,4 +54,4 @@ All themes use a shader to display images. The classes in @lib/core/images/shade
 
 ## Tools
 
-Use 'puro flutter' to run any flutter commands.
+Use 'fvm flutter' to run any flutter commands.

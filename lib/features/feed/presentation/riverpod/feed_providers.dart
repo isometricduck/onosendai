@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
+import 'package:onosendai/core/providers/database_provider.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/features/feed/data/repositories/feed_repository_impl.dart';
 import 'package:onosendai/features/feed/domain/entities/feed_state.dart';
@@ -15,7 +16,10 @@ import 'package:onosendai/features/feed/domain/usecases/fetch_post_replies_useca
 import 'package:onosendai/features/notifications/presentation/riverpod/notifications_providers.dart';
 
 final feedRepositoryProvider = Provider<FeedRepository>((ref) {
-  return FeedRepositoryImpl(ref.read(cyberspaceClientProvider));
+  return FeedRepositoryImpl(
+    ref.read(cyberspaceClientProvider),
+    ref.read(appDatabaseProvider),
+  );
 });
 
 final fetchFeedUseCaseProvider = Provider<FetchFeedUseCase>((ref) {
@@ -52,8 +56,15 @@ final postDetailNotifierProvider =
 class FeedNotifier extends AsyncNotifier<FeedState> {
   @override
   Future<FeedState> build() async {
-    final page = await ref.read(fetchFeedUseCaseProvider)();
+    final useCase = ref.read(fetchFeedUseCaseProvider);
+
+    final cached = await useCase.cached();
+    if (cached.isNotEmpty) {
+      state = AsyncData(FeedState(posts: cached));
+    }
+
     _refreshNotificationsSoon();
+    final page = await useCase();
     return FeedState(posts: page.data, nextCursor: page.cursor);
   }
 
@@ -131,9 +142,14 @@ class PostDetailNotifier extends FamilyAsyncNotifier<PostDetailState, Post> {
 
   @override
   Future<PostDetailState> build(Post post) async {
-    final page = await ref
-        .read(fetchPostRepliesUseCaseProvider)
-        .call(post.postId, limit: _pageSize);
+    final useCase = ref.read(fetchPostRepliesUseCaseProvider);
+
+    final cached = await useCase.cached(post.postId, limit: _pageSize);
+    if (cached.isNotEmpty) {
+      state = AsyncData(PostDetailState(post: post, replies: cached));
+    }
+
+    final page = await useCase.call(post.postId, limit: _pageSize);
     return PostDetailState(
       post: post,
       replies: page.data,

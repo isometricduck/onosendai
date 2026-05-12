@@ -1,7 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
+import 'package:onosendai/core/providers/database_provider.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
+import 'package:onosendai/features/bookmarks/data/repositories/bookmarks_repository_impl.dart';
 import 'package:onosendai/features/bookmarks/domain/entities/bookmarks_state.dart';
+import 'package:onosendai/features/bookmarks/domain/repositories/bookmarks_repository.dart';
+import 'package:onosendai/features/bookmarks/domain/usecases/fetch_bookmarks_usecase.dart';
+
+final bookmarksRepositoryProvider = Provider<BookmarksRepository>((ref) {
+  return BookmarksRepositoryImpl(
+    ref.read(cyberspaceClientProvider),
+    ref.read(appDatabaseProvider),
+    ref.read(bookmarkedItemsPrefsProvider),
+  );
+});
+
+final fetchBookmarksUseCaseProvider = Provider<FetchBookmarksUseCase>((ref) {
+  return FetchBookmarksUseCase(ref.read(bookmarksRepositoryProvider));
+});
 
 final bookmarksNotifierProvider =
     AsyncNotifierProvider<BookmarksNotifier, BookmarksState>(
@@ -11,24 +27,20 @@ final bookmarksNotifierProvider =
 class BookmarksNotifier extends AsyncNotifier<BookmarksState> {
   @override
   Future<BookmarksState> build() async {
-    final prefs = ref.read(bookmarkedItemsPrefsProvider);
-    final client = ref.read(cyberspaceClientProvider);
+    final useCase = ref.read(fetchBookmarksUseCaseProvider);
 
-    final postRefs = await prefs.getBookmarkedPosts();
-    final replyRefs = await prefs.getBookmarkedReplies();
+    final cached = await useCase.cached();
+    if (!cached.isEmpty) {
+      state = AsyncData(cached);
+    }
 
-    final posts = await Future.wait([
-      for (final ref in postRefs) client.posts.get(ref.postId),
-    ]);
-    final replies = await Future.wait([
-      for (final ref in replyRefs) client.replies.get(ref.replyId),
-    ]);
-
-    return BookmarksState(posts: posts, replies: replies);
+    return useCase();
   }
 
   Future<void> refresh() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(build);
+    state = await AsyncValue.guard(
+      () => ref.read(fetchBookmarksUseCaseProvider)(),
+    );
   }
 }
