@@ -5,6 +5,12 @@ import 'package:onosendai/core/images/images.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+const _richTextFullscreenImageKey = Key('rich-text-fullscreen-image');
+const _richTextRotateLeftKey = Key('rich-text-image-rotate-left');
+const _richTextRotateRightKey = Key('rich-text-image-rotate-right');
+const _richTextResetKey = Key('rich-text-image-reset');
+const _richTextCloseKey = Key('rich-text-image-close');
+
 class RichText extends StatefulWidget {
   final String content;
   final TextStyle? style;
@@ -563,20 +569,222 @@ class _ContentImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.cyberTheme;
+    final label = altText.isEmpty ? 'Post image' : altText;
 
     return Semantics(
-      label: altText.isEmpty ? 'Post image' : altText,
+      label: label,
       image: true,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 420),
-        child: ClipRect(
-          child: ShadedNetworkImage(
-            url: url,
-            fit: BoxFit.contain,
-            effect: theme.imageShaderEffect,
-            fallbackColor: theme.headingText,
-            placeholderBuilder: (_) => const _ContentImagePlaceholder(),
-            errorBuilder: (_) => const _ContentImageError(),
+      button: true,
+      onTapHint: 'Open image fullscreen',
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _showFullscreenImage(context, url: url, altText: label),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 420),
+            child: ClipRect(
+              child: ShadedNetworkImage(
+                url: url,
+                fit: BoxFit.contain,
+                effect: theme.imageShaderEffect,
+                fallbackColor: theme.headingText,
+                placeholderBuilder: (_) => const _ContentImagePlaceholder(),
+                errorBuilder: (_) => const _ContentImageError(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showFullscreenImage(
+    BuildContext context, {
+    required String url,
+    required String altText,
+  }) {
+    return showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Close image viewer',
+      barrierColor: Colors.black.withValues(alpha: 0.86),
+      transitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (context, _, _) =>
+          _FullscreenImageViewer(url: url, altText: altText),
+    );
+  }
+}
+
+class _FullscreenImageViewer extends StatefulWidget {
+  final String url;
+  final String altText;
+
+  const _FullscreenImageViewer({required this.url, required this.altText});
+
+  @override
+  State<_FullscreenImageViewer> createState() => _FullscreenImageViewerState();
+}
+
+class _FullscreenImageViewerState extends State<_FullscreenImageViewer> {
+  final _transformationController = TransformationController();
+  int _quarterTurns = 0;
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  void _rotateLeft() {
+    setState(() => _quarterTurns = (_quarterTurns - 1) % 4);
+  }
+
+  void _rotateRight() {
+    setState(() => _quarterTurns = (_quarterTurns + 1) % 4);
+  }
+
+  void _reset() {
+    _transformationController.value = Matrix4.identity();
+    setState(() => _quarterTurns = 0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.cyberTheme;
+
+    return Material(
+      color: theme.overlayBackground.withValues(alpha: 0.96),
+      child: SafeArea(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Semantics(
+                label: widget.altText,
+                image: true,
+                child: InteractiveViewer(
+                  transformationController: _transformationController,
+                  minScale: 0.6,
+                  maxScale: 6,
+                  child: Center(
+                    child: RotatedBox(
+                      key: _richTextFullscreenImageKey,
+                      quarterTurns: _quarterTurns,
+                      child: ShadedNetworkImage(
+                        url: widget.url,
+                        fit: BoxFit.contain,
+                        effect: theme.imageShaderEffect,
+                        fallbackColor: theme.headingText,
+                        placeholderBuilder: (_) =>
+                            const _ContentImagePlaceholder(),
+                        errorBuilder: (_) => const _ContentImageError(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 12,
+              right: 12,
+              child: _FullscreenImageToolbar(
+                onRotateLeft: _rotateLeft,
+                onRotateRight: _rotateRight,
+                onReset: _reset,
+                onClose: () => Navigator.of(context).pop(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FullscreenImageToolbar extends StatelessWidget {
+  final VoidCallback onRotateLeft;
+  final VoidCallback onRotateRight;
+  final VoidCallback onReset;
+  final VoidCallback onClose;
+
+  const _FullscreenImageToolbar({
+    required this.onRotateLeft,
+    required this.onRotateRight,
+    required this.onReset,
+    required this.onClose,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.cyberTheme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.dialogBackground,
+        border: Border.all(color: theme.dialogBorder),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _FullscreenImageButton(
+            key: _richTextRotateLeftKey,
+            icon: LucideIcons.rotateCcw,
+            label: 'Rotate left',
+            onTap: onRotateLeft,
+          ),
+          _FullscreenImageButton(
+            key: _richTextRotateRightKey,
+            icon: LucideIcons.rotateCw,
+            label: 'Rotate right',
+            onTap: onRotateRight,
+          ),
+          _FullscreenImageButton(
+            key: _richTextResetKey,
+            icon: LucideIcons.refreshCcw,
+            label: 'Reset image',
+            onTap: onReset,
+          ),
+          _FullscreenImageButton(
+            key: _richTextCloseKey,
+            icon: LucideIcons.x,
+            label: 'Close image viewer',
+            onTap: onClose,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FullscreenImageButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _FullscreenImageButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.cyberTheme;
+
+    return Tooltip(
+      message: label,
+      child: Semantics(
+        button: true,
+        label: label,
+        child: InkWell(
+          onTap: onTap,
+          hoverColor: theme.headingText.withValues(alpha: 0.08),
+          focusColor: theme.headingText.withValues(alpha: 0.08),
+          splashColor: theme.headingText.withValues(alpha: 0.12),
+          child: SizedBox.square(
+            dimension: 42,
+            child: Icon(icon, size: 20, color: theme.actionIcon),
           ),
         ),
       ),
