@@ -2,6 +2,7 @@ import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:onosendai/core/widgets/error_snackbar.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/feed/domain/entities/post_detail_state.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
@@ -135,6 +136,10 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     final currentUser = ref.watch(currentUserProfileProvider).valueOrNull;
     debugPrint("Current user: $currentUser");
     final isMobile = MediaQuery.sizeOf(context).width < 600;
+    ref.listen(postDetailNotifierProvider(widget.post), (_, next) {
+      if (!next.hasError || next.isLoading) return;
+      showErrorSnackBar(context, _errorMessage(next.error!));
+    });
 
     final body = ColoredBox(
       color: theme.pageBackground,
@@ -144,10 +149,24 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 680),
             child: detailAsync.when(
+              skipError: true,
               loading: () => const _CenteredSpinner(),
-              error: (err, _) => _ErrorView(
-                message: _errorMessage(err),
-                onRetry: () => ref
+              error: (_, _) => _PostDetailList(
+                state: PostDetailState(post: widget.post, replies: const []),
+                scrollController: _scrollController,
+                showInlineHeader: !isMobile,
+                showReplyComposer: _isReplying,
+                replyController: _replyController,
+                isSubmittingReply: _isSubmittingReply,
+                currentUserId: currentUser?.userId,
+                deletingReplyId: _deletingReplyId,
+                onReplyChanged: () => setState(() {}),
+                onStartReply: () => setState(() => _isReplying = true),
+                onSubmitReply: _submitReply,
+                onDeletePost: _deletePost,
+                onDeleteReply: _deleteReply,
+                onBack: _close,
+                onRefresh: () => ref
                     .read(postDetailNotifierProvider(widget.post).notifier)
                     .refresh(),
               ),
@@ -468,7 +487,9 @@ class _ReplyTextButton extends StatelessWidget {
     return TextButton(
       onPressed: onTap,
       style: TextButton.styleFrom(
-        foregroundColor: enabled ? theme.primaryButtonBackground : theme.secondaryButtonBorder,
+        foregroundColor: enabled
+            ? theme.primaryButtonBackground
+            : theme.secondaryButtonBorder,
         textStyle: TextStyle(
           fontFamily: 'monospace',
           fontSize: 12,
@@ -488,9 +509,7 @@ class _ReplyTextButton extends StatelessWidget {
                 color: theme.actionIcon,
               ),
             )
-          : Text(
-            '[R]EPLY',
-            style: context.cyberTheme.mainFont,),
+          : Text('[R]EPLY', style: context.cyberTheme.mainFont),
     );
   }
 }
@@ -527,92 +546,6 @@ class _InlineSpinner extends StatelessWidget {
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
             color: context.cyberTheme.actionIcon,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.cyberTheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '[ERROR]',
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 13,
-                color: const Color(0xFFcc241d),
-                letterSpacing: 1.5,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 13,
-                color: theme.headingText,
-              ),
-            ),
-            const SizedBox(height: 20),
-            _RetryButton(onTap: onRetry),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RetryButton extends StatefulWidget {
-  final VoidCallback onTap;
-  const _RetryButton({required this.onTap});
-
-  @override
-  State<_RetryButton> createState() => _RetryButtonState();
-}
-
-class _RetryButtonState extends State<_RetryButton> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.cyberTheme;
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 120),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: _hovered ? theme.primaryButtonForeground : theme.secondaryButtonBorder,
-              width: 1,
-            ),
-          ),
-          child: Text(
-            'Retry',
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 13,
-              color: theme.headingText,
-              letterSpacing: 1.5,
-            ),
           ),
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
+import 'package:onosendai/core/widgets/error_snackbar.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/selected_post_provider.dart';
@@ -49,6 +50,10 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     final theme = context.cyberTheme;
     final notificationsAsync = ref.watch(notificationsNotifierProvider);
     final isMobile = MediaQuery.sizeOf(context).width < 600;
+    ref.listen(notificationsNotifierProvider, (_, next) {
+      if (!next.hasError || next.isLoading) return;
+      showErrorSnackBar(context, _errorMessage(next.error!));
+    });
 
     final body = ColoredBox(
       color: theme.pageBackground,
@@ -58,12 +63,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: notificationsAsync.when(
+              skipError: true,
               loading: () => const _CenteredSpinner(),
-              error: (err, _) => _ErrorView(
-                message: _errorMessage(err),
-                onRetry: () =>
-                    ref.read(notificationsNotifierProvider.notifier).refresh(),
-              ),
+              error: (_, _) => const SizedBox.shrink(),
               data: (state) => _NotificationsList(
                 state: state,
                 scrollController: _scrollController,
@@ -214,9 +216,9 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
 
       final isMobile = MediaQuery.sizeOf(context).width < 600;
       if (isMobile) {
-        await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => PostDetailPage(post: post)),
-        );
+        await Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => PostDetailPage(post: post)));
       } else {
         ref.read(selectedPostProvider.notifier).state = (post, false);
       }
@@ -253,7 +255,9 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
         child: DecoratedBox(
           decoration: BoxDecoration(
             border: Border.all(
-              color: notification.read ? theme.notificationReadBorder : theme.notificationUnreadBorder,
+              color: notification.read
+                  ? theme.notificationReadBorder
+                  : theme.notificationUnreadBorder,
             ),
             color: theme.cardBackground,
           ),
@@ -274,7 +278,9 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
                 else
                   Icon(
                     notification.read ? LucideIcons.bell : LucideIcons.bellRing,
-                    color: notification.read ? theme.notificationReadIcon : theme.notificationUnreadIcon,
+                    color: notification.read
+                        ? theme.notificationReadIcon
+                        : theme.notificationUnreadIcon,
                     size: 20,
                   ),
                 const SizedBox(width: 12),
@@ -431,41 +437,6 @@ class _InlineSpinner extends StatelessWidget {
   }
 }
 
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.cyberTheme;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('[ERROR]', style: theme.mainFont),
-            const SizedBox(height: 12),
-            Text(message, textAlign: TextAlign.center, style: theme.mainFont),
-            const SizedBox(height: 20),
-            TextButton(
-              onPressed: onRetry,
-              style: TextButton.styleFrom(
-                foregroundColor: theme.primaryButtonForeground,
-                textStyle: theme.mainFont,
-              ),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _DimmedText extends StatelessWidget {
   final String text;
 
@@ -475,7 +446,9 @@ class _DimmedText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: context.cyberTheme.mainFont.copyWith(color: context.cyberTheme.metaText),
+      style: context.cyberTheme.mainFont.copyWith(
+        color: context.cyberTheme.metaText,
+      ),
     );
   }
 }

@@ -33,8 +33,10 @@ class NotificationsNotifier extends AsyncNotifier<NotificationsState> {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(build);
+    final previous = state;
+    state = const AsyncLoading<NotificationsState>().copyWithPrevious(previous);
+    final next = await AsyncValue.guard(build);
+    state = next.copyWithPrevious(previous);
   }
 
   Future<void> loadMore() async {

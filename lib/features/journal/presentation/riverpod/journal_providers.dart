@@ -42,11 +42,13 @@ class JournalNotifier extends AsyncNotifier<JournalState> {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+    final previous = state;
+    state = const AsyncLoading<JournalState>().copyWithPrevious(previous);
+    final next = await AsyncValue.guard(() async {
       final page = await ref.read(fetchJournalUseCaseProvider)();
       return JournalState(notes: page.data, nextCursor: page.cursor);
     });
+    state = next.copyWithPrevious(previous);
   }
 
   Future<void> loadMore() async {

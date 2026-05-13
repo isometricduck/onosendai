@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
+import 'package:onosendai/core/widgets/error_snackbar.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/bookmarks/domain/entities/bookmarks_state.dart';
 import 'package:onosendai/features/bookmarks/presentation/riverpod/bookmarks_providers.dart';
@@ -19,6 +20,10 @@ class BookmarksPage extends ConsumerWidget {
     final theme = context.cyberTheme;
     final bookmarksAsync = ref.watch(bookmarksNotifierProvider);
     final isMobile = MediaQuery.sizeOf(context).width < 600;
+    ref.listen(bookmarksNotifierProvider, (_, next) {
+      if (!next.hasError || next.isLoading) return;
+      showErrorSnackBar(context, _errorMessage(next.error!));
+    });
 
     final body = ColoredBox(
       color: theme.pageBackground,
@@ -28,12 +33,9 @@ class BookmarksPage extends ConsumerWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 680),
             child: bookmarksAsync.when(
+              skipError: true,
               loading: () => const _CenteredSpinner(),
-              error: (err, _) => _ErrorView(
-                message: _errorMessage(err),
-                onRetry: () =>
-                    ref.read(bookmarksNotifierProvider.notifier).refresh(),
-              ),
+              error: (_, _) => const SizedBox.shrink(),
               data: (state) => _BookmarksList(
                 state: state,
                 showInlineHeader: !isMobile,
@@ -105,8 +107,10 @@ class _BookmarksList extends ConsumerWidget {
           ),
         );
       } else {
-        ref.read(selectedPostProvider.notifier).state =
-            (post, initiallyReplying);
+        ref.read(selectedPostProvider.notifier).state = (
+          post,
+          initiallyReplying,
+        );
       }
     }
 
@@ -242,71 +246,6 @@ class _CenteredSpinner extends StatelessWidget {
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
           color: context.cyberTheme.actionIcon,
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.cyberTheme;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('[ERROR]', style: theme.mainFont),
-            const SizedBox(height: 12),
-            Text(message, textAlign: TextAlign.center, style: theme.mainFont),
-            const SizedBox(height: 20),
-            _RetryButton(onTap: onRetry),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RetryButton extends StatefulWidget {
-  final VoidCallback onTap;
-
-  const _RetryButton({required this.onTap});
-
-  @override
-  State<_RetryButton> createState() => _RetryButtonState();
-}
-
-class _RetryButtonState extends State<_RetryButton> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.cyberTheme;
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 120),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: _hovered ? theme.primaryButtonForeground : theme.secondaryButtonBorder,
-              width: 1,
-            ),
-          ),
-          child: Text('Retry', style: theme.mainFont),
         ),
       ),
     );

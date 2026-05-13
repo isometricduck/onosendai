@@ -38,9 +38,11 @@ class BookmarksNotifier extends AsyncNotifier<BookmarksState> {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(
+    final previous = state;
+    state = const AsyncLoading<BookmarksState>().copyWithPrevious(previous);
+    final next = await AsyncValue.guard(
       () => ref.read(fetchBookmarksUseCaseProvider)(),
     );
+    state = next.copyWithPrevious(previous);
   }
 }

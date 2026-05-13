@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:onosendai/core/navigation/desktop_shell.dart';
+import 'package:onosendai/core/navigation/landscape_shell.dart';
 import 'package:onosendai/core/navigation/eink_shell.dart';
 import 'package:onosendai/core/navigation/mobile_shell.dart';
 

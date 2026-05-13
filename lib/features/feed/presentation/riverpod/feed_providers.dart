@@ -69,13 +69,15 @@ class FeedNotifier extends AsyncNotifier<FeedState> {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+    final previous = state;
+    state = const AsyncLoading<FeedState>().copyWithPrevious(previous);
+    final next = await AsyncValue.guard(() async {
       final notificationsRefresh = _refreshNotifications();
       final page = await ref.read(fetchFeedUseCaseProvider)();
       await notificationsRefresh;
       return FeedState(posts: page.data, nextCursor: page.cursor);
     });
+    state = next.copyWithPrevious(previous);
   }
 
   void _refreshNotificationsSoon() {
@@ -159,8 +161,9 @@ class PostDetailNotifier extends FamilyAsyncNotifier<PostDetailState, Post> {
 
   Future<void> refresh({bool fetchPost = false}) async {
     final currentPost = arg;
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+    final previous = state;
+    state = const AsyncLoading<PostDetailState>().copyWithPrevious(previous);
+    final next = await AsyncValue.guard(() async {
       final post = fetchPost
           ? await ref
                 .read(cyberspaceClientProvider)
@@ -176,6 +179,7 @@ class PostDetailNotifier extends FamilyAsyncNotifier<PostDetailState, Post> {
         nextCursor: page.cursor,
       );
     });
+    state = next.copyWithPrevious(previous);
   }
 
   Future<void> createReply(String content) async {

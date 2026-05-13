@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
+import 'package:onosendai/core/widgets/error_snackbar.dart';
 import 'package:onosendai/features/theme/classic_theme.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/bookmarks/domain/entities/bookmarks_state.dart';
@@ -129,15 +130,6 @@ class _EinkFeedPageState extends ConsumerState<EinkFeedPage> {
     return state.posts[selectedIndex];
   }
 
-  Future<void> _refresh() {
-    _loadBookmarkedPostIds();
-    return switch (widget.source) {
-      EinkFeedSource.feed => ref.read(feedNotifierProvider.notifier).refresh(),
-      EinkFeedSource.bookmarks =>
-        ref.read(bookmarksNotifierProvider.notifier).refresh(),
-    };
-  }
-
   void _toggleOverlay() {
     setState(() => _overlayVisible = !_overlayVisible);
   }
@@ -184,6 +176,18 @@ class _EinkFeedPageState extends ConsumerState<EinkFeedPage> {
   @override
   Widget build(BuildContext context) {
     final theme = context.cyberTheme;
+    switch (widget.source) {
+      case EinkFeedSource.feed:
+        ref.listen(feedNotifierProvider, (_, next) {
+          if (!next.hasError || next.isLoading) return;
+          showErrorSnackBar(context, _errorMessage(next.error!));
+        });
+      case EinkFeedSource.bookmarks:
+        ref.listen(bookmarksNotifierProvider, (_, next) {
+          if (!next.hasError || next.isLoading) return;
+          showErrorSnackBar(context, _errorMessage(next.error!));
+        });
+    }
     final postsAsync = switch (widget.source) {
       EinkFeedSource.feed =>
         ref
@@ -225,11 +229,14 @@ class _EinkFeedPageState extends ConsumerState<EinkFeedPage> {
                     _EinkPageTitle(_title),
                     Expanded(
                       child: postsAsync.when(
+                        skipError: true,
                         loading: () => const _CenteredStatus('Loading...'),
-                        error: (error, _) => _EinkFeedErrorView(
-                          message: _errorMessage(error),
-                          onRetry: _refresh,
-                        ),
+                        error: (_, _) =>
+                            _CenteredStatus(switch (widget.source) {
+                              EinkFeedSource.feed => 'No posts yet.',
+                              EinkFeedSource.bookmarks =>
+                                'No bookmarked posts yet.',
+                            }),
                         data: (state) {
                           if (state.posts.isEmpty) {
                             return _CenteredStatus(switch (widget.source) {
@@ -359,6 +366,10 @@ class _PostRepliesSheetState extends ConsumerState<_PostRepliesSheet> {
   Widget build(BuildContext context) {
     final theme = context.cyberTheme;
     final detailAsync = ref.watch(postDetailNotifierProvider(widget.post));
+    ref.listen(postDetailNotifierProvider(widget.post), (_, next) {
+      if (!next.hasError || next.isLoading) return;
+      showErrorSnackBar(context, _errorMessage(next.error!));
+    });
 
     return SafeArea(
       top: false,
@@ -384,15 +395,9 @@ class _PostRepliesSheetState extends ConsumerState<_PostRepliesSheet> {
                 const SizedBox(height: 12),
                 Expanded(
                   child: detailAsync.when(
+                    skipError: true,
                     loading: () => const _CenteredStatus('Loading replies...'),
-                    error: (error, _) => _RepliesErrorView(
-                      message: _errorMessage(error),
-                      onRetry: () => ref
-                          .read(
-                            postDetailNotifierProvider(widget.post).notifier,
-                          )
-                          .refresh(),
-                    ),
+                    error: (_, _) => const _CenteredStatus('No replies yet.'),
                     data: (state) {
                       if (state.replies.isEmpty) {
                         return const _CenteredStatus('No replies yet.');
@@ -426,29 +431,6 @@ class _PostRepliesSheetState extends ConsumerState<_PostRepliesSheet> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _RepliesErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _RepliesErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.cyberTheme;
-
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(message, textAlign: TextAlign.center, style: theme.mainFont),
-          const SizedBox(height: 16),
-          OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
-        ],
       ),
     );
   }
@@ -601,33 +583,5 @@ class _CenteredStatus extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(child: Text(message, style: context.cyberTheme.mainFont));
-  }
-}
-
-class _EinkFeedErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _EinkFeedErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.cyberTheme;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('[ERROR]', style: theme.mainFont),
-            const SizedBox(height: 12),
-            Text(message, textAlign: TextAlign.center, style: theme.mainFont),
-            const SizedBox(height: 20),
-            OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
-          ],
-        ),
-      ),
-    );
   }
 }

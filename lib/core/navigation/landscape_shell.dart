@@ -4,6 +4,7 @@ import 'package:onosendai/core/navigation/destinations.dart';
 import 'package:onosendai/core/navigation/rail_body.dart';
 import 'package:onosendai/core/navigation/shell_effect.dart';
 import 'package:onosendai/core/providers/nav_provider.dart';
+import 'package:onosendai/features/about/presentation/pages/about_page.dart';
 import 'package:onosendai/features/about/presentation/widgets/about_dialog.dart';
 import 'package:onosendai/features/bookmarks/presentation/pages/bookmarks_page.dart';
 import 'package:onosendai/features/feed/presentation/pages/feed_page.dart';
@@ -49,8 +50,6 @@ class LandscapeShell extends ConsumerWidget {
       case AppDestination.menu:
         nav.showEffect(ShellEffect.menu);
         return;
-      case AppDestination.about:
-        nav.showEffect(ShellEffect.about);
       case AppDestination.logout:
         nav.showEffect(ShellEffect.logout);
         return;
@@ -77,8 +76,9 @@ class LandscapeShell extends ConsumerWidget {
         return SettingsPage();
       case AppDestination.netiquette:
         return NetiquettePage();
-
       case AppDestination.about:
+        return AboutPage();
+      
       case AppDestination.menu:
       case AppDestination.logout:
         throw StateError('$destination is not a desktop page');
