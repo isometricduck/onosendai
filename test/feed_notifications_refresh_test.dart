@@ -10,6 +10,9 @@ class _CountingFeedRepository implements FeedRepository {
   int fetchCalls = 0;
 
   @override
+  Future<List<cyberspace.Post>> fetchCached({int limit = 20}) async => const [];
+
+  @override
   Future<cyberspace.PagedResult<cyberspace.Post>> fetch({
     int limit = 20,
     String? cursor,
@@ -17,6 +20,12 @@ class _CountingFeedRepository implements FeedRepository {
     fetchCalls += 1;
     return const cyberspace.PagedResult(data: [], cursor: null);
   }
+
+  @override
+  Future<List<cyberspace.Reply>> fetchCachedReplies(
+    String postId, {
+    int limit = 20,
+  }) async => const [];
 
   @override
   Future<cyberspace.PagedResult<cyberspace.Reply>> fetchReplies(

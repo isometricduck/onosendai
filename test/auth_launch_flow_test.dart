@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:cyberspace_client/cyberspace_client.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -13,17 +13,33 @@ import 'package:onosendai/core/providers/prefs_provider.dart';
 import 'package:onosendai/core/prefs/app_prefs.dart';
 import 'package:onosendai/core/prefs/bookmarked_items_prefs.dart';
 import 'package:onosendai/core/prefs/current_user_prefs.dart';
+import 'package:onosendai/features/boot/presentation/boot_glitch.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/feed/domain/repositories/feed_repository.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
 import 'package:onosendai/features/login/presentation/login_dialog.dart';
 import 'package:onosendai/features/login/presentation/riverpod/login_providers.dart';
+import 'package:onosendai/features/notifications/domain/repositories/notifications_repository.dart';
+import 'package:onosendai/features/notifications/presentation/riverpod/notifications_providers.dart';
 import 'package:onosendai/main.dart';
 
 class _LoadedFeedRepository implements FeedRepository {
+  int fetchCalls = 0;
+
   @override
-  Future<PagedResult<Post>> fetch({int limit = 20, String? cursor}) async =>
-      const PagedResult(data: [], cursor: null);
+  Future<List<Post>> fetchCached({int limit = 20}) async => const [];
+
+  @override
+  Future<PagedResult<Post>> fetch({int limit = 20, String? cursor}) async {
+    fetchCalls += 1;
+    return const PagedResult(data: [], cursor: null);
+  }
+
+  @override
+  Future<List<Reply>> fetchCachedReplies(
+    String postId, {
+    int limit = 20,
+  }) async => const [];
 
   @override
   Future<PagedResult<Reply>> fetchReplies(
@@ -37,6 +53,14 @@ class _LoadedFeedRepository implements FeedRepository {
 
   @override
   Future<void> deleteReply(String replyId) async {}
+}
+
+class _LoadedNotificationsRepository implements NotificationsRepository {
+  @override
+  Future<PagedResult<Notification>> fetch({
+    int limit = 20,
+    String? cursor,
+  }) async => const PagedResult(data: [], cursor: null);
 }
 
 class _MemoryAppPrefs implements AppPrefs {
@@ -168,7 +192,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets(
-    'mobile cold launch shows entry buttons without validating tokens',
+    'boot animation mounts app and starts feed fetch before it finishes',
     (tester) async {
       tester.view
         ..physicalSize = const Size(390, 844)
@@ -185,47 +209,76 @@ void main() {
           rtdbToken: 'rtdb-token',
         ),
       );
+      final feedRepository = _LoadedFeedRepository();
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             tokenStorageProvider.overrideWithValue(storage),
             appPrefsProvider.overrideWithValue(_MemoryAppPrefs()),
-            feedRepositoryProvider.overrideWithValue(_LoadedFeedRepository()),
+            feedRepositoryProvider.overrideWithValue(feedRepository),
+            notificationsRepositoryProvider.overrideWithValue(
+              _LoadedNotificationsRepository(),
+            ),
           ],
-          child: const MainApp(),
+          child: const GlitchBootAnimation(
+            duration: Duration(milliseconds: 1500),
+            child: MainApp(),
+          ),
         ),
       );
 
-      await tester.pumpAndSettle();
-
-      expect(find.text('Login'), findsOneWidget);
-      expect(find.text('feed'), findsOneWidget);
-      expect(storage.reads, 0);
-      expect(find.byType(AppUI), findsNothing);
-      expect(find.byType(LoginDialog), findsNothing);
-
-      await tester.tap(find.text('Login'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(LoginDialog), findsOneWidget);
-      expect(storage.reads, 0);
-
-      await tester.tap(find.text('[ESC]'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(LoginDialog), findsNothing);
-      expect(storage.reads, 0);
-
-      await tester.tap(find.text('feed'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 100));
 
       expect(storage.reads, 1);
+      expect(feedRepository.fetchCalls, 1);
       expect(find.byType(AppUI), findsOneWidget);
-      expect(find.byType(NavigationBar), findsOneWidget);
-      expect(find.byType(LoginDialog), findsNothing);
+      expect(find.byType(Image), findsWidgets);
+
+      await tester.pump(const Duration(milliseconds: 1));
     },
   );
+
+  testWidgets('mobile cold launch with stored tokens opens the app', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(390, 844)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final storage = _MemoryTokenStorage(
+      AuthTokens(
+        idToken: _jwtWithExp(
+          DateTime.now().millisecondsSinceEpoch ~/ 1000 + 3600,
+        ),
+        refreshToken: 'refresh-token',
+        rtdbToken: 'rtdb-token',
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          tokenStorageProvider.overrideWithValue(storage),
+          appPrefsProvider.overrideWithValue(_MemoryAppPrefs()),
+          feedRepositoryProvider.overrideWithValue(_LoadedFeedRepository()),
+          notificationsRepositoryProvider.overrideWithValue(
+            _LoadedNotificationsRepository(),
+          ),
+        ],
+        child: const MainApp(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(storage.reads, 1);
+    expect(find.byType(AppUI), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(LoginDialog), findsNothing);
+  });
 
   test('app theme provider loads and stores the selected theme', () async {
     final prefs = _MemoryAppPrefs({'app_theme_id': 'matrix'});
@@ -263,8 +316,7 @@ void main() {
 
         return http.Response(
           jsonEncode({
-            'idToken': 'new-id-token',
-            'rtdbToken': 'new-rtdb-token',
+            'data': {'idToken': 'new-id-token', 'rtdbToken': 'new-rtdb-token'},
           }),
           200,
           headers: {'content-type': 'application/json'},

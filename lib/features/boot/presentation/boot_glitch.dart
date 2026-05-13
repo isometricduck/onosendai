@@ -44,14 +44,27 @@ class _GlitchBootAnimationState extends ConsumerState<GlitchBootAnimation>
 
   @override
   Widget build(BuildContext context) {
-    if (_done) return widget.child;
+    if (_done) {
+      return widget.child;
+    }
+
     final theme = ref.watch(app_theme.appThemeProvider).theme;
 
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return _GlitchSplash(progress: _controller.value, theme: theme);
-      },
+    return Stack(
+      alignment: Alignment.topLeft,
+      children: [
+        widget.child,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                return _GlitchSplash(progress: _controller.value, theme: theme);
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

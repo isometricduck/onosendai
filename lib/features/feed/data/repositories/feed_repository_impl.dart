@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cyberspace_client/cyberspace_client.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:onosendai/core/database/app_database.dart';
 import 'package:onosendai/features/feed/domain/repositories/feed_repository.dart';
 
@@ -39,6 +40,7 @@ class FeedRepositoryImpl implements FeedRepository {
 
   @override
   Future<PagedResult<Post>> fetch({int limit = 20, String? cursor}) async {
+    debugPrint("Fetch remote posts");
     final result = await _client.posts.list(limit: limit, cursor: cursor);
     final now = DateTime.now();
     await _db.managers.feedPostsTable.bulkCreate(
