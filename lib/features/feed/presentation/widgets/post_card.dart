@@ -465,22 +465,12 @@ class ReplyCard extends StatelessWidget {
           if (reply.deleted)
             Text(
               '[reply deleted]',
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 13,
-                color: theme.hintText,
-                fontStyle: FontStyle.italic,
-              ),
+              style: theme.mainFont,
             )
           else
             RichText(
               content: reply.content,
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 14,
-                color: theme.headingText,
-                height: 1.4,
-              ),
+              style: theme.mainFont,
             ),
         ],
       ),
