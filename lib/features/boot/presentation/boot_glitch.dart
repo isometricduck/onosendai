@@ -124,9 +124,8 @@ class _GlitchText extends StatelessWidget {
       noise = 0;
     }
 
-    final cleanProgress = progress < 0.85
-        ? 0.0
-        : (progress - 0.85) / 0.15; // 0→1 in final phase
+    final cleanProgress = (progress < 0.85 ? 0.0 : (progress - 0.85) / 0.15)
+        .clamp(0.0, 1.0); // 0→1 in final phase
 
     return Stack(
       alignment: Alignment.center,

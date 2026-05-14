@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/images/images.dart';
+import 'package:onosendai/features/profiles/presentation/pages/user_posts_page.dart';
 import 'package:onosendai/features/profiles/presentation/riverpod/profile_providers.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 
@@ -112,10 +113,7 @@ class _ProfileContent extends StatelessWidget {
                       ),
                       if (_hasText(profile.bio)) ...[
                         const SizedBox(height: 6),
-                        Text(
-                          profile.bio!.trim(),
-                          style: theme.mainFont,
-                        ),
+                        Text(profile.bio!.trim(), style: theme.mainFont),
                       ],
                     ],
                   ),
@@ -140,7 +138,41 @@ class _ProfileContent extends StatelessWidget {
             _ProfileField('Following', profile.followingCount.toString()),
           ],
         ),
+        const SizedBox(height: 12),
+        _PostsButton(username: profile.username),
       ],
+    );
+  }
+}
+
+class _PostsButton extends StatelessWidget {
+  final String username;
+
+  const _PostsButton({required this.username});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.cyberTheme;
+
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => UserPostsPage(username: username),
+            ),
+          );
+        },
+        label: const Text('Posts'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: theme.headingText,
+          side: BorderSide(color: theme.cardBorder),
+          textStyle: theme.mainFont.copyWith(fontWeight: FontWeight.w700),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          shape: const RoundedRectangleBorder(),
+        ),
+      ),
     );
   }
 }
