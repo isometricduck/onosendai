@@ -434,21 +434,47 @@ class _PostActionIcon extends StatelessWidget {
   }
 }
 
-class ReplyCard extends StatelessWidget {
+class ReplyCard extends ConsumerStatefulWidget {
   final Reply reply;
+  final VoidCallback? onReply;
   final VoidCallback? onDelete;
   final bool isDeleting;
 
   const ReplyCard({
     super.key,
     required this.reply,
+    this.onReply,
     this.onDelete,
     this.isDeleting = false,
   });
 
   @override
+  ConsumerState<ReplyCard> createState() => _ReplyCardState();
+}
+
+class _ReplyCardState extends ConsumerState<ReplyCard> {
+  bool _savingBookmark = false;
+  String? _bookmarkId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBookmarkState();
+  }
+
+  @override
+  void didUpdateWidget(covariant ReplyCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.reply.replyId != widget.reply.replyId) {
+      _bookmarkId = null;
+      _loadBookmarkState();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = context.cyberTheme;
+    final reply = widget.reply;
 
     return Container(
       decoration: BoxDecoration(
@@ -459,18 +485,149 @@ class ReplyCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _ReplyHeader(
-            reply: reply,
-            onDelete: reply.deleted || isDeleting ? null : onDelete,
-            isDeleting: isDeleting,
-          ),
+          _ReplyHeader(reply: reply),
           const SizedBox(height: 10),
           if (reply.deleted)
             Text('[reply deleted]', style: theme.mainFont)
           else
             RichText(content: reply.content, style: theme.mainFont),
+          const SizedBox(height: 10),
+          _PostSectionDivider(),
+          const SizedBox(height: 10),
+          _ReplyActionBar(
+            onReplyTap: reply.deleted ? null : widget.onReply,
+            onSaveTap: _saveBookmark,
+            onRemoveSaveTap: _removeBookmark,
+            savingBookmark: _savingBookmark,
+            bookmarked: _bookmarkId != null,
+            showDelete: widget.onDelete != null && !reply.deleted,
+            isDeleting: widget.isDeleting,
+            onDeleteTap: widget.onDelete,
+          ),
         ],
       ),
+    );
+  }
+
+  Future<void> _loadBookmarkState() async {
+    final bookmarks = await ref
+        .read(bookmarkedItemsPrefsProvider)
+        .getBookmarkedReplies();
+    if (!mounted) return;
+
+    String? bookmarkId;
+    for (final bookmark in bookmarks) {
+      if (bookmark.replyId == widget.reply.replyId) {
+        bookmarkId = bookmark.bookmarkId;
+        break;
+      }
+    }
+
+    setState(() {
+      _bookmarkId = bookmarkId;
+    });
+  }
+
+  Future<void> _saveBookmark() async {
+    if (_savingBookmark || _bookmarkId != null || widget.reply.deleted) return;
+
+    setState(() => _savingBookmark = true);
+    try {
+      final bookmarkId = await ref
+          .read(cyberspaceClientProvider)
+          .bookmarks
+          .bookmarkReply(widget.reply.replyId);
+      await ref
+          .read(bookmarkedItemsPrefsProvider)
+          .addReplyBookmark(
+            bookmarkId: bookmarkId,
+            replyId: widget.reply.replyId,
+          );
+      if (!mounted) return;
+      setState(() {
+        _savingBookmark = false;
+        _bookmarkId = bookmarkId;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _savingBookmark = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Could not save bookmark.')));
+    }
+  }
+
+  Future<void> _removeBookmark() async {
+    final bookmarkId = _bookmarkId;
+    if (_savingBookmark || bookmarkId == null) return;
+
+    setState(() => _savingBookmark = true);
+    try {
+      await ref.read(cyberspaceClientProvider).bookmarks.remove(bookmarkId);
+      await ref
+          .read(bookmarkedItemsPrefsProvider)
+          .removeReplyBookmark(widget.reply.replyId);
+      if (!mounted) return;
+      setState(() {
+        _savingBookmark = false;
+        _bookmarkId = null;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _savingBookmark = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not remove bookmark.')),
+      );
+    }
+  }
+}
+
+class _ReplyActionBar extends StatelessWidget {
+  final VoidCallback? onReplyTap;
+  final VoidCallback onSaveTap;
+  final VoidCallback onRemoveSaveTap;
+  final bool savingBookmark;
+  final bool bookmarked;
+  final bool showDelete;
+  final bool isDeleting;
+  final VoidCallback? onDeleteTap;
+
+  const _ReplyActionBar({
+    required this.onReplyTap,
+    required this.onSaveTap,
+    required this.onRemoveSaveTap,
+    required this.savingBookmark,
+    required this.bookmarked,
+    required this.showDelete,
+    required this.isDeleting,
+    required this.onDeleteTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _PostActionIcon(
+          icon: bookmarked ? LucideIcons.bookmarkMinus : LucideIcons.bookmark,
+          tooltip: bookmarked ? 'Remove bookmark' : 'Save',
+          onTap: bookmarked ? onRemoveSaveTap : onSaveTap,
+          busy: savingBookmark,
+        ),
+        const SizedBox(width: 18),
+        _PostActionIcon(
+          icon: LucideIcons.messageSquare,
+          tooltip: 'Reply',
+          onTap: onReplyTap,
+        ),
+        const Spacer(),
+        if (showDelete || isDeleting)
+          _PostActionIcon(
+            icon: LucideIcons.trash2,
+            tooltip: 'Delete reply',
+            onTap: isDeleting ? null : onDeleteTap,
+            busy: isDeleting,
+          ),
+      ],
     );
   }
 }
@@ -521,14 +678,8 @@ class _Header extends StatelessWidget {
 
 class _ReplyHeader extends StatelessWidget {
   final Reply reply;
-  final VoidCallback? onDelete;
-  final bool isDeleting;
 
-  const _ReplyHeader({
-    required this.reply,
-    this.onDelete,
-    this.isDeleting = false,
-  });
+  const _ReplyHeader({required this.reply});
 
   @override
   Widget build(BuildContext context) {
@@ -565,28 +716,6 @@ class _ReplyHeader extends StatelessWidget {
             color: theme.metaText,
           ),
         ),
-        if (onDelete != null || isDeleting) ...[
-          const SizedBox(width: 4),
-          IconButton(
-            onPressed: isDeleting ? null : onDelete,
-            tooltip: 'Delete reply',
-            icon: isDeleting
-                ? SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1.5,
-                      color: theme.actionIcon,
-                    ),
-                  )
-                : const Icon(LucideIcons.trash2),
-            color: theme.actionIcon,
-            hoverColor: theme.headingText.withValues(alpha: 0.08),
-            focusColor: theme.headingText.withValues(alpha: 0.08),
-            splashColor: theme.headingText.withValues(alpha: 0.12),
-            visualDensity: VisualDensity.compact,
-          ),
-        ],
       ],
     );
   }

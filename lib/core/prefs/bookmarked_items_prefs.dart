@@ -82,6 +82,36 @@ class BookmarkedItemsPrefs {
     ]);
   }
 
+  Future<void> addReplyBookmark({
+    required String bookmarkId,
+    required String replyId,
+  }) async {
+    final bookmarks = await getBookmarkedReplies();
+    if (bookmarks.any((bookmark) => bookmark.replyId == replyId)) return;
+
+    await _prefs.setStringList(bookmarkedRepliesPrefsKey, [
+      ...bookmarks.map(
+        (bookmark) => jsonEncode({
+          'bookmarkId': bookmark.bookmarkId,
+          'replyId': bookmark.replyId,
+        }),
+      ),
+      jsonEncode({'bookmarkId': bookmarkId, 'replyId': replyId}),
+    ]);
+  }
+
+  Future<void> removeReplyBookmark(String replyId) async {
+    final bookmarks = await getBookmarkedReplies();
+    await _prefs.setStringList(bookmarkedRepliesPrefsKey, [
+      for (final bookmark in bookmarks)
+        if (bookmark.replyId != replyId)
+          jsonEncode({
+            'bookmarkId': bookmark.bookmarkId,
+            'replyId': bookmark.replyId,
+          }),
+    ]);
+  }
+
   Future<void> clear() async {
     await Future.wait([
       _prefs.remove(bookmarkedPostsPrefsKey),

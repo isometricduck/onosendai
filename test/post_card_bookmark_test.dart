@@ -117,6 +117,19 @@ void main() {
     );
   }
 
+  Reply buildReply() {
+    return Reply(
+      replyId: 'reply-1',
+      postId: 'post-1',
+      parentReplyId: null,
+      authorId: 'user-2',
+      authorUsername: 'trace',
+      content: 'Nested signal.',
+      createdAt: DateTime.utc(2026, 4, 30),
+      deleted: false,
+    );
+  }
+
   testWidgets('save button creates a post bookmark and stores it in prefs', (
     tester,
   ) async {
@@ -217,6 +230,108 @@ void main() {
 
     expect(requests, ['DELETE /v1/bookmarks/bookmark-post-1']);
     expect(await prefs.getStringList(bookmarkedPostsPrefsKey), isEmpty);
+    expect(find.byIcon(LucideIcons.bookmark), findsOneWidget);
+  });
+
+  testWidgets('save button creates a reply bookmark and stores it in prefs', (
+    tester,
+  ) async {
+    final prefs = _MemoryAppPrefs();
+    final requests = <String>[];
+    final client = CyberspaceClient(
+      authTokenProvider: _NoopAuthTokenProvider(),
+      httpClient: MockClient((request) async {
+        requests.add('${request.method} ${request.url.path}');
+        expect(request.method, 'POST');
+        expect(request.url.path, '/v1/bookmarks');
+        expect(request.headers['Authorization'], 'Bearer id-token');
+        expect(jsonDecode(request.body), {
+          'replyId': 'reply-1',
+          'type': 'reply',
+        });
+
+        return http.Response(
+          jsonEncode({
+            'data': {'bookmarkId': 'bookmark-reply-1'},
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appPrefsProvider.overrideWithValue(prefs),
+          tokenStorageProvider.overrideWithValue(_MemoryTokenStorage()),
+          cyberspaceClientProvider.overrideWithValue(client),
+        ],
+        child: MaterialApp(
+          home: Scaffold(body: ReplyCard(reply: buildReply())),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(find.byIcon(LucideIcons.bookmark));
+    await tester.pumpAndSettle();
+
+    expect(requests, ['POST /v1/bookmarks']);
+    final stored = await prefs.getStringList(bookmarkedRepliesPrefsKey);
+    expect(stored, isNotNull);
+    expect(jsonDecode(stored!.single), {
+      'bookmarkId': 'bookmark-reply-1',
+      'replyId': 'reply-1',
+    });
+  });
+
+  testWidgets('bookmarked reply renders remove action and deletes bookmark', (
+    tester,
+  ) async {
+    final prefs = _MemoryAppPrefs();
+    await prefs.setStringList(bookmarkedRepliesPrefsKey, [
+      jsonEncode({'bookmarkId': 'bookmark-reply-1', 'replyId': 'reply-1'}),
+    ]);
+    final requests = <String>[];
+    final client = CyberspaceClient(
+      authTokenProvider: _NoopAuthTokenProvider(),
+      httpClient: MockClient((request) async {
+        requests.add('${request.method} ${request.url.path}');
+        expect(request.method, 'DELETE');
+        expect(request.url.path, '/v1/bookmarks/bookmark-reply-1');
+        expect(request.headers['Authorization'], 'Bearer id-token');
+
+        return http.Response(
+          jsonEncode({'data': {}}),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appPrefsProvider.overrideWithValue(prefs),
+          tokenStorageProvider.overrideWithValue(_MemoryTokenStorage()),
+          cyberspaceClientProvider.overrideWithValue(client),
+        ],
+        child: MaterialApp(
+          home: Scaffold(body: ReplyCard(reply: buildReply())),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.byIcon(LucideIcons.bookmarkMinus), findsOneWidget);
+
+    await tester.tap(find.byIcon(LucideIcons.bookmarkMinus));
+    await tester.pumpAndSettle();
+
+    expect(requests, ['DELETE /v1/bookmarks/bookmark-reply-1']);
+    expect(await prefs.getStringList(bookmarkedRepliesPrefsKey), isEmpty);
     expect(find.byIcon(LucideIcons.bookmark), findsOneWidget);
   });
 

@@ -31,6 +31,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
   static const _loadMoreThreshold = 400.0;
   var _isReplying = false;
   var _isSubmittingReply = false;
+  Reply? _replyingTo;
   String? _deletingReplyId;
 
   void _close() {
@@ -69,14 +70,18 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     final content = _replyController.text.trim();
     if (content.isEmpty || _isSubmittingReply) return;
 
+    final parentReplyId = _replyingTo?.replyId;
     setState(() => _isSubmittingReply = true);
     try {
       await ref
           .read(postDetailNotifierProvider(widget.post).notifier)
-          .createReply(content);
+          .createReply(content, parentReplyId: parentReplyId);
       _replyController.clear();
       if (!mounted) return;
-      setState(() => _isReplying = false);
+      setState(() {
+        _isReplying = false;
+        _replyingTo = null;
+      });
     } catch (error) {
       if (!mounted) return;
       final theme = context.cyberTheme;
@@ -130,6 +135,13 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     _close();
   }
 
+  void _startReply([Reply? reply]) {
+    setState(() {
+      _isReplying = true;
+      _replyingTo = reply;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = context.cyberTheme;
@@ -157,12 +169,13 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                 scrollController: _scrollController,
                 showInlineHeader: !isMobile,
                 showReplyComposer: _isReplying,
+                replyingTo: _replyingTo,
                 replyController: _replyController,
                 isSubmittingReply: _isSubmittingReply,
                 currentUserId: currentUser?.userId,
                 deletingReplyId: _deletingReplyId,
                 onReplyChanged: () => setState(() {}),
-                onStartReply: () => setState(() => _isReplying = true),
+                onStartReply: _startReply,
                 onSubmitReply: _submitReply,
                 onDeletePost: _deletePost,
                 onDeleteReply: _deleteReply,
@@ -176,12 +189,13 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                 scrollController: _scrollController,
                 showInlineHeader: !isMobile,
                 showReplyComposer: _isReplying,
+                replyingTo: _replyingTo,
                 replyController: _replyController,
                 isSubmittingReply: _isSubmittingReply,
                 currentUserId: currentUser?.userId,
                 deletingReplyId: _deletingReplyId,
                 onReplyChanged: () => setState(() {}),
-                onStartReply: () => setState(() => _isReplying = true),
+                onStartReply: _startReply,
                 onSubmitReply: _submitReply,
                 onDeletePost: _deletePost,
                 onDeleteReply: _deleteReply,
@@ -224,12 +238,13 @@ class _PostDetailList extends StatelessWidget {
   final ScrollController scrollController;
   final bool showInlineHeader;
   final bool showReplyComposer;
+  final Reply? replyingTo;
   final TextEditingController replyController;
   final bool isSubmittingReply;
   final String? currentUserId;
   final String? deletingReplyId;
   final VoidCallback onReplyChanged;
-  final VoidCallback onStartReply;
+  final ValueChanged<Reply?> onStartReply;
   final VoidCallback onSubmitReply;
   final Future<void> Function(Post post) onDeletePost;
   final ValueChanged<Reply> onDeleteReply;
@@ -241,6 +256,7 @@ class _PostDetailList extends StatelessWidget {
     required this.scrollController,
     required this.showInlineHeader,
     required this.showReplyComposer,
+    required this.replyingTo,
     required this.replyController,
     required this.isSubmittingReply,
     required this.currentUserId,
@@ -283,7 +299,7 @@ class _PostDetailList extends StatelessWidget {
             return PostCard(
               post: state.post,
               full: true,
-              onReply: onStartReply,
+              onReply: () => onStartReply(null),
               onDelete: onDeletePost,
             );
           }
@@ -295,6 +311,7 @@ class _PostDetailList extends StatelessWidget {
           if (showReplyComposer && index == replyComposerIndex) {
             return _ReplyComposer(
               controller: replyController,
+              replyingTo: replyingTo,
               canSubmit: canSubmitReply,
               isSubmitting: isSubmittingReply,
               onChanged: onReplyChanged,
@@ -313,6 +330,7 @@ class _PostDetailList extends StatelessWidget {
             return ReplyCard(
               reply: reply,
               isDeleting: deletingReplyId == reply.replyId,
+              onReply: reply.deleted ? null : () => onStartReply(reply),
               onDelete: canDelete ? () => onDeleteReply(reply) : null,
             );
           }
@@ -425,6 +443,7 @@ class _RepliesHeader extends StatelessWidget {
 
 class _ReplyComposer extends StatelessWidget {
   final TextEditingController controller;
+  final Reply? replyingTo;
   final bool canSubmit;
   final bool isSubmitting;
   final VoidCallback onChanged;
@@ -432,6 +451,7 @@ class _ReplyComposer extends StatelessWidget {
 
   const _ReplyComposer({
     required this.controller,
+    required this.replyingTo,
     required this.canSubmit,
     required this.isSubmitting,
     required this.onChanged,
@@ -444,6 +464,17 @@ class _ReplyComposer extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (replyingTo != null) ...[
+          Text(
+            'Replying to @${replyingTo!.authorUsername}',
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 12,
+              color: theme.metaText,
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
         TextField(
           controller: controller,
           minLines: 4,

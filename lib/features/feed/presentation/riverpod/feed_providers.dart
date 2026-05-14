@@ -178,17 +178,22 @@ class PostDetailNotifier extends FamilyAsyncNotifier<PostDetailState, Post> {
     state = next.copyWithPrevious(previous);
   }
 
-  Future<void> createReply(String content) async {
+  Future<void> createReply(String content, {String? parentReplyId}) async {
     await ref
         .read(cyberspaceClientProvider)
         .replies
-        .create(postId: arg.postId, content: content);
+        .create(
+          postId: arg.postId,
+          content: content,
+          parentReplyId: parentReplyId,
+        );
     await refresh(fetchPost: true);
     ref.invalidate(feedNotifierProvider);
   }
 
   Future<void> deleteReply(String replyId) async {
     await ref.read(deleteReplyUseCaseProvider)(replyId);
+    await ref.read(bookmarkedItemsPrefsProvider).removeReplyBookmark(replyId);
     await refresh(fetchPost: true);
     ref.invalidate(feedNotifierProvider);
   }
