@@ -80,6 +80,35 @@ class _WritePageState extends ConsumerState<WritePage> {
     );
   }
 
+  Color _disabledSubmitForeground(CyberTheme theme) {
+    final background = theme.secondaryButtonBorder;
+    final candidates = [
+      theme.primaryButtonForeground,
+      theme.primaryButtonBackground,
+      theme.headingText,
+      theme.pageBackground,
+    ];
+
+    return candidates.reduce((best, candidate) {
+      final bestContrast = _contrastRatio(best, background);
+      final candidateContrast = _contrastRatio(candidate, background);
+      return candidateContrast > bestContrast ? candidate : best;
+    });
+  }
+
+  double _contrastRatio(Color foreground, Color background) {
+    final foregroundLuminance = foreground.computeLuminance();
+    final backgroundLuminance = background.computeLuminance();
+    final lighter = foregroundLuminance > backgroundLuminance
+        ? foregroundLuminance
+        : backgroundLuminance;
+    final darker = foregroundLuminance > backgroundLuminance
+        ? backgroundLuminance
+        : foregroundLuminance;
+
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
   Future<bool> _confirmFeedPublish() async {
     final theme = context.cyberTheme;
     return await showDialog<bool>(
@@ -130,6 +159,7 @@ class _WritePageState extends ConsumerState<WritePage> {
   Widget build(BuildContext context) {
     final theme = context.cyberTheme;
     final canSubmit = _contentController.text.trim().isNotEmpty;
+    final disabledSubmitForeground = _disabledSubmitForeground(theme);
     final publishLabel = switch (_destination) {
       _WriteDestination.journal => 'Save Note',
       _WriteDestination.feed => 'Publish to Feed',
@@ -239,9 +269,14 @@ class _WritePageState extends ConsumerState<WritePage> {
                         }
                         return theme.primaryButtonBackground;
                       }),
-                      foregroundColor: WidgetStateProperty.all(
-                        theme.primaryButtonForeground,
-                      ),
+                      foregroundColor: WidgetStateProperty.resolveWith<Color>((
+                        states,
+                      ) {
+                        if (states.contains(WidgetState.disabled)) {
+                          return disabledSubmitForeground;
+                        }
+                        return theme.primaryButtonForeground;
+                      }),
                       overlayColor: WidgetStateProperty.all(
                         theme.primaryButtonForeground.withValues(alpha: 0.08),
                       ),
@@ -262,7 +297,7 @@ class _WritePageState extends ConsumerState<WritePage> {
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: theme.primaryButtonForeground,
+                              color: disabledSubmitForeground,
                             ),
                           )
                         : Text(publishLabel),
