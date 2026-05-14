@@ -238,7 +238,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "07629da2b0c40990271ee166881a119be9aa3943"
+      resolved-ref: "15f524974bd2bcaff1a01dd2a33f4b2ab3f2deb1"
       url: "https://github.com/isometricduck/cyberspace_client"
     source: git
     version: "0.0.1"

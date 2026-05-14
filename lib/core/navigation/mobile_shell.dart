@@ -12,6 +12,7 @@ import 'package:onosendai/features/journal/presentation/pages/journal_page.dart'
 import 'package:onosendai/features/login/presentation/logout_dialog.dart';
 import 'package:onosendai/features/netiquette/presentation/pages/netiquette_page.dart';
 import 'package:onosendai/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:onosendai/features/profiles/presentation/pages/user_profile_page.dart';
 import 'package:onosendai/features/settings/presentation/pages/settings_page.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/write/presentation/pages/write_page.dart';
@@ -27,6 +28,7 @@ const visibleDestinations = <AppDestination>[
 const hiddenDestinations = <AppDestination>[
   AppDestination.journal,
   AppDestination.bookmarks,
+  AppDestination.profile,
   AppDestination.settings,
   AppDestination.netiquette,
   AppDestination.about,
@@ -34,11 +36,10 @@ const hiddenDestinations = <AppDestination>[
 ];
 
 class MobileShell extends ConsumerWidget {
-
   const MobileShell({super.key});
 
   Widget _buildPageForDestination(AppDestination destination) {
-    switch(destination) {
+    switch (destination) {
       case AppDestination.feed:
         return FeedPage();
       case AppDestination.write:
@@ -49,6 +50,8 @@ class MobileShell extends ConsumerWidget {
         return JournalPage();
       case AppDestination.bookmarks:
         return BookmarksPage();
+      case AppDestination.profile:
+        return UserProfilePage();
       case AppDestination.settings:
         return SettingsPage();
       case AppDestination.netiquette:
@@ -56,7 +59,7 @@ class MobileShell extends ConsumerWidget {
 
       case AppDestination.about:
       case AppDestination.menu:
-      case AppDestination.themes:      
+      case AppDestination.themes:
       case AppDestination.logout:
         throw StateError('$destination is not a mobile page');
     }

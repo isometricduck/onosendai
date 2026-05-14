@@ -7,6 +7,7 @@ import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/features/feed/domain/entities/post_detail_state.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/feed_providers.dart';
 import 'package:onosendai/features/feed/presentation/widgets/post_card.dart';
+import 'package:onosendai/features/profiles/presentation/riverpod/profile_providers.dart';
 
 class PostDetailPage extends ConsumerStatefulWidget {
   final Post post;

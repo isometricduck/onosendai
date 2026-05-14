@@ -12,6 +12,7 @@ import 'package:onosendai/features/journal/presentation/pages/journal_page.dart'
 import 'package:onosendai/features/login/presentation/logout_dialog.dart';
 import 'package:onosendai/features/netiquette/presentation/pages/netiquette_page.dart';
 import 'package:onosendai/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:onosendai/features/profiles/presentation/pages/user_profile_page.dart';
 import 'package:onosendai/features/settings/presentation/pages/settings_page.dart';
 import 'package:onosendai/features/feed/presentation/pages/post_detail_page.dart';
 import 'package:onosendai/features/feed/presentation/riverpod/selected_post_provider.dart';
@@ -26,6 +27,7 @@ const _landscapeDestinations = <AppDestination>[
   AppDestination.notifications,
   AppDestination.journal,
   AppDestination.bookmarks,
+  AppDestination.profile,
   AppDestination.settings,
   AppDestination.netiquette,
   AppDestination.about,
@@ -70,6 +72,8 @@ class LandscapeShell extends ConsumerWidget {
         return JournalPage();
       case AppDestination.bookmarks:
         return BookmarksPage();
+      case AppDestination.profile:
+        return UserProfilePage();
       case AppDestination.themes:
         return ThemePage();
       case AppDestination.settings:
@@ -78,7 +82,7 @@ class LandscapeShell extends ConsumerWidget {
         return NetiquettePage();
       case AppDestination.about:
         return AboutPage();
-      
+
       case AppDestination.menu:
       case AppDestination.logout:
         throw StateError('$destination is not a desktop page');

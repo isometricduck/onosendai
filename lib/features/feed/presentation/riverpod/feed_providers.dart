@@ -40,10 +40,6 @@ final deleteReplyUseCaseProvider = Provider<DeleteReplyUseCase>((ref) {
   return DeleteReplyUseCase(ref.read(feedRepositoryProvider));
 });
 
-final currentUserProfileProvider = FutureProvider<UserProfile>((ref) {
-  return ref.read(cyberspaceClientProvider).users.getMe();
-});
-
 final feedNotifierProvider = AsyncNotifierProvider<FeedNotifier, FeedState>(
   FeedNotifier.new,
 );

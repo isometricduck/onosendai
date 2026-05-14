@@ -384,14 +384,11 @@ void main() {
               'data': {
                 'userId': 'user-1',
                 'username': 'case',
-                'displayName': 'Case',
+                'profilePictureUrl': 'https://example.test/avatar.png',
                 'bio': 'Terminal poet',
                 'pinnedPostId': 'post-1',
                 'websiteUrl': 'https://example.test',
                 'websiteName': 'Example',
-                'websiteImageUrl': 'https://example.test/card.png',
-                'locationLatitude': 12.5,
-                'locationLongitude': -45.25,
                 'locationName': 'The grid',
                 'createdAt': '2026-04-30T12:34:56.000Z',
               },
@@ -472,7 +469,7 @@ void main() {
     final storedJson = jsonDecode(stored!) as Map<String, dynamic>;
     expect(storedJson['userId'], 'user-1');
     expect(storedJson['username'], 'case');
-    expect(storedJson['displayName'], 'Case');
+    expect(storedJson['profilePictureUrl'], 'https://example.test/avatar.png');
     expect(storedJson['createdAt'], '2026-04-30T12:34:56.000Z');
 
     final bookmarkedPosts = (await prefs.getStringList(
