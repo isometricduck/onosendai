@@ -43,3 +43,12 @@ jobs:
         with:
           name: release-apks
           path: build/app/outputs/flutter-apk/*.apk
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          tag_name: android-draft-${{ github.run_number }}
+          name: Android draft ${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          files: build/app/outputs/flutter-apk/*.apk
