@@ -35,6 +35,15 @@ const hiddenDestinations = <AppDestination>[
   AppDestination.logout,
 ];
 
+int mobileNavigationIndexFor(AppDestination destination) {
+  final visibleIndex = visibleDestinations.indexOf(destination);
+  if (visibleIndex >= 0 && visibleIndex < visibleDestinations.length - 1) {
+    return visibleIndex;
+  }
+
+  return visibleDestinations.length - 1;
+}
+
 class MobileShell extends ConsumerWidget {
   const MobileShell({super.key});
 
@@ -77,6 +86,7 @@ class MobileShell extends ConsumerWidget {
         return;
       case AppDestination.about:
         nav.showEffect(ShellEffect.about);
+        return;
       case AppDestination.logout:
         nav.showEffect(ShellEffect.logout);
         return;
@@ -149,7 +159,7 @@ class MobileShell extends ConsumerWidget {
           ),
         ),
         child: NavigationBar(
-          selectedIndex: 0,
+          selectedIndex: mobileNavigationIndexFor(navState.destination),
           onDestinationSelected: (index) {
             _selectDestination(ref, visibleDestinations[index]);
           },
