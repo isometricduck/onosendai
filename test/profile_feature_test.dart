@@ -144,6 +144,53 @@ void main() {
     expect(find.byType(ShadedNetworkImage), findsOneWidget);
   });
 
+  testWidgets('profile page can fetch and render an arbitrary user', (
+    tester,
+  ) async {
+    final requests = <String>[];
+    final client = CyberspaceClient(
+      authTokenProvider: _NoopAuthTokenProvider(),
+      httpClient: MockClient((request) async {
+        requests.add('${request.method} ${request.url.path}');
+
+        if (request.url.path == '/v1/users/molly') {
+          return http.Response(
+            jsonEncode({
+              'data': {
+                'userId': 'user-2',
+                'username': 'molly',
+                'bio': 'Signal hunter',
+                'createdAt': '2026-05-01T12:34:56.000Z',
+              },
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+
+        return http.Response(
+          jsonEncode({
+            'error': {'code': 'not_found', 'message': 'Not found'},
+          }),
+          404,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+
+    await tester.pumpWidget(
+      _wrap(
+        const UserProfilePage(username: 'molly'),
+        overrides: [cyberspaceClientProvider.overrideWithValue(client)],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(requests, ['GET /v1/users/molly']);
+    expect(find.text('@molly'), findsOneWidget);
+    expect(find.text('Signal hunter'), findsOneWidget);
+  });
+
   testWidgets('mobile keeps profile hidden behind the menu', (tester) async {
     tester.view
       ..physicalSize = const Size(390, 844)

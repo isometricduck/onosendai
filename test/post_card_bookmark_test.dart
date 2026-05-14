@@ -306,6 +306,60 @@ void main() {
     expect(find.byIcon(LucideIcons.trash2), findsNothing);
   });
 
+  testWidgets('tapping a post author opens that user profile', (tester) async {
+    final prefs = _MemoryAppPrefs();
+    final requests = <String>[];
+    final client = CyberspaceClient(
+      authTokenProvider: _NoopAuthTokenProvider(),
+      httpClient: MockClient((request) async {
+        requests.add('${request.method} ${request.url.path}');
+
+        if (request.url.path == '/v1/users/case') {
+          return http.Response(
+            jsonEncode({
+              'data': {
+                'userId': 'user-1',
+                'username': 'case',
+                'bio': 'Profile from a post',
+                'createdAt': '2026-04-30T12:34:56.000Z',
+              },
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+
+        return http.Response(
+          jsonEncode({
+            'error': {'code': 'not_found', 'message': 'Not found'},
+          }),
+          404,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appPrefsProvider.overrideWithValue(prefs),
+          tokenStorageProvider.overrideWithValue(_MemoryTokenStorage()),
+          cyberspaceClientProvider.overrideWithValue(client),
+        ],
+        child: MaterialApp(
+          home: Scaffold(body: PostCard(post: buildPost())),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(find.text('@case'));
+    await tester.pumpAndSettle();
+
+    expect(requests, ['GET /v1/users/case']);
+    expect(find.text('Profile from a post'), findsOneWidget);
+  });
+
   testWidgets('delete action asks for confirmation before deleting post', (
     tester,
   ) async {

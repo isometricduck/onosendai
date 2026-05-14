@@ -8,6 +8,13 @@ final currentUserProfileProvider = FutureProvider<UserProfile>((ref) {
   return ref.read(cyberspaceClientProvider).users.getMe();
 });
 
+final userProfileProvider = FutureProvider.family<UserProfile, String>((
+  ref,
+  username,
+) {
+  return ref.read(cyberspaceClientProvider).users.get(username);
+});
+
 final userPostsNotifierProvider =
     AsyncNotifierProvider.family<UserPostsNotifier, FeedState, String>(
       UserPostsNotifier.new,

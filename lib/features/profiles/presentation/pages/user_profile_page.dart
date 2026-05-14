@@ -8,13 +8,19 @@ import 'package:onosendai/features/profiles/presentation/riverpod/profile_provid
 import 'package:onosendai/features/theme/cyber_theme.dart';
 
 class UserProfilePage extends ConsumerWidget {
-  const UserProfilePage({super.key});
+  final String? username;
+
+  const UserProfilePage({super.key, this.username});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = context.cyberTheme;
     final isMobile = MediaQuery.sizeOf(context).width < 600;
-    final profileAsync = ref.watch(currentUserProfileProvider);
+    final username = this.username;
+    final profileProvider = username == null
+        ? currentUserProfileProvider
+        : userProfileProvider(username);
+    final profileAsync = ref.watch(profileProvider);
 
     final body = ColoredBox(
       color: theme.pageBackground,
@@ -24,13 +30,13 @@ class UserProfilePage extends ConsumerWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: RefreshIndicator(
-              onRefresh: () => ref.refresh(currentUserProfileProvider.future),
+              onRefresh: () => ref.refresh(profileProvider.future),
               child: profileAsync.when(
                 loading: () =>
                     const _ScrollableCenter(child: CircularProgressIndicator()),
                 error: (error, _) => _ProfileError(
                   showInlineHeader: !isMobile,
-                  onRetry: () => ref.invalidate(currentUserProfileProvider),
+                  onRetry: () => ref.invalidate(profileProvider),
                 ),
                 data: (profile) => _ProfileContent(
                   profile: profile,

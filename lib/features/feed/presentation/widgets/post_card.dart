@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:onosendai/core/providers/client_provider.dart';
 import 'package:onosendai/core/providers/prefs_provider.dart';
+import 'package:onosendai/features/profiles/presentation/pages/user_profile_page.dart';
 import 'package:onosendai/features/theme/cyber_theme.dart';
 import 'package:onosendai/core/widgets/rich_text.dart';
 
@@ -66,7 +67,10 @@ class _PostCardState extends ConsumerState<PostCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _Header(post: post),
+          _Header(
+            post: post,
+            onAuthorTap: () => _openProfile(context, post.authorUsername),
+          ),
           const SizedBox(height: _sectionGap),
           const _PostSectionDivider(),
           const SizedBox(height: _sectionGap),
@@ -158,8 +162,7 @@ class _PostCardState extends ConsumerState<PostCard> {
   }
 
   bool _canExpand(Post post) =>
-      !_full &&
-      RichText.decodeContent(post.content).length > _truncateAt;
+      !_full && RichText.decodeContent(post.content).length > _truncateAt;
 
   Future<void> _loadBookmarkState() async {
     final bookmarks = await ref
@@ -463,15 +466,9 @@ class ReplyCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           if (reply.deleted)
-            Text(
-              '[reply deleted]',
-              style: theme.mainFont,
-            )
+            Text('[reply deleted]', style: theme.mainFont)
           else
-            RichText(
-              content: reply.content,
-              style: theme.mainFont,
-            ),
+            RichText(content: reply.content, style: theme.mainFont),
         ],
       ),
     );
@@ -480,7 +477,9 @@ class ReplyCard extends StatelessWidget {
 
 class _Header extends StatelessWidget {
   final Post post;
-  const _Header({required this.post});
+  final VoidCallback onAuthorTap;
+
+  const _Header({required this.post, required this.onAuthorTap});
 
   @override
   Widget build(BuildContext context) {
@@ -488,16 +487,23 @@ class _Header extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '@${post.authorUsername}',
-          style: TextStyle(
-            fontFamily: 'monospace',
-            fontSize: 13,
-            color: theme.headingText,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.4,
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onAuthorTap,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Text(
+              '@${post.authorUsername}',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 13,
+                color: theme.headingText,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.4,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 3),
         Text(
@@ -530,16 +536,23 @@ class _ReplyHeader extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Text(
-            '@${reply.authorUsername}',
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 13,
-              color: theme.headingText,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.4,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _openProfile(context, reply.authorUsername),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Text(
+                '@${reply.authorUsername}',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 13,
+                  color: theme.headingText,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.4,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            overflow: TextOverflow.ellipsis,
           ),
         ),
         const SizedBox(width: 8),
@@ -577,6 +590,12 @@ class _ReplyHeader extends StatelessWidget {
       ],
     );
   }
+}
+
+void _openProfile(BuildContext context, String username) {
+  Navigator.of(context).push(
+    MaterialPageRoute(builder: (_) => UserProfilePage(username: username)),
+  );
 }
 
 class _TopicChip extends StatelessWidget {
