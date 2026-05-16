@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0] "Fitter. Happier. More produtive" - 2026-05-16
+### Added
+- User profiles
+- Reply to replies
+- Tap to see images in full screen
+- Improved landscape navigation
+- Offline cache
+
 ## [0.2.0] "A whiter shade of pale" - 2026-05-09
 ### Added
 - E-reader version: no animations, e-book like navigation
